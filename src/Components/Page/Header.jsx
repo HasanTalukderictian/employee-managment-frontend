@@ -7,12 +7,17 @@ const Header = () => {
         style={{
           backgroundColor: '#0fb5f7',
           color: '#fff',
-          padding: '10px',
+          padding: '15px',
           cursor: 'pointer',
-          userSelect: 'none' // prevents text selection cursor
+          userSelect: 'none',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '15px'
         }}
       >
-        <h1>My Dashboard</h1>
+        <i className="bi bi-people" style={{ fontSize: "45px", color: "#07f747" }}></i>
+        <h1 style={{ margin: 0, fontSize: "36px", fontWeight: "600" }}>Employee Management System</h1>
       </header>
     </div>
   );
