@@ -13,6 +13,18 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+
+
+  element.style {
+    display: flex;
+    flex-direction: column;
+    width: 2000px !important;
+    height: 1024px;
+    margin: 0px auto;
+    border: 1px solid rgb(204, 204, 204);
+    box-sizing: border-box;
+}
+
 a {
   font-weight: 500;
   color: #646cff;

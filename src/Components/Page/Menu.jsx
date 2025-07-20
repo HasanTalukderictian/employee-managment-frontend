@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 const Menu = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   // Retrieve token from localStorage
   const token = localStorage.getItem('authToken');
@@ -13,7 +14,7 @@ const Menu = () => {
     try {
       console.log("Logging out with token:", token);
 
-      const response = await fetch('http://127.0.0.1:8000/api/admin/logout', {
+      const response = await fetch(`${BASE_URL}/api/admin/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -18,7 +18,7 @@ const AdminLogin = () => {
 
             const login = async () => {
                 try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/login`, {
+                    const response = await fetch(`${BASE_URL}/api/admin/login`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -148,9 +148,31 @@ const AdminLogin = () => {
                 aria-hidden={!showModal}
             >
                 <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Notification</h5>
+                    <div
+                        className="modal-content"
+                        style={{
+                            border: "3px solid #ff99cc", // your custom border color
+                            backgroundColor: "#f0f8ff",
+                             borderRadius: "8px",
+                             width: "450px",
+                             height: "200px",
+                                boxShadow: '0 4px 6px gray' // your custom background color
+                        }}
+                    >
+                        <div
+                            className="modal-header"
+                            style={{
+                                borderBottom: "2px solid #ff99cc", // header bottom border color
+                                backgroundColor: "#e6f2ff", 
+                               // header background color
+                            }}
+                        >
+                            <h5
+                                className="modal-title"
+                                style={{ fontSize: "24px", fontWeight: "600", textAlign:"center"}} // increased text size
+                            >
+                                Message 
+                            </h5>
                             <button
                                 type="button"
                                 className="btn-close"
@@ -158,8 +180,11 @@ const AdminLogin = () => {
                                 aria-label="Close"
                             ></button>
                         </div>
-                        <div className="modal-body">
-                            <p>{responseMessage}</p>
+                        <div
+                            className="modal-body"
+                            style={{ fontSize: "20px" }} // increased body text size
+                        >
+                            <p className="h2">{responseMessage}</p>
                         </div>
                     </div>
                 </div>

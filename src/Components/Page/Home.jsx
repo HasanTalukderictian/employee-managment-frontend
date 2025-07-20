@@ -1,6 +1,7 @@
 import Header from './Header';
 import Footer from './Footer';
 import Menu from './Menu';
+import '../../index.css';
 
 const Home = () => {
   return (
@@ -8,7 +9,7 @@ const Home = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        width: '1840px',
+        width: '1890px' ,
         height: '1024px',
         margin: '0 auto', // centers horizontally
         border: '1px solid #ccc', // optional: for visual debug
