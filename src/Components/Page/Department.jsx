@@ -2,7 +2,7 @@ import  { useEffect, useState } from 'react'
 import Header from './Header'
 import Menu from './Menu'
 import Footer from './Footer'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const Department = () => {
    
@@ -17,7 +17,7 @@ const Department = () => {
   const itemsPerPage = 10;
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-  const navigate = useNavigate();
+
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -46,10 +46,7 @@ const Department = () => {
   useEffect(() => {
     fetchEmployees();
   }, [searchQuery]);
-
-  const handleEdit = (id) => {
-    navigate(`/admin/edit-dept/${id}`);
-  };
+ 
 
   const handleDelete = async (id) => {
     const token = localStorage.getItem("authToken");
@@ -110,7 +107,7 @@ const Department = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        width: '1840px',
+         width: '1890px' ,
         height: '1024px',
         margin: '0 auto', // centers horizontally
         border: '1px solid #ccc', // optional: for visual debug
@@ -131,11 +128,11 @@ const Department = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <button className="btn btn-sm btn-primary ms-2" onClick={handleSearch}>
+          <button className="btn btn-sm btn-primary me-2" onClick={handleSearch}>
             <i className="bi bi-search me-1"></i>
           </button>
-          <Link to="">
-            <button className="btn btn-sm btn-success ms-2">Add Employee</button>
+          <Link to="/admin-add-department">
+            <button className="btn btn-sm btn-success me-2">Add Department</button>
           </Link>
         </div>
 
@@ -161,20 +158,7 @@ const Department = () => {
                         <td className="text-center h4">{employee.name}</td>
                         <td className="text-center">
                           <div className="d-flex justify-content-center">
-                          
-
-                            <button
-                              className="btn btn-sm btn-primary me-2"
-                              style={{
-                                paddingTop: "2px",
-                                paddingBottom: "2px",
-                                background: "#5f0c95",
-                                borderColor: "#5f0c95",
-                              }}
-                              onClick={() => handleEdit(employee.id)}
-                            >
-                              <i className="bi bi-pencil fs-5 me-1"></i> Edit
-                            </button>
+                         
                             <button
                               className="btn btn-sm btn-danger"
                               onClick={() => handleDelete(employee.id)}
