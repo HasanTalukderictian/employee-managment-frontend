@@ -137,7 +137,7 @@ const Employee = () => {
               <button className="btn btn-sm btn-primary me-2" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i>
               </button>
-              <Link to="/admin-add-desgination">
+              <Link to="/admin-add-employee">
                 <button className="btn btn-sm btn-success me-2">Add Employee</button>
               </Link>
             </div>
