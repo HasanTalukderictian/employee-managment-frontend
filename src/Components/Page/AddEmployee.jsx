@@ -1,13 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Menu from './Menu';
 import Header from './Header';
 import Footer from './Footer';
+import { useNavigate } from 'react-router-dom';
 
 const AddEmployee = () => {
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
+  const [imagePreview, setImagePreview] = useState(null);
+  const dateInputRef = useRef(null);
+  const navigate = useNavigate();
 
-  // Form state
+  // Form state with updated keys department_id and designation_id
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -17,8 +21,8 @@ const AddEmployee = () => {
     date_of_birth: '',
     gender: '',
     hire_date: '',
-    department: '',
-    designation: '',
+    department_id: '',   // updated key
+    designation_id: '',  // updated key
     salary: '',
     profile_picture: null,
     status: 'Active',
@@ -63,11 +67,19 @@ const AddEmployee = () => {
       .catch(err => console.error("Desi fetch error:", err));
   }, []);
 
+
   // Handle input changes
   const handleChange = e => {
     const { name, value, files } = e.target;
     if (name === 'profile_picture') {
-      setFormData(prev => ({ ...prev, [name]: files[0] || null }));
+      const file = files[0];
+      if (file) {
+        setFormData(prev => ({ ...prev, [name]: file }));
+        setImagePreview(URL.createObjectURL(file));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: null }));
+        setImagePreview(null);
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -78,92 +90,109 @@ const AddEmployee = () => {
     const newErrors = {};
 
     if (!formData.first_name.trim()) newErrors.first_name = 'First Name is required';
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
+
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone is required';
-    } else if (!/^\d+$/.test(formData.phone)) {
-      newErrors.phone = 'Phone must be numeric';
+    } else if (!/^\d{11}$/.test(formData.phone)) {
+      newErrors.phone = 'Phone must be exactly 11 digits';
     }
+
+
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.date_of_birth) newErrors.date_of_birth = 'Date of Birth is required';
     if (!formData.gender) newErrors.gender = 'Gender is required';
     if (!formData.hire_date) newErrors.hire_date = 'Hire Date is required';
-    if (!formData.department) newErrors.department = 'Department is required';
-    if (!formData.designation) newErrors.designation = 'Designation is required';
+
+    if (!formData.department_id) newErrors.department_id = 'Department is required';
+    if (!formData.designation_id) newErrors.designation_id = 'Designation is required';
+
     if (!formData.salary) newErrors.salary = 'Salary is required';
     if (!formData.profile_picture) newErrors.profile_picture = 'Profile Picture is required';
 
     return newErrors;
   };
 
+
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, profile_picture: null }));
+    setImagePreview(null);
+  };
+
+
   // Submit form data to backend
- const handleSubmit = async e => {
-  e.preventDefault();
+  const handleSubmit = async e => {
+    e.preventDefault();
 
-  const validationErrors = validate();
-  if (Object.keys(validationErrors).length > 0) {
-    setErrors(validationErrors);
-    return;
-  }
-  setErrors({});
-
-  // ✅ Show formData in console before submission
-  console.log("Form data before submission:");
-  for (let [key, value] of Object.entries(formData)) {
-    if (key === "profile_picture" && value) {
-      console.log(`${key}: ${value.name}`);
-    } else {
-      console.log(`${key}: ${value}`);
-    }
-  }
-
-  try {
-    const payload = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value !== null) {
-        payload.append(key, value);
-      }
-    });
-
-    const response = await fetch('http://127.0.0.1:8000/api/add-emplyee', {
-      method: 'POST',
-      body: payload,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      alert('Failed to submit form: ' + (errorData.message || response.statusText));
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
+    setErrors({});
 
-    const data = await response.json();
-    alert('Form submitted successfully!');
+    // Show formData in console before submission
+    console.log("Form data before submission:");
+    for (let [key, value] of Object.entries(formData)) {
+      if (key === "profile_picture" && value) {
+        console.log(`${key}: ${value.name}`);
+      } else {
+        console.log(`${key}: ${value}`);
+      }
+    }
 
-    // Reset form after success
-    setFormData({
-      first_name: '',
-      last_name: '',
-      email: '',
-      phone: '',
-      address: '',
-      date_of_birth: '',
-      gender: '',
-      hire_date: '',
-      department: '',
-      designation: '',
-      salary: '',
-      profile_picture: null,
-      status: 'Active',
-    });
-  } catch (error) {
-    console.error('Error submitting form:', error);
-    alert('An error occurred while submitting the form.');
-  }
-};
+    try {
+      const payload = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) {
+          payload.append(key, value);
+        }
+      });
+
+      const response = await fetch('http://127.0.0.1:8000/api/add-emplyee', {
+        method: 'POST',
+        body: payload,
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert('Failed to submit form: ' + (errorData.message || response.statusText));
+        return;
+      }
+
+      navigate("/admin-employee");
+      alert('Form submitted successfully!');
+
+
+      // Reset form after success
+      setFormData({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        address: '',
+        date_of_birth: '',
+        gender: '',
+        hire_date: '',
+        department_id: '',
+        designation_id: '',
+        salary: '',
+        profile_picture: null,
+        status: 'Active',
+      });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred while submitting the form.');
+    }
+  };
 
 
   return (
@@ -185,15 +214,16 @@ const AddEmployee = () => {
           <Menu />
           <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}>
             <div className="container mt-4">
-              <h3>Add New Employee</h3>
+              <h3 style={{ fontFamily: "sans-serif", marginBottom: '5px' }}>Add Employee</h3>
               <form
                 onSubmit={handleSubmit}
-                style={{ backgroundColor: 'slategray', padding: '20px', borderRadius: '8px' }}
+                style={{ backgroundColor: 'slategray', padding: '10px', borderRadius: '8px' }}
                 noValidate
               >
                 <div className="row mb-3 mt-5">
                   <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">
+                    <label className="form-label fs-5 text-start h2 d-block"
+                    style={{ pointerEvents: 'none' }}>
                       First Name *
                     </label>
                     <input
@@ -265,20 +295,24 @@ const AddEmployee = () => {
                     </label>
                     <input
                       type="date"
+                      ref={dateInputRef}
                       className={`form-control ${errors.date_of_birth ? 'is-invalid' : ''}`}
                       name="date_of_birth"
                       value={formData.date_of_birth}
                       onChange={handleChange}
+                      onFocus={() => dateInputRef.current?.showPicker?.()} // auto open calendar on focus
                     />
                     {errors.date_of_birth && (
                       <div className="invalid-feedback">{errors.date_of_birth}</div>
                     )}
                   </div>
+
                 </div>
 
                 <div className="row mb-3">
                   <div className="col-md-6">
                     <label className="form-label fs-5 text-start h2 d-block">Gender *</label>
+
                     <select
                       className={`form-control ${errors.gender ? 'is-invalid' : ''}`}
                       name="gender"
@@ -287,21 +321,26 @@ const AddEmployee = () => {
                       style={selectStyle}
                     >
                       <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
                     </select>
+
+
                     {errors.gender && <div className="invalid-feedback">{errors.gender}</div>}
                   </div>
 
                   <div className="col-md-6">
                     <label className="form-label fs-5 text-start h2 d-block">Hire Date *</label>
-                    <input
+
+                     <input
                       type="date"
-                      className={`form-control ${errors.hire_date ? 'is-invalid' : ''}`}
-                      name="hire_date"
+                      ref={dateInputRef}
+                      className={`form-control ${errors.date_of_birth ? 'is-invalid' : ''}`}
+                      name="date_of_birth"
                       value={formData.hire_date}
                       onChange={handleChange}
+                      onFocus={() => dateInputRef.current?.showPicker?.()} // auto open calendar on focus
                     />
                     {errors.hire_date && (
                       <div className="invalid-feedback">{errors.hire_date}</div>
@@ -315,9 +354,9 @@ const AddEmployee = () => {
                       Department *
                     </label>
                     <select
-                      className={`form-control ${errors.department ? 'is-invalid' : ''}`}
-                      name="department"
-                      value={formData.department}
+                      className={`form-control ${errors.department_id ? 'is-invalid' : ''}`}
+                      name="department_id"
+                      value={formData.department_id}
                       onChange={handleChange}
                       style={selectStyle}
                     >
@@ -328,8 +367,8 @@ const AddEmployee = () => {
                         </option>
                       ))}
                     </select>
-                    {errors.department && (
-                      <div className="invalid-feedback">{errors.department}</div>
+                    {errors.department_id && (
+                      <div className="invalid-feedback">{errors.department_id}</div>
                     )}
                   </div>
 
@@ -338,9 +377,9 @@ const AddEmployee = () => {
                       Designation *
                     </label>
                     <select
-                      className={`form-control ${errors.designation ? 'is-invalid' : ''}`}
-                      name="designation"
-                      value={formData.designation}
+                      className={`form-control ${errors.designation_id ? 'is-invalid' : ''}`}
+                      name="designation_id"
+                      value={formData.designation_id}
                       onChange={handleChange}
                       style={selectStyle}
                     >
@@ -351,8 +390,8 @@ const AddEmployee = () => {
                         </option>
                       ))}
                     </select>
-                    {errors.designation && (
-                      <div className="invalid-feedback">{errors.designation}</div>
+                    {errors.designation_id && (
+                      <div className="invalid-feedback">{errors.designation_id}</div>
                     )}
                   </div>
                 </div>
@@ -371,6 +410,24 @@ const AddEmployee = () => {
                   </div>
 
                   <div className="col-md-6">
+                    <label className="form-label fs-5 text-start h2 d-block">Status</label>
+                    <select
+                      className="form-control"
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      style={selectStyle}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+
+                </div>
+
+                <div className="row mb-4">
+
+                  <div className="col-md-6">
                     <label className="form-label fs-5 text-start h2 d-block">
                       Profile Picture *
                     </label>
@@ -384,23 +441,53 @@ const AddEmployee = () => {
                     {errors.profile_picture && (
                       <div className="invalid-feedback">{errors.profile_picture}</div>
                     )}
-                  </div>
-                </div>
 
-                <div className="row mb-4">
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Status</label>
-                    <select
-                      className="form-control"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                      style={selectStyle}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
+                    {imagePreview && (
+                      <div
+                        className="position-relative mt-2"
+                        style={{ display: 'inline-block', maxWidth: '150px' }}
+                      >
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          style={{
+                            position: 'absolute',
+                            top: '-10px',
+                            right: '-10px',
+                            background: '#dc3545',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '25px',
+                            height: '25px',
+                            fontSize: '18px',
+                            lineHeight: '25px',
+                            textAlign: 'center',
+                            padding: '0',
+                            cursor: 'pointer',
+                          }}
+                          aria-label="Remove image"
+                        >
+                          &times;
+                        </button>
+
+
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          style={{
+                            width: '150px',
+                            height: '150px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            border: '1px solid #ccc',
+                          }}
+                        />
+                      </div>
+                    )}
+
                   </div>
+
                 </div>
 
                 <button type="submit" className="btn btn-primary">
