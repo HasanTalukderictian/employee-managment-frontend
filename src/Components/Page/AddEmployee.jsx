@@ -10,6 +10,7 @@ const AddEmployee = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const dateInputRef = useRef(null);
   const navigate = useNavigate();
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   // Form state with updated keys department_id and designation_id
   const [formData, setFormData] = useState({
@@ -44,7 +45,7 @@ const AddEmployee = () => {
 
   // Fetch departments and designations
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/get-dept')
+    fetch(`${BASE_URL}/api/get-dept`)
       .then(res => res.json())
       .then(response => {
         if (response.data && Array.isArray(response.data)) {
@@ -55,7 +56,7 @@ const AddEmployee = () => {
       })
       .catch(err => console.error("Dept fetch error:", err));
 
-    fetch('http://127.0.0.1:8000/api/get-desi')
+    fetch(`${BASE_URL}/api/get-desi`)
       .then(res => res.json())
       .then(response => {
         if (response.data && Array.isArray(response.data)) {
@@ -154,7 +155,7 @@ const AddEmployee = () => {
         }
       });
 
-      const response = await fetch('http://127.0.0.1:8000/api/add-emplyee', {
+      const response = await fetch(`${BASE_URL}/api/add-emplyee`, {
         method: 'POST',
         body: payload,
         headers: {
@@ -213,17 +214,40 @@ const AddEmployee = () => {
         <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
           <Menu />
           <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}>
-            <div className="container mt-4">
-              <h3 style={{ fontFamily: "sans-serif", marginBottom: '5px' }}>Add Employee</h3>
+            <div className="container mt-4 mb-4">
+              <div className="d-flex align-items-center mb-3" style={{ position: "relative" }}>
+                {/* Back Button (left aligned) */}
+                <button
+                  className="btn btn-link position-absolute start-0"
+                  onClick={() => window.history.back()}
+                  style={{ textDecoration: 'none', fontWeight: 'bold', color: '#285fc7', fontSize: '18px' }}
+                >
+                  ← Back
+                </button>
+
+                {/* Centered Heading */}
+                <h3 className="mx-auto" style={{ fontFamily: "sans-serif", marginBottom: '5px' }}>
+                  Add Employee
+                </h3>
+              </div>
+
               <form
                 onSubmit={handleSubmit}
-                style={{ backgroundColor: 'slategray', padding: '10px', borderRadius: '8px' }}
+                style={{
+                  background: "#ffffff",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  padding: "30px",
+                  minHeight: "90vh",
+                  paddingBottom: "100px", // spacing for fixed pagination
+                  position: "relative",
+                }}
                 noValidate
               >
                 <div className="row mb-3 mt-5">
                   <div className="col-md-6">
                     <label className="form-label fs-5 text-start h2 d-block"
-                    style={{ pointerEvents: 'none' }}>
+                      style={{ pointerEvents: 'none' }}>
                       First Name *
                     </label>
                     <input
@@ -333,7 +357,7 @@ const AddEmployee = () => {
                   <div className="col-md-6">
                     <label className="form-label fs-5 text-start h2 d-block">Hire Date *</label>
 
-                     <input
+                    <input
                       type="date"
                       ref={dateInputRef}
                       className={`form-control ${errors.date_of_birth ? 'is-invalid' : ''}`}
@@ -490,7 +514,11 @@ const AddEmployee = () => {
 
                 </div>
 
-                <button type="submit" className="btn btn-primary">
+                <button
+                  type="submit"
+                  className="btn text-white btn-lg"
+                  style={{ backgroundColor: '#fd7e14' }}
+                >
                   Submit
                 </button>
               </form>

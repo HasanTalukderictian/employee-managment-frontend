@@ -123,23 +123,38 @@ const Employee = () => {
       <Header />
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
         <Menu />
-        <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}>
-          <div className="container mt-4" style={{ backgroundColor: 'slategray', padding: '10px', borderRadius: '8px' }}>
-            <div className="d-flex justify-content-between align-items-center mb-3">
+        <main
+          style={{
+            flexGrow: 1,
+            padding: "40px",
+            background: "#f0eee7",
+            overflowY: "auto",
+          }}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: "16px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+              padding: "30px",
+              minHeight: "90vh",
+            }}
+          >
+            <div className="d-flex justify-content-between align-items-center mb-4">
               <input
                 type="text"
-                className="form-control w-28"
+                className="form-control"
                 placeholder="Search"
                 value={searchTerm}
-                style={{ width: "87%" }}
+                style={{ width: "78%" }}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
-              <button className="btn btn-sm btn-primary" onClick={handleSearch}>
-                <i className="bi bi-search me-1"></i>
+              <button className="btn btn-primary ms-2" onClick={handleSearch}>
+                <i className="bi bi-search me-1"></i> Search
               </button>
-              <Link to="/admin-add-employee">
-                <button className="btn btn-sm btn-success me-2">Add Employee</button>
+              <Link to="/admin-add-employee" className="ms-2">
+                <button className="btn btn-success">Add Employee</button>
               </Link>
             </div>
 
@@ -153,52 +168,44 @@ const Employee = () => {
                   <table className="table table-bordered table-striped">
                     <thead className="table-dark">
                       <tr>
-                        <th className="text-center h2">Name</th>
-                        <th className="text-center h2">Phone</th>
-                        <th className="text-center h2">Status</th>
-                        <th className="text-center h2">Department</th>
-                        <th className="text-center h2">Designation</th>
-                        <th className="text-center h2">Action</th>
+                        <th className="text-center h6">Name</th>
+                        <th className="text-center h6">Phone</th>
+                        <th className="text-center h6">Status</th>
+                        <th className="text-center h6">Department</th>
+                        <th className="text-center h6">Designation</th>
+                        <th className="text-center h6">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentEmployees.length > 0 ? (
                         currentEmployees.map((employee) => (
                           <tr key={employee.id}>
-                            <td className="text-center h4">{employee.first_name}</td>
-                            <td className="text-center h4">{employee.phone}</td>
-                            <td className="text-center h4">{employee.status}</td>
-                            <td className="text-center h4">{employee.department.name}</td>
-                            <td className="text-center h4">{employee.designation.name}</td>
+                            <td className="text-center">{employee.first_name}</td>
+                            <td className="text-center">{employee.phone}</td>
+                            <td className="text-center">{employee.status}</td>
+                            <td className="text-center">{employee.department.name}</td>
+                            <td className="text-center">{employee.designation.name}</td>
                             <td className="text-center">
-
                               <div className="d-flex justify-content-center align-items-center">
                                 <button
-                                  className="btn btn-sm btn-info d-flex align-items-center me-2"
+                                  className="btn btn-info btn-sm me-2"
                                   onClick={() => handleView(employee.id)}
                                 >
-                                  <i className="bi bi-eye fs-5 me-1"></i>
-                                  <span>View</span>
+                                  <i className="bi bi-eye me-1"></i> View
                                 </button>
-
                                 <button
-                                  className="btn btn-sm btn-success d-flex align-items-center me-2"
+                                  className="btn btn-success btn-sm me-2"
                                   onClick={() => handleEdit(employee.id)}
                                 >
-                                  <i className="bi bi-pencil-square fs-5 me-1"></i>
-                                  <span>Edit</span>
+                                  <i className="bi bi-pencil-square me-1"></i> Edit
                                 </button>
-
                                 <button
-                                  className="btn btn-sm btn-danger d-flex align-items-center"
+                                  className="btn btn-danger btn-sm"
                                   onClick={() => handleDelete(employee.id)}
                                 >
-                                  <i className="bi bi-trash fs-5 me-1"></i>
-                                  <span>Delete</span>
+                                  <i className="bi bi-trash me-1"></i> Delete
                                 </button>
                               </div>
-
-
                             </td>
                           </tr>
                         ))
@@ -214,15 +221,23 @@ const Employee = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="d-flex justify-content-center mt-3">
+
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "30px",
+                    left: "50%",
+                    alignItems:"center",
+                    transform: "translateX(-50%)",
+                  }}
+                >
                   <nav>
-                    <ul className="pagination">
+                    <ul className="pagination mb-0">
                       <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                         <button className="page-link" onClick={handlePrevPage}>
                           <i className="bi bi-chevron-left"></i>
                         </button>
                       </li>
-
                       {Array.from({ length: totalPages }, (_, i) => (
                         <li
                           key={i + 1}
@@ -233,7 +248,6 @@ const Employee = () => {
                           </button>
                         </li>
                       ))}
-
                       <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                         <button className="page-link" onClick={handleNextPage}>
                           <i className="bi bi-chevron-right"></i>
@@ -241,12 +255,13 @@ const Employee = () => {
                       </li>
                     </ul>
                   </nav>
-
                 </div>
+
               </>
             )}
           </div>
         </main>
+
       </div>
       <Footer />
     </div>
