@@ -213,7 +213,15 @@ const AddEmployee = () => {
 
         <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
           <Menu />
-          <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}>
+          <main style={{
+            flexGrow: 1,
+            padding: "40px",
+            background: "linear-gradient(to bottom right, #ffffff, #f0eee7)",
+            borderRadius: "16px",
+            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.05)",
+            minHeight: "100vh",
+            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          }}>
             <div className="container mt-4 mb-4">
               <div className="d-flex align-items-center mb-3" style={{ position: "relative" }}>
                 {/* Back Button (left aligned) */}

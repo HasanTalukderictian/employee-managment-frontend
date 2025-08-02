@@ -12,6 +12,7 @@ import AddDepartment from './Components/Page/AddDepartment';
 import AddDesgination from './Components/Page/AddDesgination';
 import AddEmployee from './Components/Page/AddEmployee';
 import ViewEmployee from './Components/Page/ViewEmployee';
+import EditEmployee from './Components/Page/EditEmployee';
 
 function App() {
 
@@ -26,6 +27,7 @@ function App() {
                 <Route path='/admin-employee' element={<Employee/>}></Route>
                  <Route path='/admin-employee' element={<Employee/>}></Route>
                  <Route path="/employee/view/:id" element={<ViewEmployee />} />
+                 <Route path="/employee/edit/:id" element={<EditEmployee />} />
                   <Route path='/admin-department' element={<Department/>}></Route>
                    <Route path='/admin-add-department' element={<AddDepartment/>}></Route>
                    <Route path='/admin-add-desgination' element={<AddDesgination/>}></Route>
