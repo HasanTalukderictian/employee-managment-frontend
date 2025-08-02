@@ -124,17 +124,18 @@ const Employee = () => {
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
         <Menu />
         <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}>
-          <div className="container mt-4">
+          <div className="container mt-4" style={{ backgroundColor: 'slategray', padding: '10px', borderRadius: '8px' }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <input
                 type="text"
-                className="form-control w-30"
-                placeholder="Search by ID or name"
+                className="form-control w-28"
+                placeholder="Search"
                 value={searchTerm}
+                style={{ width: "87%" }}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
-              <button className="btn btn-sm btn-primary me-2" onClick={handleSearch}>
+              <button className="btn btn-sm btn-primary" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i>
               </button>
               <Link to="/admin-add-employee">
@@ -170,26 +171,34 @@ const Employee = () => {
                             <td className="text-center h4">{employee.department.name}</td>
                             <td className="text-center h4">{employee.designation.name}</td>
                             <td className="text-center">
-                              <div className="d-flex justify-content-center">
+
+                              <div className="d-flex justify-content-center align-items-center">
                                 <button
-                                  className="btn btn-sm btn-info me-1"
+                                  className="btn btn-sm btn-info d-flex align-items-center me-2"
                                   onClick={() => handleView(employee.id)}
                                 >
-                                  <i className="bi bi-eye fs-5 me-1"></i> View
+                                  <i className="bi bi-eye fs-5 me-1"></i>
+                                  <span>View</span>
                                 </button>
+
                                 <button
-                                  className="btn btn-sm btn-success me-1"
+                                  className="btn btn-sm btn-success d-flex align-items-center me-2"
                                   onClick={() => handleEdit(employee.id)}
                                 >
-                                  <i className="bi bi-pencil-square fs-5 me-1"></i> Edit
+                                  <i className="bi bi-pencil-square fs-5 me-1"></i>
+                                  <span>Edit</span>
                                 </button>
+
                                 <button
-                                  className="btn btn-sm btn-danger"
+                                  className="btn btn-sm btn-danger d-flex align-items-center"
                                   onClick={() => handleDelete(employee.id)}
                                 >
-                                  <i className="bi bi-trash fs-5 me-1"></i> Delete
+                                  <i className="bi bi-trash fs-5 me-1"></i>
+                                  <span>Delete</span>
                                 </button>
                               </div>
+
+
                             </td>
                           </tr>
                         ))
@@ -210,7 +219,7 @@ const Employee = () => {
                     <ul className="pagination">
                       <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                         <button className="page-link" onClick={handlePrevPage}>
-                          &laquo; Prev
+                          <i className="bi bi-chevron-left"></i>
                         </button>
                       </li>
 
@@ -219,10 +228,7 @@ const Employee = () => {
                           key={i + 1}
                           className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
                         >
-                          <button
-                            className="page-link"
-                            onClick={() => handlePageClick(i + 1)}
-                          >
+                          <button className="page-link" onClick={() => handlePageClick(i + 1)}>
                             {i + 1}
                           </button>
                         </li>
@@ -230,11 +236,12 @@ const Employee = () => {
 
                       <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                         <button className="page-link" onClick={handleNextPage}>
-                          Next &raquo;
+                          <i className="bi bi-chevron-right"></i>
                         </button>
                       </li>
                     </ul>
                   </nav>
+
                 </div>
               </>
             )}
