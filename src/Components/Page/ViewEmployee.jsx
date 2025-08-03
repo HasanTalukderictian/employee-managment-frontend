@@ -63,20 +63,35 @@ const ViewEmployee = () => {
           }}
         >
           <div className="d-flex align-items-center mb-3" style={{ position: "relative" }}>
-                {/* Back Button (left aligned) */}
-                <button
-                  className="btn btn-link position-absolute start-0"
-                  onClick={() => window.history.back()}
-                  style={{ textDecoration: 'none', fontWeight: 'bold', color: '#285fc7', fontSize: '18px' }}
-                >
-                  ← Back
-                </button>
+            {/* Back Button (left aligned) */}
+            <button
+              className="btn btn-link position-absolute start-0"
+              onClick={() => window.history.back()}
+              style={{
+                fontSize: "16px",
+                backgroundColor: "transparent",
+                border: "1px solid #ccc",
+                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.15)",
+                transition: "opacity 0.3s ease",
+                textDecoration: "none" // ✅ Remove underline
+              }}
+            >
+              ← Back
+            </button>
 
-                {/* Centered Heading */}
-                <h3 className="mx-auto" style={{ fontFamily: "sans-serif", marginBottom: '5px' }}>
-                   Employee Details
-                </h3>
-              </div>
+            {/* Centered Heading */}
+            <h3
+              className="mx-auto"
+              style={{
+                fontFamily: "sans-serif",
+                marginBottom: "5px",
+                cursor: "default" // optional: removes text selection cursor
+              }}
+            >
+              Employee Details
+            </h3>
+          </div>
+
 
           {loading ? (
             <p>Loading...</p>

@@ -220,42 +220,36 @@ const Employee = () => {
                   </table>
                 </div>
 
-                {/* Pagination */}
+               
 
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "30px",
-                    left: "50%",
-                    alignItems:"center",
-                    transform: "translateX(-50%)",
-                  }}
-                >
-                  <nav>
-                    <ul className="pagination mb-0">
-                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                        <button className="page-link" onClick={handlePrevPage}>
-                          <i className="bi bi-chevron-left"></i>
-                        </button>
-                      </li>
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <li
-                          key={i + 1}
-                          className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
-                        >
-                          <button className="page-link" onClick={() => handlePageClick(i + 1)}>
-                            {i + 1}
-                          </button>
-                        </li>
-                      ))}
-                      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                        <button className="page-link" onClick={handleNextPage}>
-                          <i className="bi bi-chevron-right"></i>
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
+               {/* Pagination */}
+<div className="d-flex justify-content-center mt-4">
+  <nav>
+    <ul className="pagination mb-0">
+      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+        <button className="page-link" onClick={handlePrevPage}>
+          <i className="bi bi-chevron-left"></i>
+        </button>
+      </li>
+      {Array.from({ length: totalPages }, (_, i) => (
+        <li
+          key={i + 1}
+          className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+        >
+          <button className="page-link" onClick={() => handlePageClick(i + 1)}>
+            {i + 1}
+          </button>
+        </li>
+      ))}
+      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+        <button className="page-link" onClick={handleNextPage}>
+          <i className="bi bi-chevron-right"></i>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>
+
 
               </>
             )}

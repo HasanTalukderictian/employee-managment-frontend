@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Menu from "./Menu";
@@ -21,6 +21,7 @@ const EditEmployee = () => {
     const BASE_URL = import.meta.env.VITE_BASE_URL;
     const navigate = useNavigate();
     const { id } = useParams();
+      const dateInputRef = useRef(null);
 
     useEffect(() => {
         axios
@@ -39,27 +40,29 @@ const EditEmployee = () => {
         setEmployee({ ...employee, [e.target.name]: e.target.value });
     };
 
+    
+
     const handleSubmit = (e) => {
-  e.preventDefault();
+        e.preventDefault();
 
-  const formData = new FormData();
-  for (let key in employee) {
-    formData.append(key, employee[key]);
-  }
+        const formData = new FormData();
+        for (let key in employee) {
+            formData.append(key, employee[key]);
+        }
 
-  axios
-    .post(`${BASE_URL}/api/update-emplyee/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-    .then(() => {
-      navigate("/employee");
-    })
-    .catch((error) => {
-      console.error("Error updating employee:", error.response?.data || error.message);
-    });
-};
+        axios
+            .post(`${BASE_URL}/api/update-emplyee/${id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            })
+            .then(() => {
+                navigate("/admin-employee");
+            })
+            .catch((error) => {
+                console.error("Error updating employee:", error.response?.data || error.message);
+            });
+    };
 
     return (
         <div
@@ -89,19 +92,36 @@ const EditEmployee = () => {
                     }}
                 >
                     <div className="container mt-4">
+
                         <div className="d-flex align-items-center mb-3" style={{ position: "relative" }}>
                             <button
                                 onClick={() => navigate(-1)}
-                                className="btn btn-link text-decoration-none"
-                                style={{ fontSize: "16px" }}
+                                className="btn text-decoration-none"
+                                style={{
+                                    fontSize: "16px",
+                                    backgroundColor: "transparent",
+                                    border: "1px solid #ccc",
+                                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.15)",
+                                    transition: "opacity 0.3s ease",
+                                }}
+                                onMouseOver={(e) => (e.currentTarget.style.opacity = "0.5")}
+                                onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
                             >
                                 ← Back
                             </button>
-                            <h3 className="flex-grow-1 text-center mb-0" style={{ fontFamily: "sans-serif" }}>
+
+                            <h3
+                                className="flex-grow-1 text-center mb-0"
+                                style={{
+                                    fontFamily: "sans-serif",
+                                    cursor: "default" // prevents the text selection cursor
+                                }}
+                            >
                                 Edit Employee
                             </h3>
                             <div style={{ width: "75px" }}></div>
                         </div>
+
 
                         <form
                             onSubmit={handleSubmit}
@@ -114,7 +134,7 @@ const EditEmployee = () => {
                         >
                             <div className="row mb-3">
                                 <div className="col">
-                                    <label>First Name</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">First Name</label>
                                     <input
                                         type="text"
                                         name="first_name"
@@ -124,7 +144,7 @@ const EditEmployee = () => {
                                     />
                                 </div>
                                 <div className="col">
-                                    <label>Last Name</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">Last Name</label>
                                     <input
                                         type="text"
                                         name="last_name"
@@ -137,7 +157,7 @@ const EditEmployee = () => {
 
                             <div className="row mb-3">
                                 <div className="col">
-                                    <label>Email</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">Email</label>
                                     <input
                                         type="email"
                                         name="email"
@@ -147,7 +167,7 @@ const EditEmployee = () => {
                                     />
                                 </div>
                                 <div className="col">
-                                    <label>Phone</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">Phone</label>
                                     <input
                                         type="text"
                                         name="phone"
@@ -160,7 +180,7 @@ const EditEmployee = () => {
 
                             <div className="row mb-3">
                                 <div className="col">
-                                    <label>Address</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">Address</label>
                                     <input
                                         type="text"
                                         name="address"
@@ -170,30 +190,33 @@ const EditEmployee = () => {
                                     />
                                 </div>
                                 <div className="col">
-                                    <label>Hiring Date</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">Hiring Date</label>
                                     <input
-                                        type="text"
+                                        type="date"
                                         name="hire_date"
+                                        ref={dateInputRef}
                                         className="form-control"
                                         value={employee.hire_date}
                                         onChange={handleChange}
+                                          onFocus={() => dateInputRef.current?.showPicker?.()}
                                     />
                                 </div>
                             </div>
 
                             <div className="row mb-3">
                                 <div className="col">
-                                    <label>Date of Birth</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">Date of Birth</label>
                                     <input
                                         type="date"
                                         name="date_of_birth"
                                         className="form-control"
                                         value={employee.date_of_birth}
                                         onChange={handleChange}
+                                         
                                     />
                                 </div>
                                 <div className="col">
-                                    <label>Gender</label>
+                                    <label className="form-label fs-5 text-start h2 d-block">Gender</label>
                                     <select
                                         name="gender"
                                         className="form-control"
@@ -207,22 +230,43 @@ const EditEmployee = () => {
                                 </div>
                             </div>
 
-                            <div className="mb-3">
-                                <label>Status</label>
-                                <select
-                                    name="status"
-                                    className="form-control"
-                                    value={employee.status}
-                                    onChange={handleChange}
-                                >
-                                    <option value="">Select Status</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
+
+                            <div className="row mb-3">
+                                <div className="col">
+                                    <label className="form-label fs-5 text-start h2 d-block">Status</label>
+                                    <select
+                                        name="status"
+                                        className="form-control"
+                                        value={employee.status}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                </div>
+
+
+                                <div className="col">
+                                    <label className="form-label fs-5 text-start h2 d-block">Salary</label>
+                                    <input
+                                        type="text"
+                                        name="salary"
+                                        className="form-control"
+                                        value={employee.salary}
+                                        onChange={handleChange}
+                                    />
+                                </div>
                             </div>
 
+
+
+
+
+
+
                             <div className="mb-3">
-                                <label>Profile Picture</label>
+                                <label className="form-label fs-5 text-start h2 d-block">Profile Picture</label>
                                 <input
                                     type="file"
                                     name="profile_picture"
@@ -232,7 +276,7 @@ const EditEmployee = () => {
                             </div>
 
                             <button type="submit" className="btn btn-warning text-white">
-                                Submit
+                                Update
                             </button>
                         </form>
                     </div>

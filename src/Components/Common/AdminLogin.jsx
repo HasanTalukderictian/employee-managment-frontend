@@ -61,7 +61,8 @@ const AdminLogin = () => {
 
     return (
         <div>
-            <div className="container d-flex justify-content-center align-items-center vh-100">
+            <div className="container d-flex justify-content-center align-items-center vh-100" 
+            >
                 <div className="card shadow p-4" style={{ maxWidth: "800px", width: "100%" }}>
                     <div className="text-center mb-4 mt-8">
                         <i className="bi bi-person-circle mb-3" style={{ fontSize: "80px", color: "#07f747" }}></i>
