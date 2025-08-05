@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect,useState } from 'react';
 import Menu from './Menu';
 import Header from './Header';
 import Footer from './Footer';
@@ -8,7 +8,6 @@ const AddEmployee = () => {
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
-  const dateInputRef = useRef(null);
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -202,8 +201,8 @@ const AddEmployee = () => {
         style={{
           display: 'flex',
           flexDirection: 'column',
+          minHeight: '100vh', // ✅ Use minHeight instead of fixed height
           width: '1890px',
-          height: '1024px',
           margin: '0 auto',
           border: '1px solid #ccc',
           boxSizing: 'border-box',
@@ -222,7 +221,7 @@ const AddEmployee = () => {
             minHeight: "100vh",
             fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
           }}>
-            <div className="container mt-4 mb-4">
+            <div className="container mb-4">
               <div className="d-flex align-items-center mb-3" style={{ position: "relative" }}>
                 {/* Back Button (left aligned) */}
                 <button
@@ -246,7 +245,7 @@ const AddEmployee = () => {
                   borderRadius: "16px",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                   padding: "30px",
-                  minHeight: "90vh",
+                  minHeight: "400px",
                   paddingBottom: "100px", // spacing for fixed pagination
                   position: "relative",
                 }}
@@ -327,12 +326,10 @@ const AddEmployee = () => {
                     </label>
                     <input
                       type="date"
-                      ref={dateInputRef}
                       className={`form-control ${errors.date_of_birth ? 'is-invalid' : ''}`}
                       name="date_of_birth"
                       value={formData.date_of_birth}
                       onChange={handleChange}
-                      onFocus={() => dateInputRef.current?.showPicker?.()} // auto open calendar on focus
                     />
                     {errors.date_of_birth && (
                       <div className="invalid-feedback">{errors.date_of_birth}</div>
@@ -367,12 +364,10 @@ const AddEmployee = () => {
 
                     <input
                       type="date"
-                      ref={dateInputRef}
-                      className={`form-control ${errors.date_of_birth ? 'is-invalid' : ''}`}
-                      name="date_of_birth"
+                      className={`form-control ${errors.hire_date ? 'is-invalid' : ''}`}
+                      name="hire_date"
                       value={formData.hire_date}
                       onChange={handleChange}
-                      onFocus={() => dateInputRef.current?.showPicker?.()} // auto open calendar on focus
                     />
                     {errors.hire_date && (
                       <div className="invalid-feedback">{errors.hire_date}</div>
