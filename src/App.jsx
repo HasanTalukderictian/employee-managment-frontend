@@ -14,6 +14,7 @@ import AddEmployee from './Components/Page/AddEmployee';
 import ViewEmployee from './Components/Page/ViewEmployee';
 import EditEmployee from './Components/Page/EditEmployee';
 import AddUser from './Components/Page/AddUser';
+import AddSalary from './Components/Page/AddSalary';
 
 function App() {
 
@@ -35,6 +36,7 @@ function App() {
                     <Route path='/admin-add-employee' element={<AddEmployee/>}></Route>
                    <Route path='/admin-desgination' element={<Desgination/>}></Route>
                     <Route path='/admin-salary' element={<Salary/>}></Route>
+                     <Route path='/admin-add-salary' element={<AddSalary/>}></Route>
                     <Route path='/admin-leave' element={<Leave/>}></Route>
                      <Route path='/admin-users' element={<Users/>}></Route>
                      <Route path='/admin-add-users' element={<AddUser/>}></Route>

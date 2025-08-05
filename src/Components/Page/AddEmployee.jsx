@@ -112,7 +112,7 @@ const AddEmployee = () => {
     if (!formData.department_id) newErrors.department_id = 'Department is required';
     if (!formData.designation_id) newErrors.designation_id = 'Designation is required';
 
-    if (!formData.salary) newErrors.salary = 'Salary is required';
+   
     if (!formData.profile_picture) newErrors.profile_picture = 'Profile Picture is required';
 
     return newErrors;
@@ -184,7 +184,6 @@ const AddEmployee = () => {
         hire_date: '',
         department_id: '',
         designation_id: '',
-        salary: '',
         profile_picture: null,
         status: 'Active',
       });
@@ -424,17 +423,7 @@ const AddEmployee = () => {
                 </div>
 
                 <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Salary *</label>
-                    <input
-                      type="number"
-                      className={`form-control ${errors.salary ? 'is-invalid' : ''}`}
-                      name="salary"
-                      value={formData.salary}
-                      onChange={handleChange}
-                    />
-                    {errors.salary && <div className="invalid-feedback">{errors.salary}</div>}
-                  </div>
+                 
 
                   <div className="col-md-6">
                     <label className="form-label fs-5 text-start h2 d-block">Status</label>
@@ -450,11 +439,7 @@ const AddEmployee = () => {
                     </select>
                   </div>
 
-                </div>
-
-                <div className="row mb-4">
-
-                  <div className="col-md-6">
+                   <div className="col-md-6">
                     <label className="form-label fs-5 text-start h2 d-block">
                       Profile Picture *
                     </label>
