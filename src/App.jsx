@@ -13,6 +13,7 @@ import AddDesgination from './Components/Page/AddDesgination';
 import AddEmployee from './Components/Page/AddEmployee';
 import ViewEmployee from './Components/Page/ViewEmployee';
 import EditEmployee from './Components/Page/EditEmployee';
+import AddUser from './Components/Page/AddUser';
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
                     <Route path='/admin-salary' element={<Salary/>}></Route>
                     <Route path='/admin-leave' element={<Leave/>}></Route>
                      <Route path='/admin-users' element={<Users/>}></Route>
+                     <Route path='/admin-add-users' element={<AddUser/>}></Route>
         </Routes>
      </BrowserRouter>
     </>

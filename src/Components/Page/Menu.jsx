@@ -62,13 +62,13 @@ const Menu = () => {
   return (
     <nav
       style={{
-    backgroundColor: '#333',
+    backgroundColor: '#3a423c',
     color: '#fff',
     minHeight: '100vh',
     paddingLeft: '5px',
     width: '280px',
     padding: '10px',
-    boxShadow: '4px 0 10px rgba(0, 0, 0, 0.4)' // ← Shadow on right side
+    boxShadow: '4px 0 10px rgba(15, 14, 14, 0.4)' // ← Shadow on right side
   }}
     >
       <ul style={{ listStyle: 'none', padding: 0 }}>

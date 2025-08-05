@@ -134,7 +134,7 @@ const Desgination = () => {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search by ID or name"
+                placeholder="Search name"
                 value={searchTerm}
                 style={{ width: '78%' }}
                 onChange={(e) => setSearchTerm(e.target.value)}

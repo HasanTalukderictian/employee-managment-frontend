@@ -31,6 +31,8 @@ const Users = () => {
       if (!response.ok) throw new Error("Failed to fetch users");
 
       const result = await response.json();
+
+      console.log(result);
       const userData = result.data;
       setUsers(Array.isArray(userData) ? userData : []);
       setCurrentPage(1);
@@ -48,22 +50,22 @@ const Users = () => {
 
 
   const handleDelete = async (id) => {
-  if (!confirm("Are you sure you want to delete this user?")) return;
+    if (!confirm("Are you sure you want to delete this user?")) return;
 
-  try {
-    const response = await fetch(`${BASE_URL}/api/delete-user/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      const response = await fetch(`${BASE_URL}/api/delete-user/${id}`, {
+        method: "DELETE",
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to delete user");
+      if (!response.ok) {
+        throw new Error("Failed to delete user");
+      }
+
+      setUsers(users.filter((user) => user.id !== id));
+    } catch (err) {
+      alert(err.message);
     }
-
-    setUsers(users.filter((user) => user.id !== id));
-  } catch (err) {
-    alert(err.message);
-  }
-};
+  };
 
 
   const handleSearch = () => {
@@ -137,7 +139,7 @@ const Users = () => {
               <button className="btn btn-primary ms-2" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i> Search
               </button>
-              <Link to="/admin-add-user" className="ms-2">
+              <Link to="/admin-add-users" className="ms-2">
                 <button className="btn btn-success">Add User</button>
               </Link>
             </div>
@@ -152,14 +154,25 @@ const Users = () => {
                   <table className="table table-bordered table-striped">
                     <thead className="table-dark">
                       <tr>
+                        <th className="text-center h6">Name</th>
+                        <th className="text-center h6">Designation</th>
                         <th className="text-center h6">Email</th>
                         <th className="text-center h6">Action</th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {currentUsers.length > 0 ? (
                         currentUsers.map((user) => (
                           <tr key={user.id}>
+                            <td className="text-center">
+                              {user.employee
+                                ? `${user.employee.first_name} ${user.employee.last_name}`
+                                : "N/A"}
+                            </td>
+                            <td className="text-center">
+                              {user.employee?.designation?.name ?? "N/A"}
+                            </td>
                             <td className="text-center">{user.email}</td>
                             <td className="text-center">
                               <button
@@ -174,12 +187,13 @@ const Users = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="2" className="text-center">
+                          <td colSpan="4" className="text-center">
                             No users found.
                           </td>
                         </tr>
                       )}
                     </tbody>
+
 
                   </table>
                 </div>
