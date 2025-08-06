@@ -4,11 +4,11 @@ import Menu from './Menu';
 import '../../index.css';
 import { useRef, useEffect, useState } from 'react';
 import Chart from 'chart.js/auto';
+import { Link } from 'react-router-dom'; // <-- Make sure this is imported
 
 // LiveTime component to show live clock
 const LiveTime = () => {
   const [time, setTime] = useState(new Date());
-    
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -26,7 +26,7 @@ const LiveTime = () => {
 const BarChart = () => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
- 
+
   useEffect(() => {
     if (chartInstance.current) {
       chartInstance.current.destroy();
@@ -71,13 +71,14 @@ const Home = () => {
     employees: 0,
     users: 0,
   });
-   const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/get-all-data`)
       .then((res) => res.json())
       .then((data) => {
-        const totalEarning = data.salary?.reduce((sum, item) => sum + parseFloat(item.basic), 0) || 0;
+        const totalEarning =
+          data.salary?.reduce((sum, item) => sum + parseFloat(item.basic), 0) || 0;
         setStats({
           earning: totalEarning,
           departments: data.department?.length || 0,
@@ -116,8 +117,7 @@ const Home = () => {
             style={{
               position: 'relative',
               marginBottom: '2.5rem',
-              height: '2.5rem', // enough height to vertically center
-             
+              height: '2.5rem',
             }}
           >
             <h2
@@ -148,59 +148,66 @@ const Home = () => {
             </div>
           </div>
 
-
-          {/* Top Stats Cards */}
+          {/* Top Stats Cards with links */}
           <div className="row g-4 mb-4">
             <div className="col-md-3">
-              <div
-                className="d-flex align-items-center justify-content-start text-white p-4 rounded shadow"
-                style={{ background: 'linear-gradient(135deg, #000000ff, #0a0b0bff)' }}
-              >
-                <i className="bi bi-cash-stack fs-1 me-3"></i>
-                <div>
-                  <div className="h4">Salary</div>
-                  <div className="h4">${stats.earning.toLocaleString()}</div>
+              <Link to="/admin-salary" className="text-decoration-none">
+                <div
+                  className="d-flex align-items-center justify-content-start text-white p-4 rounded shadow"
+                  style={{ background: 'linear-gradient(135deg, #000000ff, #0a0b0bff)' }}
+                >
+                  <i className="bi bi-cash-stack fs-1 me-3"></i>
+                  <div>
+                    <div className="h4 text-white">Salary</div>
+                    <div className="h4 text-white">${stats.earning.toLocaleString()}</div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
 
             <div className="col-md-3">
-              <div
-                className="d-flex align-items-center justify-content-start p-4 rounded shadow"
-                style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
-              >
-                <i className="bi bi-diagram-3-fill fs-1 text-primary me-3"></i>
-                <div>
-                  <div className="h4">Departments</div>
-                  <div className="h4">{stats.departments}</div>
+              <Link to="/admin-department" className="text-decoration-none">
+                <div
+                  className="d-flex align-items-center justify-content-start p-4 rounded shadow"
+                  style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
+                >
+                  <i className="bi bi-diagram-3-fill fs-1 text-primary me-3"></i>
+                  <div>
+                    <div className="h4 text-dark">Departments</div>
+                    <div className="h4 text-dark">{stats.departments}</div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
 
             <div className="col-md-3">
-              <div
-                className="d-flex align-items-center justify-content-start p-4 rounded shadow"
-                style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
-              >
-                <i className="bi bi-people-fill fs-1 text-success me-3"></i>
-                <div>
-                  <div className="h4">Employees</div>
-                  <div className="h4">{stats.employees}</div>
+              <Link to="/admin-employee" className="text-decoration-none">
+                <div
+                  className="d-flex align-items-center justify-content-start p-4 rounded shadow"
+                  style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
+                >
+                  <i className="bi bi-people-fill fs-1 text-success me-3"></i>
+                  <div>
+                    <div className="h4 text-dark">Employees</div>
+                    <div className="h4 text-dark">{stats.employees}</div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
 
             <div className="col-md-3">
-              <div
-                className="d-flex align-items-center justify-content-start p-4 rounded shadow"
-                style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
-              >
-                <i className="bi bi-person-check-fill fs-1 text-warning me-3"></i>
-                <div>
-                  <div className="h4">Users</div>
-                  <div className="h4">{stats.users}</div>
+              <Link to="/admin-users" className="text-decoration-none">
+                <div
+                  className="d-flex align-items-center justify-content-start p-4 rounded shadow"
+                  style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
+                >
+                  <i className="bi bi-person-check-fill fs-1 text-warning me-3"></i>
+                  <div>
+                    <div className="h4 text-dark">Users</div>
+                    <div className="h4 text-dark">{stats.users}</div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
 

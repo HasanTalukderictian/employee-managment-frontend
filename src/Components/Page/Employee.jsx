@@ -3,6 +3,9 @@ import Header from './Header';
 import Menu from './Menu';
 import Footer from './Footer';
 import { Link, useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 
 const Employee = () => {
   const [employees, setEmployees] = useState([]);
@@ -46,6 +49,26 @@ const Employee = () => {
   useEffect(() => {
     fetchEmployees();
   }, [searchQuery]);
+
+
+  const handleDownloadExcel = () => {
+    const dataToExport = employees.map(emp => ({
+      Name: emp.first_name,
+      Phone: emp.phone,
+      Status: emp.status,
+      Department: emp.department.name,
+      Designation: emp.designation.name,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(data, 'employees.xlsx');
+  };
+
 
   const handleDelete = async (id) => {
     const token = localStorage.getItem("authToken");
@@ -146,7 +169,7 @@ const Employee = () => {
                 className="form-control"
                 placeholder="Search"
                 value={searchTerm}
-                style={{ width: "78%" }}
+                style={{ width: "70%" }}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
@@ -156,6 +179,10 @@ const Employee = () => {
               <Link to="/admin-add-employee" className="ms-2">
                 <button className="btn btn-success">Add Employee</button>
               </Link>
+              <button className="btn btn-success ms-2" onClick={handleDownloadExcel}>
+                <i className="bi bi-download me-1"></i> Download
+              </button>
+
             </div>
 
             {loading ? (
@@ -223,7 +250,13 @@ const Employee = () => {
 
 
                 {/* Pagination */}
-                <div className="d-flex justify-content-center mt-4">
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "30px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                  }}>
                   <nav>
                     <ul className="pagination mb-0">
                       <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>

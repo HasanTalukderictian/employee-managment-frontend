@@ -14,11 +14,12 @@ const AddUser = () => {
   const [employees, setEmployees] = useState([]);
   const [fadeOut, setFadeOut] = useState(false); // 👈 state to trigger fade-out
   const navigate = useNavigate();
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/get-emplyee');
+        const response = await fetch(`${BASE_URL}/api/get-emplyee`);
         const result = await response.json();
         setEmployees(Array.isArray(result.data) ? result.data : []);
       } catch (error) {
@@ -42,7 +43,7 @@ const handleSubmit = async (e) => {
   };
 
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/users-store', {
+    const response = await fetch(`${BASE_URL}/api/users-store`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

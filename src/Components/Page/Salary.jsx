@@ -21,7 +21,7 @@ const Salary = () => {
     setLoading(true);
     setError(null);
     try {
-      let url = `http://127.0.0.1:8000/api/get-salary`;
+      let url = `${BASE_URL}/api/get-salary`;
       if (searchQuery.trim()) {
         url += `?search=${encodeURIComponent(searchQuery)}`;
       }
