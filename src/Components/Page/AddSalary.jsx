@@ -15,11 +15,13 @@ const AddSalary = () => {
     });
     const [employees, setEmployees] = useState([]);
      const navigate = useNavigate();
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 
     useEffect(() => {
         const fetchEmployees = async () => {
             try {
-                const res = await fetch("http://127.0.0.1:8000/api/get-emplyee");
+                const res = await fetch(`${BASE_URL}/api/get-emplyee`);
                 const data = await res.json();
                 setEmployees(data.data || []);
             } catch (err) {
@@ -39,7 +41,7 @@ const AddSalary = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch("http://127.0.0.1:8000/api/add-salary", {
+            const res = await fetch(`${BASE_URL}/api/add-salary`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
