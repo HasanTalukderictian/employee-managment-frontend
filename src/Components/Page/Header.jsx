@@ -19,7 +19,7 @@ const Header = () => {
       >
         {/* Left section: Icon + Title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <i className="bi bi-people" style={{ fontSize: "40px", color: "#07f747" }}></i>
+          <i className="bi bi-people text-warning" style={{ fontSize: "40px" }}></i>
           <h1 style={{ margin: 0, fontSize: "30px", fontWeight: "600", fontFamily: 'sans-serif' }}>
             Employee Management System
           </h1>

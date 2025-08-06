@@ -3,6 +3,8 @@ import Menu from './Menu';
 import Header from './Header';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
+
 
 const AddEmployee = () => {
   const [departments, setDepartments] = useState([]);
@@ -10,6 +12,7 @@ const AddEmployee = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+  
 
   // Form state with updated keys department_id and designation_id
   const [formData, setFormData] = useState({
@@ -68,22 +71,41 @@ const AddEmployee = () => {
   }, []);
 
 
+  
+
+
+
   // Handle input changes
-  const handleChange = e => {
-    const { name, value, files } = e.target;
-    if (name === 'profile_picture') {
-      const file = files[0];
-      if (file) {
-        setFormData(prev => ({ ...prev, [name]: file }));
-        setImagePreview(URL.createObjectURL(file));
-      } else {
-        setFormData(prev => ({ ...prev, [name]: null }));
-        setImagePreview(null);
+const handleChange = async (e) => {
+  const { name, value, files } = e.target;
+
+  if (name === 'profile_picture') {
+    const file = files[0];
+    if (file) {
+      try {
+        // Image compression options
+        const options = {
+          maxSizeMB: 0.2, // Target max size in MB
+          maxWidthOrHeight: 800, // Resize the image if larger
+          useWebWorker: true,
+        };
+
+        const compressedFile = await imageCompression(file, options);
+
+        setFormData(prev => ({ ...prev, [name]: compressedFile }));
+        setImagePreview(URL.createObjectURL(compressedFile));
+      } catch (error) {
+        console.error('Image compression error:', error);
+        alert('Failed to compress image.');
       }
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData(prev => ({ ...prev, [name]: null }));
+      setImagePreview(null);
     }
-  };
+  } else {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+};
 
   // Validation function
   const validate = () => {
