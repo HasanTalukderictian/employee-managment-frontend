@@ -53,7 +53,7 @@ const Users = () => {
     if (!confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      const response = await fetch(`${BASE_URL}/api/delete-user/${id}`, {
+      const response = await fetch(`${BASE_URL}/api/del-users/${id}`, {
         method: "DELETE",
       });
 

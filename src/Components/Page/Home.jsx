@@ -154,7 +154,7 @@ const Home = () => {
               <Link to="/admin-salary" className="text-decoration-none">
                 <div
                   className="d-flex align-items-center justify-content-start text-white p-4 rounded shadow"
-                  style={{ background: 'linear-gradient(135deg, #000000ff, #0a0b0bff)' }}
+                  style={{ background: '#fec5bb' }}
                 >
                   <i className="bi bi-cash-stack fs-1 me-3"></i>
                   <div>

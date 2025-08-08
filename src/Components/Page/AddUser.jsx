@@ -47,6 +47,8 @@ const handleSubmit = async (e) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accpet' : 'application/json'
+        
       },
       body: JSON.stringify(payload),
     });
