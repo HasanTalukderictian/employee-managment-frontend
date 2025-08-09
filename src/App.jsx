@@ -15,6 +15,7 @@ import ViewEmployee from './Components/Page/ViewEmployee';
 import EditEmployee from './Components/Page/EditEmployee';
 import AddUser from './Components/Page/AddUser';
 import AddSalary from './Components/Page/AddSalary';
+import Attendance from './Components/Page/Attendance';
 
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
                     <Route path='/admin-salary' element={<Salary/>}></Route>
                      <Route path='/admin-add-salary' element={<AddSalary/>}></Route>
                     <Route path='/admin-leave' element={<Leave/>}></Route>
+                       <Route path='/admin-attendance' element={<Attendance/>}></Route>
                      <Route path='/admin-users' element={<Users/>}></Route>
                      <Route path='/admin-add-users' element={<AddUser/>}></Route>
         </Routes>
