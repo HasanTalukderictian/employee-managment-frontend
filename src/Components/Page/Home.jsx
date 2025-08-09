@@ -22,6 +22,57 @@ const LiveTime = () => {
   );
 };
 
+// LineChart Component
+const LineChart = () => {
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  useEffect(() => {
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    chartInstance.current = new Chart(chartRef.current, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        datasets: [
+          {
+            label: 'Visitors',
+            data: [30, 45, 28, 60, 42, 75, 50, 90],
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.2)',
+            tension: 0.4, // smooth curve
+            fill: true,
+            pointBackgroundColor: '#0d6efd',
+          },
+          {
+            label: 'Sales',
+            data: [10, 25, 18, 40, 30, 55, 35, 70],
+            borderColor: '#e0a800',
+            backgroundColor: 'rgba(224, 168, 0, 0.2)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#e0a800',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+        },
+        scales: {
+          y: { beginAtZero: true },
+        },
+      },
+    });
+  }, []);
+
+  return <canvas ref={chartRef} height={100} />;
+};
+
+
 // BarChart Component
 const BarChart = () => {
   const chartRef = useRef(null);
@@ -112,159 +163,203 @@ const Home = () => {
             overflowY: 'auto',
           }}
         >
-          {/* Header with title and live time */}
-          <div
-            style={{
-              position: 'relative',
-              marginBottom: '2.5rem',
-              height: '2.5rem',
-            }}
-          >
-            <h2
-              className="mb-0"
-              style={{
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                margin: 0,
-                top: '50%',
-                transformOrigin: 'center',
-              }}
-            >
-              Welcome to the Dashboard
-            </h2>
-            <div
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: '1.25rem',
-                fontWeight: 500,
-                color: '#333',
-              }}
-            >
-              <LiveTime />
-            </div>
-          </div>
 
           {/* Top Stats Cards with links */}
-          <div className="row g-4 mb-4">
-            <div className="col-md-3">
-              <Link to="/admin-salary" className="text-decoration-none">
-                <div
-                  className="d-flex align-items-center justify-content-start text-white p-4 rounded shadow"
-                  style={{ background: '#fec5bb' }}
-                >
-                  <i className="bi bi-cash-stack fs-1 me-3"></i>
-                  <div>
-                    <div className="h4 text-white">Salary</div>
-                    <div className="h4 text-white">${stats.earning.toLocaleString()}</div>
-                  </div>
-                </div>
-              </Link>
+
+
+
+          <div className="p-4 rounded shadow-sm mb-3" style={{ backgroundColor: 'white' }}>
+
+            {/* Header */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Dashboard</h2>
+              <div style={{ fontSize: '1.25rem', fontWeight: 500, color: '#333' }}>
+                <LiveTime />
+              </div>
             </div>
 
-            <div className="col-md-3">
-              <Link to="/admin-department" className="text-decoration-none">
-                <div
-                  className="d-flex align-items-center justify-content-start p-4 rounded shadow"
-                  style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
-                >
-                  <i className="bi bi-diagram-3-fill fs-1 text-primary me-3"></i>
-                  <div>
-                    <div className="h4 text-dark">Departments</div>
+            {/* Row of cards */}
+            <div className="row g-4">
+
+              {/* Salary */}
+              <div className="col-md-3">
+                <Link to="/admin-salary" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #d6e0ff, #f0f4ff)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                        <i className="bi bi-cash-stack fs-4 text-primary"></i>
+
+                      </div>
+                      <div className="h4 text-dark mb-0">Salary</div>
+                    </div>
+                    <div className="h4 fw-bold text-dark">${stats.earning.toLocaleString()}</div>
+                    <small className="text-muted">All Salary</small>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Departments */}
+              <div className="col-md-3">
+                <Link to="/admin-department" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #d0ebff, #f0f9ff)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                        <i className="bi bi-mortarboard-fill fs-4 text-info"></i>
+                      </div>
+                      <div className="h4 text-dark">Departments</div>
+
+                    </div>
+
                     <div className="h4 text-dark">{stats.departments}</div>
+                    <small className="text-muted">Registered Departments</small>
                   </div>
-                </div>
-              </Link>
-            </div>
+                </Link>
+              </div>
 
-            <div className="col-md-3">
-              <Link to="/admin-employee" className="text-decoration-none">
-                <div
-                  className="d-flex align-items-center justify-content-start p-4 rounded shadow"
-                  style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
-                >
-                  <i className="bi bi-people-fill fs-1 text-success me-3"></i>
-                  <div>
-                    <div className="h4 text-dark">Employees</div>
+              {/* Employees */}
+              <div className="col-md-3">
+                <Link to="/admin-employee" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #f3d9fa, #f8eaff)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+
+                        <i className="bi bi-people-fill fs-4 text-success"></i>
+                      </div>
+                      <div className="h4 text-dark">Employees</div>
+
+                    </div>
+
                     <div className="h4 text-dark">{stats.employees}</div>
-                  </div>
-                </div>
-              </Link>
-            </div>
+                    <div className="fw-semibold text-dark">Total Employees</div>
 
-            <div className="col-md-3">
-              <Link to="/admin-users" className="text-decoration-none">
-                <div
-                  className="d-flex align-items-center justify-content-start p-4 rounded shadow"
-                  style={{ background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)' }}
-                >
-                  <i className="bi bi-person-check-fill fs-1 text-warning me-3"></i>
-                  <div>
-                    <div className="h4 text-dark">Users</div>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Users */}
+              <div className="col-md-3">
+                <Link to="/admin-users" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #ffe5d9, #fff4f0)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                        <i className="bi bi-person-fill fs-4 text-purple"></i>
+                      </div>
+                      <div className="h4 text-dark">Users</div>
+
+                    </div>
                     <div className="h4 text-dark">{stats.users}</div>
+                    <div className="fw-semibold text-dark">Total Users</div>
+
+                  </div>
+                </Link>
+              </div>
+
+              {/* Successful Applications */}
+              <div className="col-md-3">
+                <Link to="/successful-applications" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #e9f7ef, #f4fff7)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                        <i className="bi bi-check2-circle fs-4 text-success"></i>
+                      </div>
+                      <div className="fs-5 fw-bold text-dark">{stats.successful || 0}</div>
+                    </div>
+                    <div className="fw-semibold text-dark">Successful Applications</div>
+                    <small className="text-muted">Approved applications</small>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Total Leads */}
+              <div className="col-md-3">
+                <Link to="/leads" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #d3f9d8, #f0fff4)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                        <i className="bi bi-people-fill fs-4 text-success"></i>
+                      </div>
+                      <div className="fs-5 fw-bold text-dark">{stats.leads || 0}</div>
+                    </div>
+                    <div className="fw-semibold text-dark">Total Leads</div>
+                    <small className="text-muted">All leads</small>
+                  </div>
+                </Link>
+              </div>
+
+              {/* New Leads */}
+              <div className="col-md-3">
+                <Link to="/recent-leads" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #f4fce3, #fdfff4)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                        <i className="bi bi-graph-up-arrow fs-4 text-success"></i>
+                      </div>
+                      <div className="fs-5 fw-bold text-dark">{stats.newLeads || 0}</div>
+                    </div>
+                    <div className="fw-semibold text-dark">New Leads</div>
+                    <small className="text-muted">Recent leads</small>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Branches */}
+              <div className="col-md-3">
+                <Link to="/branches" className="text-decoration-none">
+                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #fff3bf, #fff9e6)' }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                        <i className="bi bi-building fs-4 text-warning"></i>
+                      </div>
+                      <div className="fs-5 fw-bold text-dark">{stats.branches || 0}</div>
+                    </div>
+                    <div className="fw-semibold text-dark">Total Branches</div>
+                    <small className="text-muted">All branches</small>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Repeat for other cards... */}
+
+            </div>
+          </div>
+
+
+
+
+
+          {/* Parallel Chart Section */}
+          <div className="row g-4 mb-4">
+            {/* Bar Chart */}
+            <div className="col-md-6">
+              <div className="bg-white border rounded p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="mb-0">Result</h5>
+                  <button className="btn btn-warning btn-sm">Check Now</button>
+                </div>
+                <div className="p-3 bg-light">
+                  <BarChart />
+                </div>
+              </div>
+            </div>
+
+            {/* Line Chart + Calendar */}
+            <div className="col-md-6">
+              <div className="row g-4">
+                <div className="col-12">
+
+                  <div className="col-12">
+                    <div className="bg-white border rounded p-4" style={{ height: '350px' }}>
+                      <LineChart />
+                    </div>
                   </div>
                 </div>
-              </Link>
-            </div>
-          </div>
 
-          {/* Bar Chart Section */}
-          <div className="bg-white border rounded p-4 mb-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="mb-0">Result</h5>
-              <button className="btn btn-warning btn-sm">Check Now</button>
-            </div>
-            <div className="p-3 bg-light">
-              <BarChart />
-            </div>
-          </div>
-
-          {/* Line Chart and Calendar */}
-          <div className="row g-4 mb-4">
-            <div className="col-md-6">
-              <div
-                className="bg-white border rounded p-4 text-center text-muted"
-                style={{ height: '200px' }}
-              >
-                [Line Chart Placeholder]
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div
-                className="bg-white border rounded p-4 text-center text-muted"
-                style={{ height: '200px' }}
-              >
-                [Calendar Placeholder]
               </div>
             </div>
           </div>
 
-          {/* Circle Progress and List */}
-          <div className="bg-white border rounded p-4" style={{ maxWidth: '300px' }}>
-            <div
-              className="text-center text-muted mb-3"
-              style={{
-                height: '120px',
-                lineHeight: '120px',
-                backgroundColor: '#f0f0f0',
-                borderRadius: '50%',
-              }}
-            >
-              45%
-            </div>
-            <ul className="list-unstyled small">
-              <li className="mb-1">Lorem ipsum</li>
-              <li className="mb-1">Lorem ipsum</li>
-              <li className="mb-1">Lorem ipsum</li>
-              <li className="mb-1">Lorem ipsum</li>
-            </ul>
-            <div className="text-center">
-              <button className="btn btn-warning btn-sm mt-2">Check Now</button>
-            </div>
-          </div>
+
+
         </main>
       </div>
       <Footer />
