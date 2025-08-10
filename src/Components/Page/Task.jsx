@@ -5,10 +5,10 @@ import Footer from './Footer';
 
 const Task = () => {
     const [tasks, setTasks] = useState([
-        { id: 1, title: "Prepare Monthly Report", dueDate: "2025-08-15", status: "Pending" },
-        { id: 2, title: "Update Employee Records", dueDate: "2025-08-12", status: "Completed" },
-        { id: 3, title: "Team Meeting", dueDate: "2025-08-11", status: "Overdue" },
-        { id: 4, title: "Review Leave Applications", dueDate: "2025-08-14", status: "Pending" },
+        { id: 1, title: "Prepare Monthly Report", dueDate: "2025-08-15", status: "Pending", activity: [] },
+        { id: 2, title: "Update Employee Records", dueDate: "2025-08-12", status: "Completed", activity: [] },
+        { id: 3, title: "Team Meeting", dueDate: "2025-08-11", status: "Overdue", activity: [] },
+        { id: 4, title: "Review Leave Applications", dueDate: "2025-08-14", status: "Pending", activity: [] },
     ]);
 
     const getBadgeClass = (status) => {
@@ -20,11 +20,22 @@ const Task = () => {
         }
     };
 
-    // Update status in state
     const handleStatusChange = (id, newStatus) => {
-        setTasks(tasks.map(task =>
-            task.id === id ? { ...task, status: newStatus } : task
-        ));
+        setTasks(tasks.map(task => {
+            if (task.id === id) {
+                // Add new activity log entry
+                const newActivityEntry = {
+                    timestamp: new Date().toLocaleString(),
+                    description: `Status changed to ${newStatus}`
+                };
+                return {
+                    ...task,
+                    status: newStatus,
+                    activity: [...task.activity, newActivityEntry]
+                };
+            }
+            return task;
+        }));
     };
 
     return (
@@ -42,12 +53,13 @@ const Task = () => {
             <Header />
             <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
                 <Menu />
-                <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}> 
-
+                <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}>
                     <h2 className='mt-4 mb-4'>Task Management</h2>
 
                     {/* Summary Cards */}
-                    <div className="row g-3 mb-4">
+                    {/* ... your summary cards code unchanged ... */}
+
+                     <div className="row g-3 mb-4">
                         <div className="col-md-3 col-sm-6">
                             <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #e0f7fa, #ffffff)' }}>
                                 <div className="d-flex align-items-center mb-2">
@@ -111,18 +123,20 @@ const Task = () => {
                         </div>
                     </div>
 
+
                     {/* Task Table */}
                     <div className="card shadow-sm border">
                         <div className="card-header bg-white fw-bold border-bottom">
                             <i className="bi bi-table me-2"></i> Task List
                         </div>
                         <div className="card-body p-0">
-                            <table className="table table-bordered table-hover mb-0 bg-white">
+                            <table className="table table-bordered rounded table-hover mb-0 bg-white">
                                 <thead className="table-light">
-                                    <tr>
+                                    <tr style={{ background: '#000' }}>
                                         <th>Task</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
+                                        <th>Activity</th> {/* New column */}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -141,13 +155,25 @@ const Task = () => {
                                                     <option value="Overdue">Overdue</option>
                                                 </select>
                                             </td>
+                                            <td style={{ maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'auto' }}>
+                                                {/* Display last 3 activities */}
+                                                {task.activity.length === 0
+                                                    ? <small className="text-muted">No activity yet</small>
+                                                    : task.activity.slice(-3).map((act, idx) => (
+                                                        <div key={idx}>
+                                                            <small>
+                                                                [{act.timestamp}] {act.description}
+                                                            </small>
+                                                        </div>
+                                                    ))
+                                                }
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
                 </main>
             </div>
             <Footer />
