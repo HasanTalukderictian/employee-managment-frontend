@@ -16,6 +16,7 @@ import EditEmployee from './Components/Page/EditEmployee';
 import AddUser from './Components/Page/AddUser';
 import AddSalary from './Components/Page/AddSalary';
 import Attendance from './Components/Page/Attendance';
+import Task from './Components/Page/Task';
 
 function App() {
 
@@ -23,27 +24,28 @@ function App() {
   return (
     <>
 
-    <BrowserRouter>
+      <BrowserRouter>
         <Routes>
-                <Route path='/' element={<AdminLogin></AdminLogin>}></Route>
-                <Route path='/admin-home' element={<Home></Home>}></Route>
-                <Route path='/admin-employee' element={<Employee/>}></Route>
-                 <Route path='/admin-employee' element={<Employee/>}></Route>
-                 <Route path="/employee/view/:id" element={<ViewEmployee />} />
-                 <Route path="/employee/edit/:id" element={<EditEmployee />} />
-                  <Route path='/admin-department' element={<Department/>}></Route>
-                   <Route path='/admin-add-department' element={<AddDepartment/>}></Route>
-                   <Route path='/admin-add-desgination' element={<AddDesgination/>}></Route>
-                    <Route path='/admin-add-employee' element={<AddEmployee/>}></Route>
-                   <Route path='/admin-desgination' element={<Desgination/>}></Route>
-                    <Route path='/admin-salary' element={<Salary/>}></Route>
-                     <Route path='/admin-add-salary' element={<AddSalary/>}></Route>
-                    <Route path='/admin-leave' element={<Leave/>}></Route>
-                       <Route path='/admin-attendance' element={<Attendance/>}></Route>
-                     <Route path='/admin-users' element={<Users/>}></Route>
-                     <Route path='/admin-add-users' element={<AddUser/>}></Route>
+          <Route path='/' element={<AdminLogin></AdminLogin>}></Route>
+          <Route path='/admin-home' element={<Home></Home>}></Route>
+          <Route path='/admin-employee' element={<Employee />}></Route>
+          <Route path='/admin-employee' element={<Employee />}></Route>
+          <Route path="/employee/view/:id" element={<ViewEmployee />} />
+          <Route path="/employee/edit/:id" element={<EditEmployee />} />
+          <Route path='/admin-department' element={<Department />}></Route>
+          <Route path='/admin-add-department' element={<AddDepartment />}></Route>
+          <Route path='/admin-add-desgination' element={<AddDesgination />}></Route>
+          <Route path='/admin-add-employee' element={<AddEmployee />}></Route>
+          <Route path='/admin-desgination' element={<Desgination />}></Route>
+          <Route path='/admin-salary' element={<Salary />}></Route>
+          <Route path='/admin-add-salary' element={<AddSalary />}></Route>
+          <Route path='/admin-leave' element={<Leave />}></Route>
+          <Route path='/admin-attendance' element={<Attendance />}></Route>
+          <Route path='/admin-task' element={<Task />}></Route>
+          <Route path='/admin-users' element={<Users />}></Route>
+          <Route path='/admin-add-users' element={<AddUser />}></Route>
         </Routes>
-     </BrowserRouter>
+      </BrowserRouter>
     </>
   )
 }

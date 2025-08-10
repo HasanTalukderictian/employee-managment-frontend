@@ -57,6 +57,7 @@ const Menu = () => {
     { name: 'Leave', icon: 'bi-calendar-check', route: '/admin-leave' },
     { name: 'Users', icon: 'bi-person-lines-fill', route: '/admin-users' },
     { name: 'Attendance', icon: 'bi-calendar-check-fill', route: '/admin-attendance' },
+    { name: 'Task', icon: 'bi-clipboard-check', route: '/admin-task' },
     { name: 'Logout', icon: 'bi-box-arrow-right' },
   ];
 

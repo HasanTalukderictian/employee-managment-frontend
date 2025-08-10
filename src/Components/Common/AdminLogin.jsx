@@ -61,7 +61,8 @@ const AdminLogin = () => {
 
     return (
         <div>
-            <div className="container d-flex justify-content-center align-items-center vh-100" 
+            <div className="container d-flex justify-content-center align-items-center"
+            style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }} 
             >
                 <div className="card shadow p-4" style={{ maxWidth: "800px", width: "100%" }}>
                     <div className="text-center mb-4 mt-8">
@@ -154,25 +155,25 @@ const AdminLogin = () => {
                         style={{
                             border: "3px solid #ff99cc", // your custom border color
                             backgroundColor: "#f0f8ff",
-                             borderRadius: "8px",
-                             width: "450px",
-                             height: "200px",
-                                boxShadow: '0 4px 6px gray' // your custom background color
+                            borderRadius: "8px",
+                            width: "450px",
+                            height: "200px",
+                            boxShadow: '0 4px 6px gray' // your custom background color
                         }}
                     >
                         <div
                             className="modal-header"
                             style={{
                                 borderBottom: "2px solid #ff99cc", // header bottom border color
-                                backgroundColor: "#e6f2ff", 
-                               // header background color
+                                backgroundColor: "#e6f2ff",
+                                // header background color
                             }}
                         >
                             <h5
                                 className="modal-title"
-                                style={{ fontSize: "24px", fontWeight: "600", textAlign:"center"}} // increased text size
+                                style={{ fontSize: "24px", fontWeight: "600", textAlign: "center" }} // increased text size
                             >
-                                Message 
+                                Message
                             </h5>
                             <button
                                 type="button"
