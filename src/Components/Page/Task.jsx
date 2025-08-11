@@ -1,65 +1,128 @@
-import React, { useState } from 'react';
-import Header from './Header';
-import Menu from './Menu';
-import Footer from './Footer';
+import React, { useState, useEffect } from "react";
+import Header from "./Header";
+import Menu from "./Menu";
+import Footer from "./Footer";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Task = () => {
-    const [tasks, setTasks] = useState([
-        { id: 1, title: "Prepare Monthly Report", dueDate: "2025-08-15", status: "Pending", activity: [] },
-        { id: 2, title: "Update Employee Records", dueDate: "2025-08-12", status: "Completed", activity: [] },
-        { id: 3, title: "Team Meeting", dueDate: "2025-08-11", status: "Overdue", activity: [] },
-        { id: 4, title: "Review Leave Applications", dueDate: "2025-08-14", status: "Pending", activity: [] },
-    ]);
+    const [tasks, setTasks] = useState([]);
+    const [newTask, setNewTask] = useState({
+        title: "",
+        dueDate: "",
+        status: "Pending",
+    });
+    const [showModal, setShowModal] = useState(false);
+
+    const API_BASE_URL = "http://localhost:8000/api/tasks"; // GET + PUT
+    const API_ADD_TASK_URL = "http://localhost:8000/api/add-task"; // POST
+
+    // ✅ Fetch tasks from backend when page loads
+    useEffect(() => {
+        fetch(API_BASE_URL)
+            .then(async (res) => {
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Error ${res.status}: ${text}`);
+                }
+                return res.json();
+            })
+            .then((data) => {
+                console.log("Fetched tasks:", data);
+                setTasks(data);
+            })
+            .catch((err) => {
+                console.error("Fetch error:", err.message);
+                toast.error(`Fetch error: ${err.message}`);
+            });
+    }, []);
+
+
 
     const getBadgeClass = (status) => {
         switch (status) {
-            case "Completed": return "bg-success";
-            case "Pending": return "bg-warning text-dark";
-            case "Overdue": return "bg-danger";
-            default: return "bg-secondary";
+            case "Completed":
+                return "bg-success text-white";
+            case "Pending":
+                return "bg-warning text-dark";
+            case "Overdue":
+                return "bg-danger text-white";
+            default:
+                return "bg-secondary text-white";
         }
     };
 
+    // ✅ Update task status in backend
     const handleStatusChange = (id, newStatus) => {
-        setTasks(tasks.map(task => {
-            if (task.id === id) {
-                // Add new activity log entry
-                const newActivityEntry = {
-                    timestamp: new Date().toLocaleString(),
-                    description: `Status changed to ${newStatus}`
-                };
-                return {
-                    ...task,
-                    status: newStatus,
-                    activity: [...task.activity, newActivityEntry]
-                };
-            }
-            return task;
-        }));
+        fetch(`${API_BASE_URL}/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus }),
+        })
+            .then((res) => res.json())
+            .then((updatedTask) => {
+                setTasks((prev) =>
+                    prev.map((task) =>
+                        task.id === id ? { ...updatedTask } : task
+                    )
+                );
+            })
+            .catch((err) => console.error("Error updating status:", err));
+    };
+
+    // ✅ Send new task to backend
+    const handleAddTask = (e) => {
+        e.preventDefault();
+
+        const taskData = {
+            title: newTask.title,
+            due_date: newTask.dueDate,
+            status: newTask.status,
+            activity: [
+                { timestamp: new Date().toLocaleString(), description: "Task Created" },
+            ],
+        };
+
+        fetch(API_ADD_TASK_URL, {
+            method: "POST",
+
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(taskData),
+        })
+            .then((res) => res.json())
+            .then((savedTask) => {
+                setTasks((prev) => [...prev, savedTask]);
+                setNewTask({ title: "", dueDate: "", status: "Pending" });
+                setShowModal(false);
+                toast.success("Task added successfully!");
+            })
+            .catch((err) => console.error("Error adding task:", err));
     };
 
     return (
         <div
             style={{
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: '100vh',
-                width: '1890px',
-                margin: '0 auto',
-                border: '1px solid #ccc',
-                boxSizing: 'border-box',
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "100vh",
+                width: "1890px",
+                margin: "0 auto",
+                border: "1px solid #ccc",
+                boxSizing: "border-box",
             }}
         >
             <Header />
-            <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
+            <div style={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
                 <Menu />
-                <main style={{ flexGrow: 1, padding: '20px', overflowY: 'auto' }}>
-                    <h2 className='mt-4 mb-4'>Task Management</h2>
+                <main style={{ flexGrow: 1, padding: "20px", overflowY: "auto" }}>
+                    <h2 className="mt-4 mb-4">Task Management</h2>
 
-                    {/* Summary Cards */}
                     {/* ... your summary cards code unchanged ... */}
 
-                     <div className="row g-3 mb-4">
+                    <div className="row g-3 mb-4">
                         <div className="col-md-3 col-sm-6">
                             <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #e0f7fa, #ffffff)' }}>
                                 <div className="d-flex align-items-center mb-2">
@@ -123,6 +186,89 @@ const Task = () => {
                         </div>
                     </div>
 
+                    {/* New Task Button */}
+                    <button
+                        className="btn btn-primary mb-3"
+                        onClick={() => setShowModal(true)}
+                    >
+                        <i className="bi bi-plus-lg"></i> New Task
+                    </button>
+
+                    {/* Modal - Pure React */}
+                    {showModal && (
+                        <div
+                            className="modal fade show d-block"
+                            tabIndex="-1"
+                            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                        >
+                            <div className="modal-dialog">
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h5 className="modal-title">Add New Task</h5>
+                                        <button
+                                            type="button"
+                                            className="btn-close"
+                                            onClick={() => setShowModal(false)}
+                                        ></button>
+                                    </div>
+                                    <form onSubmit={handleAddTask}>
+                                        <div className="modal-body">
+                                            <div className="mb-3">
+                                                <label className="form-label fs-5 text-start h2 d-block">Task Title</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={newTask.title}
+                                                    onChange={(e) =>
+                                                        setNewTask({ ...newTask, title: e.target.value })
+                                                    }
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="form-label fs-5 text-start h2 d-block">Due Date</label>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    value={newTask.dueDate}
+                                                    onChange={(e) =>
+                                                        setNewTask({ ...newTask, dueDate: e.target.value })
+                                                    }
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="form-label fs-5 text-start h2 d-block">Status</label>
+                                                <select
+                                                    className="form-select"
+                                                    value={newTask.status}
+                                                    onChange={(e) =>
+                                                        setNewTask({ ...newTask, status: e.target.value })
+                                                    }
+                                                >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Completed">Completed</option>
+                                                    <option value="Overdue">Overdue</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary"
+                                                onClick={() => setShowModal(false)}
+                                            >
+                                                Close
+                                            </button>
+                                            <button type="submit" className="btn btn-primary">
+                                                Add Task
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Task Table */}
                     <div className="card shadow-sm border">
@@ -130,43 +276,51 @@ const Task = () => {
                             <i className="bi bi-table me-2"></i> Task List
                         </div>
                         <div className="card-body p-0">
-                            <table className="table table-bordered rounded table-hover mb-0 bg-white">
+                            <table className="table table-bordered table-hover mb-0 bg-white">
                                 <thead className="table-light">
-                                    <tr style={{ background: '#000' }}>
+                                    <tr>
                                         <th>Task</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
-                                        <th>Activity</th> {/* New column */}
+                                        <th>Activity</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {tasks.map(task => (
+                                    {tasks.map((task) => (
                                         <tr key={task.id}>
                                             <td>{task.title}</td>
-                                            <td>{task.dueDate}</td>
+                                            <td>{task.due_date}</td>
                                             <td>
                                                 <select
-                                                    className={`form-select form-select-sm ${getBadgeClass(task.status)}`}
+                                                    className={`form-select form-select-sm ${getBadgeClass(
+                                                        task.status
+                                                    )}`}
                                                     value={task.status}
-                                                    onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleStatusChange(task.id, e.target.value)
+                                                    }
                                                 >
                                                     <option value="Pending">Pending</option>
                                                     <option value="Completed">Completed</option>
                                                     <option value="Overdue">Overdue</option>
                                                 </select>
                                             </td>
-                                            <td style={{ maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'auto' }}>
-                                                {/* Display last 3 activities */}
-                                                {task.activity.length === 0
-                                                    ? <small className="text-muted">No activity yet</small>
-                                                    : task.activity.slice(-3).map((act, idx) => (
-                                                        <div key={idx}>
-                                                            <small>
-                                                                [{act.timestamp}] {act.description}
-                                                            </small>
-                                                        </div>
-                                                    ))
-                                                }
+                                            <td>
+                                                {!Array.isArray(task.activities) || task.activities.length === 0 ? (
+                                                    <small className="text-muted">No activity yet</small>
+                                                ) : (
+                                                    task.activities
+                                                        .slice(-3)
+                                                        .map((act, idx) => (
+                                                            <div key={idx}>
+                                                                <small>
+                                                                    [{act.logged_at}] {act.description}
+                                                                </small>
+                                                            </div>
+                                                        ))
+                                                )}
+
+
                                             </td>
                                         </tr>
                                     ))}
@@ -176,6 +330,8 @@ const Task = () => {
                     </div>
                 </main>
             </div>
+            <ToastContainer position="top-right" autoClose={3000} />
+
             <Footer />
         </div>
     );
