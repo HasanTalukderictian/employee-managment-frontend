@@ -4,7 +4,7 @@ import Menu from './Menu';
 import '../../index.css';
 import { useRef, useEffect, useState } from 'react';
 import Chart from 'chart.js/auto';
-import { Link } from 'react-router-dom'; // <-- Make sure this is imported
+import { data, Link } from 'react-router-dom'; // <-- Make sure this is imported
 
 // LiveTime component to show live clock
 const LiveTime = () => {
@@ -128,13 +128,17 @@ const Home = () => {
     fetch(`${BASE_URL}/api/get-all-data`)
       .then((res) => res.json())
       .then((data) => {
+        console.log('Data', data); // now logs after fetch & JSON parsing
+
         const totalEarning =
           data.salary?.reduce((sum, item) => sum + parseFloat(item.basic), 0) || 0;
+
         setStats({
           earning: totalEarning,
           departments: data.department?.length || 0,
           employees: data.employee?.length || 0,
           users: data.usersmodel?.length || 0,
+          task: data.task?.length || 0,
         });
       })
       .catch((err) => console.error('Error loading dashboard data:', err));
@@ -254,18 +258,18 @@ const Home = () => {
                 </Link>
               </div>
 
-              {/* Successful Applications */}
+              {/* Total ongoing Task */}
               <div className="col-md-3">
-                <Link to="/successful-applications" className="text-decoration-none">
+                <Link to="/admin-task" className="text-decoration-none">
                   <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #e9f7ef, #f4fff7)' }}>
                     <div className="d-flex align-items-center mb-3">
                       <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
                         <i className="bi bi-check2-circle fs-4 text-success"></i>
                       </div>
-                      <div className="fs-5 fw-bold text-dark">{stats.successful || 0}</div>
+                      <div className="fs-5 fw-bold text-dark">{stats.task || 0}</div>
                     </div>
-                    <div className="fw-semibold text-dark">Successful Applications</div>
-                    <small className="text-muted">Approved applications</small>
+                    <div className="fw-semibold text-dark">Tasks</div>
+                    <small className="text-muted">On Going Tasks</small>
                   </div>
                 </Link>
               </div>

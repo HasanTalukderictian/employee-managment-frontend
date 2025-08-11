@@ -213,6 +213,7 @@ const Employee = () => {
                             <td className="text-center">{employee.department.name}</td>
                             <td className="text-center">{employee.designation.name}</td>
                             <td className="text-center">
+
                               <div className="d-flex justify-content-center align-items-center">
                                 <button
                                   className="btn btn-info btn-sm me-2"
@@ -233,6 +234,7 @@ const Employee = () => {
                                   <i className="bi bi-trash me-1"></i> Delete
                                 </button>
                               </div>
+                              
                             </td>
                           </tr>
                         ))

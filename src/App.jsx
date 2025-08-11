@@ -17,6 +17,7 @@ import AddUser from './Components/Page/AddUser';
 import AddSalary from './Components/Page/AddSalary';
 import Attendance from './Components/Page/Attendance';
 import Task from './Components/Page/Task';
+import UserLogin from './Components/Page/UserLogin';
 
 function App() {
 
@@ -44,6 +45,7 @@ function App() {
           <Route path='/admin-task' element={<Task />}></Route>
           <Route path='/admin-users' element={<Users />}></Route>
           <Route path='/admin-add-users' element={<AddUser />}></Route>
+          <Route path='/login' element={<UserLogin />}></Route>
         </Routes>
       </BrowserRouter>
     </>

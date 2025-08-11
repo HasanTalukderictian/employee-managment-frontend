@@ -211,7 +211,7 @@ const Task = () => {
                                             onClick={() => setShowModal(false)}
                                         ></button>
                                     </div>
-                                    <form onSubmit={handleAddTask}>
+                                    <form onSubmit={handleAddTask} >
                                         <div className="modal-body">
                                             <div className="mb-3">
                                                 <label className="form-label fs-5 text-start h2 d-block">Task Title</label>
@@ -277,7 +277,7 @@ const Task = () => {
                         </div>
                         <div className="card-body p-0">
                             <table className="table table-bordered table-hover mb-0 bg-white">
-                                <thead className="table-light">
+                                <thead className="table-dark">
                                     <tr>
                                         <th>Task</th>
                                         <th>Due Date</th>
