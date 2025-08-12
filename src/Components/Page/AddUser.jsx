@@ -138,8 +138,8 @@ const handleSubmit = async (e) => {
                     required
                   >
                     <option value="">-- Select a role --</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Normal User">Normal User</option>
+                    <option value="admin">Admin</option>
+                    <option value="user">Normal User</option>
                   </select>
                 </div>
                 <div style={{ flex: 1 }}>

@@ -10,11 +10,18 @@ const Department = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [role, setRole] = useState(null);  // <-- Add this state
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  useEffect(() => {
+    // Read role from localStorage on mount
+    const storedRole = localStorage.getItem('userRole');
+    setRole(storedRole);
+  }, []);
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -45,13 +52,18 @@ const Department = () => {
   }, [searchQuery]);
 
   const handleDelete = async (id) => {
+    if (role !== 'admin') {
+      alert("You are not authorized to delete departments.");
+      return;
+    }
+
     const token = localStorage.getItem("authToken");
     if (!token) {
       alert("You are not authorized. Please log in again.");
       return;
     }
 
-    if (window.confirm("Are you sure you want to delete this employee?")) {
+    if (window.confirm("Are you sure you want to delete this department?")) {
       try {
         const response = await fetch(`${BASE_URL}/api/del-dept/${id}`, {
           method: "DELETE",
@@ -69,27 +81,12 @@ const Department = () => {
     }
   };
 
-  const handleSearch = () => {
-    setSearchQuery(searchTerm.trim());
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleSearch();
-  };
+  // ... pagination handlers unchanged ...
 
   const totalPages = Math.ceil(employees.length / itemsPerPage);
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handlePageClick = (pageNum) => {
-    setCurrentPage(pageNum);
-  };
+  const handleNextPage = () => { if (currentPage < totalPages) setCurrentPage(currentPage + 1); };
+  const handlePrevPage = () => { if (currentPage > 1) setCurrentPage(currentPage - 1); };
+  const handlePageClick = (pageNum) => { setCurrentPage(pageNum); };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -125,7 +122,7 @@ const Department = () => {
               boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
               padding: "30px",
               minHeight: "90vh",
-              paddingBottom: "100px", // spacing for fixed pagination
+              paddingBottom: "100px",
               position: "relative",
             }}
           >
@@ -137,14 +134,18 @@ const Department = () => {
                 value={searchTerm}
                 style={{ width: "78%" }}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onKeyDown={(e) => { if(e.key === "Enter") setSearchQuery(searchTerm.trim()) }}
               />
-              <button className="btn btn-primary ms-2" onClick={handleSearch}>
+              <button className="btn btn-primary ms-2" onClick={() => setSearchQuery(searchTerm.trim())}>
                 <i className="bi bi-search me-1"></i> Search
               </button>
-              <Link to="/admin-add-department" className="ms-2">
-                <button className="btn btn-success">Add Department</button>
-              </Link>
+
+              {/* Only show Add Department button if admin */}
+              {role === 'admin' && (
+                <Link to="/admin-add-department" className="ms-2">
+                  <button className="btn btn-success">Add Department</button>
+                </Link>
+              )}
             </div>
 
             {loading ? (
@@ -168,12 +169,15 @@ const Department = () => {
                             <td className="text-center h6">{employee.name}</td>
                             <td className="text-center">
                               <div className="d-flex justify-content-center">
-                                <button
-                                  className="btn btn-danger btn-sm d-flex align-items-center"
-                                  onClick={() => handleDelete(employee.id)}
-                                >
-                                  <i className="bi bi-trash me-1"></i> Delete
-                                </button>
+                                {/* Show Delete button only for admin */}
+                                {role === 'admin' && (
+                                  <button
+                                    className="btn btn-danger btn-sm d-flex align-items-center"
+                                    onClick={() => handleDelete(employee.id)}
+                                  >
+                                    <i className="bi bi-trash me-1"></i> Delete
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>

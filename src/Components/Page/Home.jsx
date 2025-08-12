@@ -4,7 +4,7 @@ import Menu from './Menu';
 import '../../index.css';
 import { useRef, useEffect, useState } from 'react';
 import Chart from 'chart.js/auto';
-import { data, Link } from 'react-router-dom'; // <-- Make sure this is imported
+import {  Link } from 'react-router-dom'; // <-- Make sure this is imported
 
 // LiveTime component to show live clock
 const LiveTime = () => {

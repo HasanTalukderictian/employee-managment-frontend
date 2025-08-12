@@ -12,6 +12,8 @@ const UserLogin = () => {
 
     const BASE_URL = import.meta.env.VITE_BASE_URL;
 
+    
+
     useEffect(() => {
         if (submittedData) {
             const { email, password } = submittedData;
@@ -34,6 +36,8 @@ const UserLogin = () => {
                         setResponseMessage(data.message || "Login successful!");
                         localStorage.setItem("authToken", token);
                         localStorage.setItem("isAdminLoggedIn", true);
+                        localStorage.setItem('userRole', data.data.role);
+
                         setShowModal(true);
                         setTimeout(() => {
                             setShowModal(false);
@@ -48,6 +52,8 @@ const UserLogin = () => {
                     setShowModal(true);
                     console.error("Error during login:", error);
                 }
+
+                
             };
 
             login();
@@ -62,7 +68,7 @@ const UserLogin = () => {
     return (
         <div>
             <div className="container d-flex justify-content-center align-items-center"
-            style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }} 
+                style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}
             >
                 <div className="card shadow p-4" style={{ maxWidth: "800px", width: "100%" }}>
                     <div className="text-center mb-4 mt-8">

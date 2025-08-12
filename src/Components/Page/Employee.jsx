@@ -14,6 +14,7 @@ const Employee = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -21,6 +22,15 @@ const Employee = () => {
   const navigate = useNavigate(); // for view and edit navigation
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem('userRole');
+    console.log('storedRole from localStorage:', storedRole);
+    setRole(storedRole);
+  }, []);
+
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -176,12 +186,21 @@ const Employee = () => {
               <button className="btn btn-primary ms-2" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i> Search
               </button>
-              <Link to="/admin-add-employee" className="ms-2">
-                <button className="btn btn-success">Add Employee</button>
-              </Link>
-              <button className="btn btn-success ms-2" onClick={handleDownloadExcel}>
-                <i className="bi bi-download me-1"></i> Download
-              </button>
+              {role === 'admin' && (
+                <>
+                  <Link to="/admin-add-employee" className="ms-2">
+                    <button className="btn btn-success">Add Employee</button>
+                  </Link>
+                  <button className="btn btn-success ms-2" onClick={handleDownloadExcel}>
+                    <i className="bi bi-download me-1"></i> Download
+                  </button>
+
+                </>
+
+
+
+              )}
+
 
             </div>
 
@@ -221,20 +240,26 @@ const Employee = () => {
                                 >
                                   <i className="bi bi-eye me-1"></i> View
                                 </button>
-                                <button
-                                  className="btn btn-success btn-sm me-2"
-                                  onClick={() => handleEdit(employee.id)}
-                                >
-                                  <i className="bi bi-pencil-square me-1"></i> Edit
-                                </button>
-                                <button
-                                  className="btn btn-danger btn-sm"
-                                  onClick={() => handleDelete(employee.id)}
-                                >
-                                  <i className="bi bi-trash me-1"></i> Delete
-                                </button>
+
+                                {role && role.toLowerCase() === 'admin' ? (
+                                  <>
+                                    <button
+                                      className="btn btn-success btn-sm me-2"
+                                      onClick={() => handleEdit(employee.id)}
+                                    >
+                                      <i className="bi bi-pencil-square me-1"></i> Edit
+                                    </button>
+                                    <button
+                                      className="btn btn-danger btn-sm"
+                                      onClick={() => handleDelete(employee.id)}
+                                    >
+                                      <i className="bi bi-trash me-1"></i> Delete
+                                    </button>
+                                  </>
+                                ) : null}
+
                               </div>
-                              
+
                             </td>
                           </tr>
                         ))
