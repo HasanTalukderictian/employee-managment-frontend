@@ -16,7 +16,8 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // const navigate = useNavigate();
+  // Get user role from localStorage
+  const role = localStorage.getItem("userRole"); // e.g. 'admin', 'user'
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -48,13 +49,14 @@ const Users = () => {
     fetchUsers();
   }, [searchQuery]);
 
-
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
 
     try {
       const response = await fetch(`${BASE_URL}/api/del-users/${id}`, {
         method: "DELETE",
+        // You may want to add Authorization header here if required
+        // headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
@@ -66,7 +68,6 @@ const Users = () => {
       alert(err.message);
     }
   };
-
 
   const handleSearch = () => {
     setSearchQuery(searchTerm.trim());
@@ -139,9 +140,13 @@ const Users = () => {
               <button className="btn btn-primary ms-2" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i> Search
               </button>
-              <Link to="/admin-add-users" className="ms-2">
-                <button className="btn btn-success">Add User</button>
-              </Link>
+
+              {/* Show Add User button ONLY if admin */}
+              {role === "admin" && (
+                <Link to="/admin-add-users" className="ms-2">
+                  <button className="btn btn-success">Add User</button>
+                </Link>
+              )}
             </div>
 
             {loading ? (
@@ -175,13 +180,16 @@ const Users = () => {
                             </td>
                             <td className="text-center">{user.email}</td>
                             <td className="text-center">
-                              <button
-                                className="btn btn-sm btn-danger"
-                                onClick={() => handleDelete(user.id)}
-                                title="Delete user"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
+                              {/* Show Delete button ONLY if admin */}
+                              {role === "admin" && (
+                                <button
+                                  className="btn btn-sm btn-danger"
+                                  onClick={() => handleDelete(user.id)}
+                                  title="Delete user"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))
@@ -193,8 +201,6 @@ const Users = () => {
                         </tr>
                       )}
                     </tbody>
-
-
                   </table>
                 </div>
 
@@ -210,7 +216,9 @@ const Users = () => {
                 >
                   <nav>
                     <ul className="pagination mb-0">
-                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                      <li
+                        className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                      >
                         <button className="page-link" onClick={handlePrevPage}>
                           <i className="bi bi-chevron-left"></i>
                         </button>
@@ -218,14 +226,20 @@ const Users = () => {
                       {Array.from({ length: totalPages }, (_, i) => (
                         <li
                           key={i + 1}
-                          className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                          className={`page-item ${
+                            currentPage === i + 1 ? "active" : ""
+                          }`}
                         >
                           <button className="page-link" onClick={() => handlePageClick(i + 1)}>
                             {i + 1}
                           </button>
                         </li>
                       ))}
-                      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                      <li
+                        className={`page-item ${
+                          currentPage === totalPages ? "disabled" : ""
+                        }`}
+                      >
                         <button className="page-link" onClick={handleNextPage}>
                           <i className="bi bi-chevron-right"></i>
                         </button>

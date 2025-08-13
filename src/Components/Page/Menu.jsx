@@ -95,7 +95,7 @@ const Menu = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: '20px',
                   color: '#fff',
                   textDecoration: 'none',
                   width: '100%'
