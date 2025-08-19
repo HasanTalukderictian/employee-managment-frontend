@@ -5,6 +5,8 @@ import Footer from './Footer';
 
 const Leave = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [totalLeave, setTotalLeave] = useState('');
@@ -12,12 +14,17 @@ const Leave = () => {
 
   const [role, setRole] = useState(null);
 
+  // Apply Leave form states
+  const [leaveType, setLeaveType] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [reason, setReason] = useState('');
+
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
     console.log('storedRole from localStorage:', storedRole);
     setRole(storedRole);
   }, []);
-
 
   // Fetch employees & leave balances on mount
   useEffect(() => {
@@ -45,7 +52,7 @@ const Leave = () => {
       .catch((err) => console.error('Error fetching leave balances:', err));
   }, []);
 
-  // Handle form submit
+  // Handle Add Leave (Admin)
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -80,6 +87,40 @@ const Leave = () => {
         setTotalLeave('');
       })
       .catch((err) => console.error('Error saving leave balance:', err));
+  };
+
+  // Handle Apply Leave (User)
+  const handleApplySubmit = (e) => {
+    e.preventDefault();
+
+    const applyData = {
+      employee_id: selectedEmployee || 1, // here you can take logged-in user id
+      leave_type: leaveType,
+      start_date: startDate,
+      end_date: endDate,
+      reason: reason,
+    };
+
+    console.log("Apply Leave Data (sending to backend):", applyData);
+
+    fetch('http://127.0.0.1:8000/api/apply-leave', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(applyData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Apply Leave Response:", data);
+        setShowApplyModal(false);
+        setLeaveType('');
+        setStartDate('');
+        setEndDate('');
+        setReason('');
+      })
+      .catch((err) => console.error("Error applying leave:", err));
   };
 
   return (
@@ -143,14 +184,12 @@ const Leave = () => {
 
                 <button
                   className="btn btn-primary"
-                  onClick={() => setShowModal(true)}
+                  onClick={() => setShowApplyModal(true)}
                   disabled={role === 'admin'} // disable if admin
                 >
                   Apply
                 </button>
               </div>
-
-
             </div>
 
             {/* Table */}
@@ -177,7 +216,12 @@ const Leave = () => {
                       <td className="text-center">{leave.remaining_leave}</td>
                       <td className="text-center">{leave.leave_type}</td>
                       <td className="text-center">
-                        <button className="btn btn-primary btn-sm">Request</button>
+                        <button
+                          className="btn btn-primary btn-sm"
+                          onClick={() => setShowApplyModal(true)}
+                        >
+                          Request
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -189,7 +233,7 @@ const Leave = () => {
       </div>
       <Footer />
 
-      {/* Modal */}
+      {/* Modal for Add Leave (Admin) */}
       {showModal && (
         <div
           className="modal fade show"
@@ -247,6 +291,94 @@ const Leave = () => {
                     </button>
                     <button type="submit" className="btn btn-primary">
                       Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Apply Leave (User) */}
+      {showApplyModal && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Apply for Leave</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowApplyModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleApplySubmit}>
+                  {/* Leave Type */}
+                  <div className="mb-3">
+                    <label className="form-label">Leave Type</label>
+                    <select
+                      className="form-select"
+                      value={leaveType}
+                      onChange={(e) => setLeaveType(e.target.value)}
+                      required
+                    >
+                      <option value="">Select Leave Type</option>
+                      <option value="Paid">Casual Leave</option>
+                      <option value="Unpaid">Sick Leave</option>
+                    </select>
+                  </div>
+
+                  {/* Start Date */}
+                  <div className="mb-3">
+                    <label className="form-label">Start Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* End Date */}
+                  <div className="mb-3">
+                    <label className="form-label">End Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Reason */}
+                  <div className="mb-3">
+                    <label className="form-label">Reason</label>
+                    <textarea
+                      className="form-control"
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      rows="3"
+                      required
+                    ></textarea>
+                  </div>
+
+                  <div className="text-end">
+                    <button
+                      type="button"
+                      className="btn btn-secondary me-2"
+                      onClick={() => setShowApplyModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn btn-primary">
+                      Submit
                     </button>
                   </div>
                 </form>
