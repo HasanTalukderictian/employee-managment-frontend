@@ -20,6 +20,57 @@ const Leave = () => {
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
 
+  const [leaveRequests, setLeaveRequests] = useState([]);
+
+
+  useEffect(() => {
+    // Leave Balances
+    fetch('http://127.0.0.1:8000/api/get-leaves')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data)) {
+          setLeaveBalances(data);
+        } else if (data && Array.isArray(data.data)) {
+          setLeaveBalances(data.data);
+        }
+      });
+
+    // Leave Requests (for admin)
+    fetch('http://127.0.0.1:8000/api/my-leave-requests')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data)) {
+          setLeaveRequests(data);
+        } else if (data && Array.isArray(data.data)) {
+          setLeaveRequests(data.data);
+        }
+      });
+  }, []);
+
+  // Approve Leave Request
+  const handleApprove = (id) => {
+    fetch(`http://127.0.0.1:8000/api/leave-requests/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setLeaveRequests((prev) => prev.filter((req) => req.id !== id));
+      });
+  };
+
+  // Reject Leave Request
+  const handleReject = (id) => {
+    fetch(`http://127.0.0.1:8000/api/leave-requests/${id}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setLeaveRequests((prev) => prev.filter((req) => req.id !== id));
+      });
+  };
+
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
     console.log('storedRole from localStorage:', storedRole);
@@ -89,39 +140,65 @@ const Leave = () => {
       .catch((err) => console.error('Error saving leave balance:', err));
   };
 
+
   // Handle Apply Leave (User)
   const handleApplySubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const applyData = {
-      employee_id: selectedEmployee || 1, // here you can take logged-in user id
-      leave_type: leaveType,
-      start_date: startDate,
-      end_date: endDate,
-      reason: reason,
-    };
+  const applyData = {
+    employee_id: selectedEmployee || 1,
+    leave_type: leaveType,
+    start_date: startDate,
+    end_date: endDate,
+    reason: reason,
+  };
 
-    console.log("Apply Leave Data (sending to backend):", applyData);
+  fetch('http://127.0.0.1:8000/api/apply-leave', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(applyData),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Leave applied:", data);
 
-    fetch('http://127.0.0.1:8000/api/apply-leave', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(applyData),
+      setShowApplyModal(false);
+      setLeaveType('');
+      setStartDate('');
+      setEndDate('');
+      setReason('');
+
+      // ✅ Refresh leave requests table for admin
+      fetch('http://127.0.0.1:8000/api/get-apply-leave')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && Array.isArray(data)) setLeaveRequests(data);
+          else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
+        });
     })
+    .catch((err) => console.error('Error applying leave:', err));
+};
+
+
+
+  // Fetch leave requests for admin
+useEffect(() => {
+  if (role === 'admin') {
+    fetch('http://127.0.0.1:8000/api/get-apply-leave')
       .then((res) => res.json())
       .then((data) => {
-        console.log("Apply Leave Response:", data);
-        setShowApplyModal(false);
-        setLeaveType('');
-        setStartDate('');
-        setEndDate('');
-        setReason('');
+        if (data && Array.isArray(data)) {
+          setLeaveRequests(data);
+        } else if (data && Array.isArray(data.data)) {
+          setLeaveRequests(data.data);
+        }
       })
-      .catch((err) => console.error("Error applying leave:", err));
-  };
+      .catch((err) => console.error('Error fetching leave requests:', err));
+  }
+}, [role]);
+
+
+
 
   return (
     <div
@@ -216,18 +293,74 @@ const Leave = () => {
                       <td className="text-center">{leave.remaining_leave}</td>
                       <td className="text-center">{leave.leave_type}</td>
                       <td className="text-center">
-                        <button
-                          className="btn btn-primary btn-sm"
-                          onClick={() => setShowApplyModal(true)}
-                        >
-                          Request
-                        </button>
+                        
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {/* Leave Requests Table (Admin Only) */}
+            {role === 'admin' && (
+              <div className="mt-5">
+                <h3>User Leave Requests</h3>
+                <div className="table-responsive">
+                  <table className="table table-bordered table-striped">
+                    <thead className="table-dark">
+                      <tr>
+                        <th className="text-center h6">Employee</th>
+                        <th className="text-center h6">Leave Type</th>
+                        <th className="text-center h6">Start Date</th>
+                        <th className="text-center h6">End Date</th>
+                        <th className="text-center h6">Reason</th>
+                        <th className="text-center h6">Status</th>
+                        <th className="text-center h6">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leaveRequests.length > 0 ? (
+                        leaveRequests.map((req) => (
+                          <tr key={req.id}>
+                            <td className="text-center">
+                              {req.employee?.first_name} {req.employee?.last_name}
+                            </td>
+                            <td className="text-center">{req.leave_type}</td>
+                            <td className="text-center">{req.start_date}</td>
+                            <td className="text-center">{req.end_date}</td>
+                            <td className="text-center">{req.reason}</td>
+                            <td className="text-center">{req.status}</td>
+                            <td className="text-center">
+                              {req.status === 'pending' && (
+                                <>
+                                  <button
+                                    className="btn btn-success btn-sm me-2"
+                                    onClick={() => handleApprove(req.id)}
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => handleReject(req.id)}
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="7" className="text-center">No leave requests found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
           </div>
         </main>
       </div>
