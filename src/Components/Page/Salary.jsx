@@ -14,8 +14,11 @@ const Salary = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+    const [role, setRole] = useState(null);
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -40,6 +43,13 @@ const Salary = () => {
       setLoading(false);
     }
   };
+
+  
+  useEffect(() => {
+    // Read role on mount
+    const storedRole = localStorage.getItem('userRole');
+    setRole(storedRole);
+  }, []);
 
   useEffect(() => {
     fetchEmployees();
@@ -149,9 +159,11 @@ const Salary = () => {
               <button className="btn btn-primary ms-2" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i> Search
               </button>
+              {role === 'admin' && (
               <Link to="/admin-add-salary" className="ms-2">
                 <button className="btn btn-success">Add Salary</button>
               </Link>
+              )}
             </div>
 
             {loading ? (
@@ -204,12 +216,15 @@ const Salary = () => {
                               {salary.month}
                             </td>
                             <td className="text-center">
+                              {role === 'admin' && (
                               <button
                                 className="btn btn-danger btn-sm d-flex align-items-center justify-content-center mx-auto"
                                 onClick={() => handleDelete(salary.id)}
                               >
+                                
                                 <i className="bi bi-trash me-1"></i> Delete
                               </button>
+                              )}
                             </td>
                           </tr>
                         ))

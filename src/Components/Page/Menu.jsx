@@ -80,7 +80,7 @@ const Menu = () => {
             onClick={item.name === 'Logout' ? handleLogout : undefined}
             style={{
               fontSize: '23px',
-              padding: '10px 8px',
+              padding: '4px 10px',
               cursor: 'pointer',
               backgroundColor: location.pathname === item.route ? '#555' : 'transparent',
               borderRadius: '4px',
@@ -95,7 +95,7 @@ const Menu = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '20px',
+                  gap: '30px',
                   color: '#fff',
                   textDecoration: 'none',
                   width: '100%'
@@ -110,13 +110,13 @@ const Menu = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: '20px',
                   color: '#fff',
                   textDecoration: 'none',
                   width: '100%'
                 }}
               >
-                <i className={`bi ${item.icon}`} style={{ fontSize: '30px', color: '#07f747' }}></i>
+                <i className={`bi ${item.icon}`} style={{ fontSize: '30px', color: '#07f747', fontFamily: 'sans-serif'}}></i>
                 {item.name}
               </Link>
             )}

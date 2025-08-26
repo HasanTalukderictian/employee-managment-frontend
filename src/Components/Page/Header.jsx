@@ -12,8 +12,6 @@ const Header = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderTopLeftRadius: '10px',
-          borderTopRightRadius: '10px',
           boxShadow: '0 4px 6px gray',
         }}
       >
