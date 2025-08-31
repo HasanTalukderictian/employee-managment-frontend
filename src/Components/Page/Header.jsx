@@ -1,6 +1,14 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 
 const Header = () => {
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem('userRole');
+    console.log('storedRole from localStorage:', storedRole);
+    setRole(storedRole);
+  }, []);
+
   return (
     <div>
       <header
@@ -25,10 +33,18 @@ const Header = () => {
 
         {/* Right section: Profile Image + Notification Icon */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-         <i className="bi bi-bell-fill" style={{ fontSize: "28px", color: "#ffffff", cursor: 'pointer' }}></i>
-        <p>Admin</p>
+          <i
+            className="bi bi-bell-fill"
+            style={{ fontSize: "28px", color: "#ffffff", cursor: 'pointer' }}
+          ></i>
+
+          {/* 👇 Dynamic role text */}
+          <p style={{ margin: 0 }}>
+            {role ? `Welcome ${role}` : "Welcome"}
+          </p>
+
           <img
-            src="https://i.ibb.co.com/jvFR7NXv/IMG-2688.jpg" // ← Use your actual path to default image
+            src="https://i.ibb.co.com/jvFR7NXv/IMG-2688.jpg"
             alt="Profile"
             style={{
               width: '40px',
@@ -38,7 +54,6 @@ const Header = () => {
               border: '2px solid white',
             }}
           />
-         
         </div>
       </header>
     </div>

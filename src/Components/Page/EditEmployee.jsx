@@ -21,7 +21,7 @@ const EditEmployee = () => {
     const BASE_URL = import.meta.env.VITE_BASE_URL;
     const navigate = useNavigate();
     const { id } = useParams();
-      const dateInputRef = useRef(null);
+    const dateInputRef = useRef(null);
 
     useEffect(() => {
         axios
@@ -40,7 +40,7 @@ const EditEmployee = () => {
         setEmployee({ ...employee, [e.target.name]: e.target.value });
     };
 
-    
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -85,7 +85,6 @@ const EditEmployee = () => {
                         flexGrow: 1,
                         padding: "40px",
                         background: "linear-gradient(to bottom right, #ffffff, #f0eee7)",
-                        borderRadius: "16px",
                         boxShadow: "0 8px 20px rgba(0, 0, 0, 0.05)",
                         minHeight: "100vh",
                         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -198,7 +197,7 @@ const EditEmployee = () => {
                                         className="form-control"
                                         value={employee.hire_date}
                                         onChange={handleChange}
-                                          onFocus={() => dateInputRef.current?.showPicker?.()}
+                                        onFocus={() => dateInputRef.current?.showPicker?.()}
                                     />
                                 </div>
                             </div>
@@ -212,7 +211,7 @@ const EditEmployee = () => {
                                         className="form-control"
                                         value={employee.date_of_birth}
                                         onChange={handleChange}
-                                         
+
                                     />
                                 </div>
                                 <div className="col">

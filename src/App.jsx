@@ -18,38 +18,92 @@ import AddSalary from './Components/Page/AddSalary';
 import Attendance from './Components/Page/Attendance';
 import Task from './Components/Page/Task';
 import UserLogin from './Components/Page/UserLogin';
+import { useEffect, useState } from 'react';
+import ProtectedRoute from './Components/Page/ProtectedRoute';
 
 function App() {
+  const [role, setRole] = useState('guest');
 
+  useEffect(() => {
+    const storedRole = localStorage.getItem('userRole');
+    console.log('storedRole from localStorage:', storedRole);
+    setRole(storedRole);
+  }, []);
 
   return (
-    <>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<AdminLogin />} />
+        <Route path='/admin-home' element={<Home />} />
+        <Route path='/admin-employee' element={<Employee />} />
+        <Route path="/employee/view/:id" element={<ViewEmployee />} />
+        <Route path='/admin-department' element={<Department />} />
+          <Route path='/admin-users' element={<Users />} />
 
-      <BrowserRouter>
-        <Routes>
-          <Route path='/' element={<AdminLogin></AdminLogin>}></Route>
-          <Route path='/admin-home' element={<Home></Home>}></Route>
-          <Route path='/admin-employee' element={<Employee />}></Route>
-          <Route path='/admin-employee' element={<Employee />}></Route>
-          <Route path="/employee/view/:id" element={<ViewEmployee />} />
-          <Route path="/employee/edit/:id" element={<EditEmployee />} />
-          <Route path='/admin-department' element={<Department />}></Route>
-          <Route path='/admin-add-department' element={<AddDepartment />}></Route>
-          <Route path='/admin-add-desgination' element={<AddDesgination />}></Route>
-          <Route path='/admin-add-employee' element={<AddEmployee />}></Route>
-          <Route path='/admin-desgination' element={<Desgination />}></Route>
-          <Route path='/admin-salary' element={<Salary />}></Route>
-          <Route path='/admin-add-salary' element={<AddSalary />}></Route>
-          <Route path='/admin-leave' element={<Leave />}></Route>
-          <Route path='/admin-attendance' element={<Attendance />}></Route>
-          <Route path='/admin-task' element={<Task />}></Route>
-          <Route path='/admin-users' element={<Users />}></Route>
-          <Route path='/admin-add-users' element={<AddUser />}></Route>
-          <Route path='/login' element={<UserLogin />}></Route>
-        </Routes>
-      </BrowserRouter>
-    </>
+        {/* ✅ Protected Routes */}
+        <Route
+          path='/employee/edit/:id'
+          element={
+            <ProtectedRoute role={role} allowedRole="admin">
+              <EditEmployee />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/admin-add-department'
+          element={
+            <ProtectedRoute role={role} allowedRole="admin">
+              <AddDepartment />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/admin-add-desgination'
+          element={
+            <ProtectedRoute role={role} allowedRole="admin">
+              <AddDesgination />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/admin-add-salary'
+          element={
+            <ProtectedRoute role={role} allowedRole="admin">
+              <AddSalary />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/admin-add-desgination'
+          element={
+            <ProtectedRoute role={role} allowedRole="admin">
+              <AddUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/admin-add-employee'
+          element={
+            <ProtectedRoute role={role} allowedRole="admin">
+              <AddEmployee />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path='/admin-desgination' element={<Desgination />} />
+        <Route path='/admin-salary' element={<Salary />} />
+        <Route path='/admin-leave' element={<Leave />} />
+        <Route path='/admin-attendance' element={<Attendance />} />
+        <Route path='/admin-task' element={<Task />} />
+        <Route path='/admin-add-users' element={<AddUser />} />
+        <Route path='/login' element={<UserLogin />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
-export default App
+export default App;
