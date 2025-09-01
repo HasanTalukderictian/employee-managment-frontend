@@ -17,9 +17,27 @@ const Task = () => {
     const API_BASE_URL = "http://localhost:8000/api/tasks"; // GET + PUT
     const API_ADD_TASK_URL = "http://localhost:8000/api/add-task"; // POST
 
+    const [employeeId, setEmployeeId] = useState(null);
+
+    useEffect(() => {
+        const id = localStorage.getItem('employeeId');
+        setEmployeeId(id);
+    }, []);
+
+
     // ✅ Fetch tasks from backend when page loads
     useEffect(() => {
-        fetch(API_BASE_URL)
+        const role = localStorage.getItem("userRole");
+        const id = localStorage.getItem("employeeId");
+
+        let url = API_BASE_URL;
+
+        // if not admin, fetch only user's own tasks
+        if (role !== "admin" && id) {
+            url = `${API_BASE_URL}?employee_id=${id}`;
+        }
+
+        fetch(url)
             .then(async (res) => {
                 if (!res.ok) {
                     const text = await res.text();
@@ -39,6 +57,7 @@ const Task = () => {
 
 
 
+
     const getBadgeClass = (status) => {
         switch (status) {
             case "Completed":
@@ -55,20 +74,28 @@ const Task = () => {
     // ✅ Update task status in backend
     const handleStatusChange = (id, newStatus) => {
         fetch(`${API_BASE_URL}/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: newStatus }),
+            method: "POST", // or POST if your backend expects POST
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                status: newStatus,
+                employee_id: employeeId, // 👈 send employee_id too
+            }),
         })
             .then((res) => res.json())
             .then((updatedTask) => {
                 setTasks((prev) =>
                     prev.map((task) =>
-                        task.id === id ? { ...updatedTask } : task
+                        task.id === id ? { ...task, ...updatedTask } : task
                     )
                 );
+                toast.success("Task updated successfully!");
             })
             .catch((err) => console.error("Error updating status:", err));
     };
+
 
     // ✅ Send new task to backend
     const handleAddTask = (e) => {
@@ -78,8 +105,9 @@ const Task = () => {
             title: newTask.title,
             due_date: newTask.dueDate,
             status: newTask.status,
-            activity: [
-                { timestamp: new Date().toLocaleString(), description: "Task Created" },
+            employee_id: employeeId, // 👈 send employee_id to backend
+            activities: [
+                { logged_at: new Date().toISOString(), description: "Task Created" },
             ],
         };
 
@@ -186,13 +214,16 @@ const Task = () => {
                         </div>
                     </div>
 
-                    {/* New Task Button */}
-                    <button
-                        className="btn btn-primary mb-3"
-                        onClick={() => setShowModal(true)}
-                    >
-                        <i className="bi bi-plus-lg"></i> New Task
-                    </button>
+                    {/* New Task Button - hide for admin */}
+                    {localStorage.getItem("userRole") !== "admin" && (
+                        <button
+                            className="btn btn-primary mb-3"
+                            onClick={() => setShowModal(true)}
+                        >
+                            <i className="bi bi-plus-lg"></i> New Task
+                        </button>
+                    )}
+
 
                     {/* Modal - Pure React */}
                     {showModal && (
@@ -204,7 +235,14 @@ const Task = () => {
                             <div className="modal-dialog">
                                 <div className="modal-content">
                                     <div className="modal-header">
-                                        <h5 className="modal-title">Add New Task</h5>
+                                        {localStorage.getItem('userRole') === 'employee' && (
+                                            <button
+                                                className="btn btn-primary mb-3"
+                                                onClick={() => setShowModal(true)}
+                                            >
+                                                <i className="bi bi-plus-lg"></i> New Task
+                                            </button>
+                                        )}
                                         <button
                                             type="button"
                                             className="btn-close"
@@ -279,6 +317,7 @@ const Task = () => {
                             <table className="table table-bordered table-hover mb-0 bg-white">
                                 <thead className="table-dark">
                                     <tr>
+                                        {localStorage.getItem("userRole") === "admin" && <th>Employee</th>}
                                         <th>Task</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
@@ -288,17 +327,20 @@ const Task = () => {
                                 <tbody>
                                     {tasks.map((task) => (
                                         <tr key={task.id}>
+                                            {localStorage.getItem("userRole") === "admin" && (
+                                                <td>
+                                                    {task.employee
+                                                        ? `${task.employee.first_name} ${task.employee.last_name}`
+                                                        : "Unknown"}
+                                                </td>
+                                            )}
                                             <td>{task.title}</td>
                                             <td>{task.due_date}</td>
                                             <td>
                                                 <select
-                                                    className={`form-select form-select-sm ${getBadgeClass(
-                                                        task.status
-                                                    )}`}
+                                                    className={`form-select form-select-sm ${getBadgeClass(task.status)}`}
                                                     value={task.status}
-                                                    onChange={(e) =>
-                                                        handleStatusChange(task.id, e.target.value)
-                                                    }
+                                                    onChange={(e) => handleStatusChange(task.id, e.target.value)}
                                                 >
                                                     <option value="Pending">Pending</option>
                                                     <option value="Completed">Completed</option>
@@ -309,23 +351,20 @@ const Task = () => {
                                                 {!Array.isArray(task.activities) || task.activities.length === 0 ? (
                                                     <small className="text-muted">No activity yet</small>
                                                 ) : (
-                                                    task.activities
-                                                        .slice(-3)
-                                                        .map((act, idx) => (
-                                                            <div key={idx}>
-                                                                <small>
-                                                                    [{act.logged_at}] {act.description}
-                                                                </small>
-                                                            </div>
-                                                        ))
+                                                    task.activities.slice(-3).map((act, idx) => (
+                                                        <div key={idx}>
+                                                            <small>
+                                                                [{act.logged_at}] {act.description}
+                                                            </small>
+                                                        </div>
+                                                    ))
                                                 )}
-
-
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 </main>

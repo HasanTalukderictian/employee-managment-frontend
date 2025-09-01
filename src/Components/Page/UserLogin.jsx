@@ -37,6 +37,7 @@ const UserLogin = () => {
                         localStorage.setItem("authToken", token);
                         localStorage.setItem("isAdminLoggedIn", true);
                         localStorage.setItem('userRole', data.data.role);
+                        localStorage.setItem('employeeId', data.data.employee_id);
 
                         setShowModal(true);
                         setTimeout(() => {
