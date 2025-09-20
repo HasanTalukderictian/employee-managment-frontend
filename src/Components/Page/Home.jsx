@@ -16,7 +16,7 @@ const LiveTime = () => {
   }, []);
 
   return (
-    <div style={{ fontSize: '1.25rem', fontWeight: '500', color: '#333' }}>
+    <div style={{ fontSize: '1.25rem', fontWeight: '500', color: '#1fcf4eff' }}>
       {time.toLocaleTimeString()}
     </div>
   );

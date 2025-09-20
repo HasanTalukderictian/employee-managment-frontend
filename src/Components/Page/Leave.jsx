@@ -20,7 +20,11 @@ const Leave = () => {
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
 
+  const userId = localStorage.getItem('employeeId');
+
   const [leaveRequests, setLeaveRequests] = useState([]); // admin OR user requests
+
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
@@ -29,7 +33,7 @@ const Leave = () => {
 
   // Fetch employees & leave balances on mount
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/get-emplyee')
+    fetch(`${BASE_URL}/api/get-emplyee`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data.data)) {
@@ -38,7 +42,7 @@ const Leave = () => {
       })
       .catch((err) => console.error('Error fetching employees:', err));
 
-    fetch('http://127.0.0.1:8000/api/get-leaves')
+    fetch(`${BASE_URL}/api/get-leaves`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data)) setLeaveBalances(data);
@@ -50,7 +54,7 @@ const Leave = () => {
   // Fetch leave requests (admin or user)
   useEffect(() => {
     if (role === 'admin') {
-      fetch('http://127.0.0.1:8000/api/get-apply-leave')
+      fetch(`${BASE_URL}/api/get-apply-leave`)
         .then((res) => res.json())
         .then((data) => {
           if (data && Array.isArray(data)) setLeaveRequests(data);
@@ -59,7 +63,7 @@ const Leave = () => {
         .catch((err) => console.error('Error fetching leave requests:', err));
     } else {
       // For regular users: fetch only their own leave requests
-      fetch('http://127.0.0.1:8000/api/my-leaves')
+      fetch(`${BASE_URL}/api/my-leaves`)
         .then((res) => res.json())
         .then((data) => {
           if (data && Array.isArray(data)) setLeaveRequests(data);
@@ -71,7 +75,7 @@ const Leave = () => {
 
   // Approve Leave Request
   const handleApprove = (id) => {
-    fetch(`http://127.0.0.1:8000/api/leave-requests/${id}/approve`, {
+    fetch(`${BASE_URL}/api/leave-requests/${id}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     })
@@ -83,7 +87,7 @@ const Leave = () => {
 
   // Reject Leave Request
   const handleReject = (id) => {
-    fetch(`http://127.0.0.1:8000/api/leave-requests/${id}/reject`, {
+    fetch(`${BASE_URL}/api/leave-requests/${id}/reject`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     })
@@ -96,14 +100,14 @@ const Leave = () => {
   // Handle Add Leave (Admin)
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch('http://127.0.0.1:8000/api/add-leaves', {
+    fetch(`${BASE_URL}/api/add-leaves`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ employee_id: selectedEmployee, total_leave: parseInt(totalLeave, 10) }),
     })
       .then((res) => res.json())
       .then(() => {
-        fetch('http://127.0.0.1:8000/api/get-leaves')
+        fetch('${BASE_URL}/api/get-leaves')
           .then((res) => res.json())
           .then((data) => {
             if (data && Array.isArray(data)) setLeaveBalances(data);
@@ -119,14 +123,22 @@ const Leave = () => {
   // Handle Apply Leave (User)
   const handleApplySubmit = (e) => {
     e.preventDefault();
+
+    if (!userId) {
+      console.error("Employee ID is missing!");
+      alert("Your session is missing employee ID. Please login again.");
+      return;
+    }
+
     const applyData = {
-      employee_id: selectedEmployee || 1,
+      employee_id: userId, // must be valid
       leave_type: leaveType,
       start_date: startDate,
       end_date: endDate,
       reason,
     };
-    fetch('http://127.0.0.1:8000/api/apply-leave', {
+
+    fetch(`${BASE_URL}/api/apply-leave`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(applyData),
@@ -139,15 +151,25 @@ const Leave = () => {
         setEndDate('');
         setReason('');
         // Refresh user leave requests
-        fetch('http://127.0.0.1:8000/api/my-leaves')
-          .then((res) => res.json())
-          .then((data) => {
-            if (data && Array.isArray(data)) setLeaveRequests(data);
-            else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
-          });
+        // Fetch only current user's leaves
+        
+        if (userId) {
+          fetch(`${BASE_URL}/api/my-leaves?employee_id=${userId}`)
+            .then((res) => res.json())
+            .then((data) => {
+              if (data && Array.isArray(data)) setLeaveRequests(data);
+              else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
+            })
+            .catch((err) => console.error('Error fetching user leave requests:', err));
+        } else {
+          console.error('No employeeId found in localStorage');
+        }
+
+
       })
       .catch((err) => console.error('Error applying leave:', err));
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '1890px', margin: '0 auto', border: '1px solid #ccc', boxSizing: 'border-box' }}>
