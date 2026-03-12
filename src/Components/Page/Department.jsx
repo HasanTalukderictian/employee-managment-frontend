@@ -10,18 +10,11 @@ const Department = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [role, setRole] = useState(null);  // <-- Add this state
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-
-  useEffect(() => {
-    // Read role from localStorage on mount
-    const storedRole = localStorage.getItem('userRole');
-    setRole(storedRole);
-  }, []);
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -52,11 +45,6 @@ const Department = () => {
   }, [searchQuery]);
 
   const handleDelete = async (id) => {
-    if (role !== 'admin') {
-      alert("You are not authorized to delete departments.");
-      return;
-    }
-
     const token = localStorage.getItem("authToken");
     if (!token) {
       alert("You are not authorized. Please log in again.");
@@ -81,8 +69,7 @@ const Department = () => {
     }
   };
 
-  // ... pagination handlers unchanged ...
-
+  // Pagination handlers
   const totalPages = Math.ceil(employees.length / itemsPerPage);
   const handleNextPage = () => { if (currentPage < totalPages) setCurrentPage(currentPage + 1); };
   const handlePrevPage = () => { if (currentPage > 1) setCurrentPage(currentPage - 1); };
@@ -140,12 +127,10 @@ const Department = () => {
                 <i className="bi bi-search me-1"></i> Search
               </button>
 
-              {/* Only show Add Department button if admin */}
-              {role === 'admin' && (
-                <Link to="/admin-add-department" className="ms-2">
-                  <button className="btn btn-success">Add Department</button>
-                </Link>
-              )}
+              {/* Add Department button now always visible */}
+              <Link to="/admin-add-department" className="ms-2">
+                <button className="btn btn-success">Add Department</button>
+              </Link>
             </div>
 
             {loading ? (
@@ -169,15 +154,13 @@ const Department = () => {
                             <td className="text-center h6">{employee.name}</td>
                             <td className="text-center">
                               <div className="d-flex justify-content-center">
-                                {/* Show Delete button only for admin */}
-                                {role === 'admin' && (
-                                  <button
-                                    className="btn btn-danger btn-sm d-flex align-items-center"
-                                    onClick={() => handleDelete(employee.id)}
-                                  >
-                                    <i className="bi bi-trash me-1"></i> Delete
-                                  </button>
-                                )}
+                                {/* Delete button now always visible */}
+                                <button
+                                  className="btn btn-danger btn-sm d-flex align-items-center"
+                                  onClick={() => handleDelete(employee.id)}
+                                >
+                                  <i className="bi bi-trash me-1"></i> Delete
+                                </button>
                               </div>
                             </td>
                           </tr>

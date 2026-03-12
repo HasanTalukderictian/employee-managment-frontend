@@ -186,7 +186,7 @@ const Employee = () => {
               <button className="btn btn-primary ms-2" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i> Search
               </button>
-              {role === 'admin' && (
+             
                 <>
                   <Link to="/admin-add-employee" className="ms-2">
                     <button className="btn btn-success">Add Employee</button>
@@ -199,7 +199,7 @@ const Employee = () => {
 
 
 
-              )}
+             
 
 
             </div>

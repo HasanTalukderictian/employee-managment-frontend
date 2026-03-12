@@ -41,58 +41,63 @@ function App() {
           <Route path='/admin-users' element={<Users />} />
 
         {/* ✅ Protected Routes */}
-        <Route
+        {/* <Route
           path='/employee/edit/:id'
           element={
             <ProtectedRoute role={role} allowedRole="admin">
               <EditEmployee />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
-        <Route
+         <Route path='/employee/edit/:id' element={<EditEmployee />} />
+
+        {/* <Route
           path='/admin-add-department'
           element={
             <ProtectedRoute role={role} allowedRole="admin">
               <AddDepartment />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path='/admin-add-desgination'
-          element={
-            <ProtectedRoute role={role} allowedRole="admin">
-              <AddDesgination />
-            </ProtectedRoute>
-          }
-        />
+        /> */}
 
-        <Route
+         <Route path='/admin-add-department' element={<AddDepartment />} />
+       
+
+           <Route path='/admin-add-salary' element={<AddSalary />} />
+
+        {/* <Route
           path='/admin-add-salary'
           element={
             <ProtectedRoute role={role} allowedRole="admin">
               <AddSalary />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
-        <Route
+        <Route path='/admin-add-salary' element={<AddSalary />} />
+
+        {/* <Route
           path='/admin-add-desgination'
           element={
             <ProtectedRoute role={role} allowedRole="admin">
               <AddUser />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
-        <Route
+        <Route path='/admin-add-desgination' element={<AddDesgination />} />
+
+        {/* <Route
           path='/admin-add-employee'
           element={
             <ProtectedRoute role={role} allowedRole="admin">
               <AddEmployee />
             </ProtectedRoute>
           }
-        />
+        /> */}
+
+           <Route path='/admin-add-employee' element={<AddEmployee />} />
 
         <Route path='/admin-desgination' element={<Desgination />} />
         <Route path='/admin-salary' element={<Salary />} />

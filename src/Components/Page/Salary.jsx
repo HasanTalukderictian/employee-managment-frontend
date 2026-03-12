@@ -159,11 +159,11 @@ const Salary = () => {
               <button className="btn btn-primary ms-2" onClick={handleSearch}>
                 <i className="bi bi-search me-1"></i> Search
               </button>
-              {role === 'admin' && (
+          
               <Link to="/admin-add-salary" className="ms-2">
                 <button className="btn btn-success">Add Salary</button>
               </Link>
-              )}
+           
             </div>
 
             {loading ? (

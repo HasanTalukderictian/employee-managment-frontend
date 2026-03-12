@@ -16,9 +16,6 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Get user role from localStorage
-  const role = localStorage.getItem("userRole"); // e.g. 'admin', 'user'
-
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
@@ -33,7 +30,6 @@ const Users = () => {
 
       const result = await response.json();
 
-      console.log(result);
       const userData = result.data;
       setUsers(Array.isArray(userData) ? userData : []);
       setCurrentPage(1);
@@ -55,8 +51,6 @@ const Users = () => {
     try {
       const response = await fetch(`${BASE_URL}/api/del-users/${id}`, {
         method: "DELETE",
-        // You may want to add Authorization header here if required
-        // headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
@@ -141,12 +135,10 @@ const Users = () => {
                 <i className="bi bi-search me-1"></i> Search
               </button>
 
-              {/* Show Add User button ONLY if admin */}
-              {role === "admin" && (
-                <Link to="/admin-add-users" className="ms-2">
-                  <button className="btn btn-success">Add User</button>
-                </Link>
-              )}
+              {/* Add User button now always visible */}
+              <Link to="/admin-add-users" className="ms-2">
+                <button className="btn btn-success">Add User</button>
+              </Link>
             </div>
 
             {loading ? (
@@ -180,16 +172,14 @@ const Users = () => {
                             </td>
                             <td className="text-center">{user.email}</td>
                             <td className="text-center">
-                              {/* Show Delete button ONLY if admin */}
-                              {role === "admin" && (
-                                <button
-                                  className="btn btn-sm btn-danger"
-                                  onClick={() => handleDelete(user.id)}
-                                  title="Delete user"
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </button>
-                              )}
+                              {/* Delete button now always visible */}
+                              <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => handleDelete(user.id)}
+                                title="Delete user"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
                             </td>
                           </tr>
                         ))

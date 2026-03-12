@@ -157,11 +157,11 @@ const Desgination = () => {
               </button>
 
               {/* Show Add Designation button only if admin */}
-              {role === 'admin' && (
+             
                 <Link to="/admin-add-desgination" className="ms-2">
                   <button className="btn btn-success">Add Designation</button>
                 </Link>
-              )}
+         
             </div>
 
             {/* Table */}
