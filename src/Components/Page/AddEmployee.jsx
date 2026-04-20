@@ -1,10 +1,9 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import Menu from './Menu';
 import Header from './Header';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
-
 
 const AddEmployee = () => {
   const [departments, setDepartments] = useState([]);
@@ -12,9 +11,7 @@ const AddEmployee = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-  
 
-  // Form state with updated keys department_id and designation_id
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -24,520 +21,238 @@ const AddEmployee = () => {
     date_of_birth: '',
     gender: '',
     hire_date: '',
-    department_id: '',   // updated key
-    designation_id: '',  // updated key
+    department_id: '',
+    designation_id: '',
     salary: '',
     profile_picture: null,
     status: 'Active',
   });
 
-  // Validation errors
   const [errors, setErrors] = useState({});
 
-  const selectStyle = {
-    appearance: 'none',
-    WebkitAppearance: 'none',
-    MozAppearance: 'none',
-    backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%204%205'%3E%3Cpath%20fill='black'%20d='M2%205L0%200h4z'/%3E%3C/svg%3E")`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 0.75rem center',
-    backgroundSize: '10px',
-    paddingRight: '2rem',
-  };
-
-  // Fetch departments and designations
   useEffect(() => {
-    fetch(`${BASE_URL}/api/get-dept`)
-      .then(res => res.json())
-      .then(response => {
-        if (response.data && Array.isArray(response.data)) {
-          setDepartments(response.data);
-        } else {
-          setDepartments([]);
-        }
-      })
-      .catch(err => console.error("Dept fetch error:", err));
+    fetch(`${BASE_URL}/api/get-dept`).then(res => res.json()).then(response => {
+      setDepartments(response.data || []);
+    }).catch(err => console.error("Dept fetch error:", err));
 
-    fetch(`${BASE_URL}/api/get-desi`)
-      .then(res => res.json())
-      .then(response => {
-        if (response.data && Array.isArray(response.data)) {
-          setDesignations(response.data);
-        } else {
-          setDesignations([]);
-        }
-      })
-      .catch(err => console.error("Desi fetch error:", err));
+    fetch(`${BASE_URL}/api/get-desi`).then(res => res.json()).then(response => {
+      setDesignations(response.data || []);
+    }).catch(err => console.error("Desi fetch error:", err));
   }, []);
 
-
-  
-
-
-
-  // Handle input changes
-const handleChange = async (e) => {
-  const { name, value, files } = e.target;
-
-  if (name === 'profile_picture') {
-    const file = files[0];
-    if (file) {
-      try {
-        // Image compression options
-        const options = {
-          maxSizeMB: 0.2, // Target max size in MB
-          maxWidthOrHeight: 800, // Resize the image if larger
-          useWebWorker: true,
-        };
-
-        const compressedFile = await imageCompression(file, options);
-
-        setFormData(prev => ({ ...prev, [name]: compressedFile }));
-        setImagePreview(URL.createObjectURL(compressedFile));
-      } catch (error) {
-        console.error('Image compression error:', error);
-        alert('Failed to compress image.');
+  const handleChange = async (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'profile_picture') {
+      const file = files[0];
+      if (file) {
+        try {
+          const options = { maxSizeMB: 0.2, maxWidthOrHeight: 800, useWebWorker: true };
+          const compressedFile = await imageCompression(file, options);
+          setFormData(prev => ({ ...prev, [name]: compressedFile }));
+          setImagePreview(URL.createObjectURL(compressedFile));
+        } catch (error) {
+          alert('Failed to compress image.');
+        }
       }
     } else {
-      setFormData(prev => ({ ...prev, [name]: null }));
-      setImagePreview(null);
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
-  } else {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }
-};
+  };
 
-  // Validation function
   const validate = () => {
     const newErrors = {};
-
     if (!formData.first_name.trim()) newErrors.first_name = 'First Name is required';
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone is required';
-    } else if (!/^\d{11}$/.test(formData.phone)) {
-      newErrors.phone = 'Phone must be exactly 11 digits';
-    }
-
-
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
     if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.date_of_birth) newErrors.date_of_birth = 'Date of Birth is required';
-    if (!formData.gender) newErrors.gender = 'Gender is required';
-    if (!formData.hire_date) newErrors.hire_date = 'Hire Date is required';
-
     if (!formData.department_id) newErrors.department_id = 'Department is required';
     if (!formData.designation_id) newErrors.designation_id = 'Designation is required';
-
-   
     if (!formData.profile_picture) newErrors.profile_picture = 'Profile Picture is required';
-
     return newErrors;
   };
 
-
-  const handleRemoveImage = () => {
-    setFormData(prev => ({ ...prev, profile_picture: null }));
-    setImagePreview(null);
-  };
-
-
-  // Submit form data to backend
   const handleSubmit = async e => {
     e.preventDefault();
-
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    setErrors({});
-
-    // Show formData in console before submission
-    console.log("Form data before submission:");
-    for (let [key, value] of Object.entries(formData)) {
-      if (key === "profile_picture" && value) {
-        console.log(`${key}: ${value.name}`);
-      } else {
-        console.log(`${key}: ${value}`);
-      }
-    }
 
     try {
       const payload = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null) {
-          payload.append(key, value);
-        }
+        if (value !== null) payload.append(key, value);
       });
 
       const response = await fetch(`${BASE_URL}/api/add-emplyee`, {
         method: 'POST',
         body: payload,
-        headers: {
-          Accept: 'application/json',
-        },
+        headers: { Accept: 'application/json' },
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        alert('Employee added successfully!');
+        navigate("/admin-employee");
+      } else {
         const errorData = await response.json();
-        alert('Failed to submit form: ' + (errorData.message || response.statusText));
-        return;
+        alert('Error: ' + errorData.message);
       }
-
-      navigate("/admin-employee");
-      alert('Form submitted successfully!');
-
-
-      // Reset form after success
-      setFormData({
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        address: '',
-        date_of_birth: '',
-        gender: '',
-        hire_date: '',
-        department_id: '',
-        designation_id: '',
-        profile_picture: null,
-        status: 'Active',
-      });
     } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('An error occurred while submitting the form.');
+      alert('An error occurred.');
     }
   };
 
+  const inputStyle = {
+    borderRadius: '10px',
+    border: '1px solid #e2e8f0',
+    padding: '12px 15px',
+    fontSize: '15px',
+    transition: 'all 0.3s ease',
+    backgroundColor: '#fcfcfc'
+  };
+
+  const labelStyle = {
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: '8px',
+    fontSize: '14px',
+    display: 'block'
+  };
 
   return (
-    <>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh', // ✅ Use minHeight instead of fixed height
-          width: '1890px',
-          margin: '0 auto',
-          border: '1px solid #ccc',
-          boxSizing: 'border-box',
-        }}
-      >
-        <Header />
+    <div style={{ display: 'flex', flexDirection: 'column', width: '1890px', minHeight: '100vh', margin: '0 auto', background: '#f8fafc' }}>
+      <Header />
+      <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
+        <Menu />
+        <main style={{ flexGrow: 1, padding: "40px", background: "#f1f5f9", overflowY: 'auto' }}>
+          
+          <div style={{ background: "#fff", borderRadius: "20px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", padding: "40px" }}>
+            
+            <div className="d-flex justify-content-between align-items-center mb-5">
+              <button onClick={() => navigate(-1)} className="btn btn-light" style={{ borderRadius: '10px', fontWeight: '600', color: '#64748b' }}>
+                <i className="bi bi-arrow-left me-2"></i>Back to List
+              </button>
+              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Add New Employee</h2>
+              <div style={{ width: '100px' }}></div> {/* Spacer */}
+            </div>
 
-        <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-          <Menu />
-          <main style={{
-            flexGrow: 1,
-            padding: "40px",
-            background: "linear-gradient(to bottom right, #ffffff, #f0eee7)",
-            borderRadius: "16px",
-            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.05)",
-            minHeight: "100vh",
-            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-          }}>
-            <div className="container mb-4">
-              <div className="d-flex align-items-center mb-3" style={{ position: "relative" }}>
-                {/* Back Button (left aligned) */}
-                <button
-                  className="btn btn-link position-absolute start-0"
-                  onClick={() => window.history.back()}
-                  style={{ textDecoration: 'none', fontWeight: 'bold', color: '#285fc7', fontSize: '18px' }}
-                >
-                  ← Back
-                </button>
-
-                {/* Centered Heading */}
-                <h3 className="mx-auto" style={{ fontFamily: "sans-serif", marginBottom: '5px' }}>
-                  Add Employee
-                </h3>
-              </div>
-
-              <form
-                onSubmit={handleSubmit}
-                style={{
-                  background: "#ffffff",
-                  borderRadius: "16px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  padding: "30px",
-                  minHeight: "400px",
-                  paddingBottom: "100px", // spacing for fixed pagination
-                  position: "relative",
-                }}
-                noValidate
-              >
-                <div className="row mb-3 mt-5">
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block"
-                      style={{ pointerEvents: 'none' }}>
-                      First Name *
-                    </label>
-                    <input
-                      type="text"
-                      className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
-                      name="first_name"
-                      value={formData.first_name}
-                      onChange={handleChange}
-                    />
-                    {errors.first_name && (
-                      <div className="invalid-feedback">{errors.first_name}</div>
-                    )}
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Last Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="last_name"
-                      value={formData.last_name}
-                      onChange={handleChange}
-                    />
-                  </div>
+            <form onSubmit={handleSubmit}>
+              <div className="row g-4">
+                
+                {/* Personal Info Section */}
+                <div className="col-12 mb-2">
+                  <h5 style={{ color: '#10b981', fontWeight: '700', borderBottom: '2px solid #ecfdf5', paddingBottom: '10px' }}>Personal Information</h5>
                 </div>
 
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Email *</label>
-                    <input
-                      type="email"
-                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                    />
-                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Phone *</label>
-                    <input
-                      type="text"
-                      className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                    />
-                    {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
-                  </div>
+                <div className="col-md-4">
+                  <label style={labelStyle}>First Name *</label>
+                  <input type="text" name="first_name" className={`form-control ${errors.first_name ? 'is-invalid' : ''}`} style={inputStyle} value={formData.first_name} onChange={handleChange} placeholder="John" />
+                  {errors.first_name && <div className="invalid-feedback">{errors.first_name}</div>}
                 </div>
 
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Address *</label>
-                    <input
-                      type="text"
-                      className={`form-control ${errors.address ? 'is-invalid' : ''}`}
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                    />
-                    {errors.address && <div className="invalid-feedback">{errors.address}</div>}
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">
-                      Date of Birth *
-                    </label>
-                    <input
-                      type="date"
-                      className={`form-control ${errors.date_of_birth ? 'is-invalid' : ''}`}
-                      name="date_of_birth"
-                      value={formData.date_of_birth}
-                      onChange={handleChange}
-                    />
-                    {errors.date_of_birth && (
-                      <div className="invalid-feedback">{errors.date_of_birth}</div>
-                    )}
-                  </div>
-
+                <div className="col-md-4">
+                  <label style={labelStyle}>Last Name</label>
+                  <input type="text" name="last_name" className="form-control" style={inputStyle} value={formData.last_name} onChange={handleChange} placeholder="Doe" />
                 </div>
 
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Gender *</label>
-
-                    <select
-                      className={`form-control ${errors.gender ? 'is-invalid' : ''}`}
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      style={selectStyle}
-                    >
-                      <option value="">Select</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-
-
-                    {errors.gender && <div className="invalid-feedback">{errors.gender}</div>}
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Hire Date *</label>
-
-                    <input
-                      type="date"
-                      className={`form-control ${errors.hire_date ? 'is-invalid' : ''}`}
-                      name="hire_date"
-                      value={formData.hire_date}
-                      onChange={handleChange}
-                    />
-                    {errors.hire_date && (
-                      <div className="invalid-feedback">{errors.hire_date}</div>
-                    )}
-                  </div>
+                <div className="col-md-4">
+                  <label style={labelStyle}>Email Address *</label>
+                  <input type="email" name="email" className={`form-control ${errors.email ? 'is-invalid' : ''}`} style={inputStyle} value={formData.email} onChange={handleChange} placeholder="john@example.com" />
+                  {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                 </div>
 
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">
-                      Department *
-                    </label>
-                    <select
-                      className={`form-control ${errors.department_id ? 'is-invalid' : ''}`}
-                      name="department_id"
-                      value={formData.department_id}
-                      onChange={handleChange}
-                      style={selectStyle}
-                    >
-                      <option value="">Select Department</option>
-                      {departments.map(dept => (
-                        <option key={dept.id} value={dept.id}>
-                          {dept.name}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.department_id && (
-                      <div className="invalid-feedback">{errors.department_id}</div>
-                    )}
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">
-                      Designation *
-                    </label>
-                    <select
-                      className={`form-control ${errors.designation_id ? 'is-invalid' : ''}`}
-                      name="designation_id"
-                      value={formData.designation_id}
-                      onChange={handleChange}
-                      style={selectStyle}
-                    >
-                      <option value="">Select Designation</option>
-                      {designations.map(desi => (
-                        <option key={desi.id} value={desi.id}>
-                          {desi.name}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.designation_id && (
-                      <div className="invalid-feedback">{errors.designation_id}</div>
-                    )}
-                  </div>
+                <div className="col-md-4">
+                  <label style={labelStyle}>Phone Number *</label>
+                  <input type="text" name="phone" className={`form-control ${errors.phone ? 'is-invalid' : ''}`} style={inputStyle} value={formData.phone} onChange={handleChange} placeholder="017xxxxxxxx" />
+                  {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
                 </div>
 
-                <div className="row mb-3">
-                 
+                <div className="col-md-4">
+                  <label style={labelStyle}>Date of Birth *</label>
+                  <input type="date" name="date_of_birth" className="form-control" style={inputStyle} value={formData.date_of_birth} onChange={handleChange} />
+                </div>
 
-                  <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">Status</label>
-                    <select
-                      className="form-control"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                      style={selectStyle}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
-                  </div>
+                <div className="col-md-4">
+                  <label style={labelStyle}>Gender *</label>
+                  <select name="gender" className="form-select" style={inputStyle} value={formData.gender} onChange={handleChange}>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
 
-                   <div className="col-md-6">
-                    <label className="form-label fs-5 text-start h2 d-block">
-                      Profile Picture *
-                    </label>
-                    <input
-                      type="file"
-                      className={`form-control ${errors.profile_picture ? 'is-invalid' : ''}`}
-                      name="profile_picture"
-                      onChange={handleChange}
-                      accept="image/*"
-                    />
-                    {errors.profile_picture && (
-                      <div className="invalid-feedback">{errors.profile_picture}</div>
-                    )}
+                {/* Job Info Section */}
+                <div className="col-12 mt-5 mb-2">
+                  <h5 style={{ color: '#10b981', fontWeight: '700', borderBottom: '2px solid #ecfdf5', paddingBottom: '10px' }}>Employment Details</h5>
+                </div>
 
+                <div className="col-md-4">
+                  <label style={labelStyle}>Department *</label>
+                  <select name="department_id" className="form-select" style={inputStyle} value={formData.department_id} onChange={handleChange}>
+                    <option value="">Select Department</option>
+                    {departments.map(dept => <option key={dept.id} value={dept.id}>{dept.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label style={labelStyle}>Designation *</label>
+                  <select name="designation_id" className="form-select" style={inputStyle} value={formData.designation_id} onChange={handleChange}>
+                    <option value="">Select Designation</option>
+                    {designations.map(desi => <option key={desi.id} value={desi.id}>{desi.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label style={labelStyle}>Hire Date *</label>
+                  <input type="date" name="hire_date" className="form-control" style={inputStyle} value={formData.hire_date} onChange={handleChange} />
+                </div>
+
+                <div className="col-md-12">
+                  <label style={labelStyle}>Full Address *</label>
+                  <textarea name="address" className="form-control" style={{ ...inputStyle, height: '100px' }} value={formData.address} onChange={handleChange} placeholder="Enter full address here..."></textarea>
+                </div>
+
+                {/* Profile Upload Section */}
+                <div className="col-md-6 mt-4">
+                  <label style={labelStyle}>Profile Picture *</label>
+                  <div style={{ border: '2px dashed #e2e8f0', borderRadius: '15px', padding: '20px', textAlign: 'center', background: '#f8fafc' }}>
+                    <input type="file" name="profile_picture" className="form-control mb-3" onChange={handleChange} accept="image/*" />
                     {imagePreview && (
-                      <div
-                        className="position-relative mt-2"
-                        style={{ display: 'inline-block', maxWidth: '150px' }}
-                      >
-                        <button
-                          type="button"
-                          onClick={handleRemoveImage}
-                          style={{
-                            position: 'absolute',
-                            top: '-10px',
-                            right: '-10px',
-                            background: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '25px',
-                            height: '25px',
-                            fontSize: '18px',
-                            lineHeight: '25px',
-                            textAlign: 'center',
-                            padding: '0',
-                            cursor: 'pointer',
-                          }}
-                          aria-label="Remove image"
-                        >
-                          &times;
-                        </button>
-
-
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          style={{
-                            width: '150px',
-                            height: '150px',
-                            objectFit: 'cover',
-                            borderRadius: '8px',
-                            border: '1px solid #ccc',
-                          }}
-                        />
+                      <div className="mt-2 position-relative d-inline-block">
+                        <img src={imagePreview} alt="Preview" style={{ width: '120px', height: '120px', borderRadius: '12px', objectFit: 'cover', border: '3px solid #fff', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }} />
+                        <button type="button" onClick={() => setImagePreview(null)} className="btn btn-danger btn-sm position-absolute" style={{ top: '-10px', right: '-10px', borderRadius: '50%', padding: '2px 6px' }}>×</button>
                       </div>
                     )}
-
                   </div>
-
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn text-white btn-lg"
-                  style={{ backgroundColor: '#fd7e14' }}
-                >
-                  Submit
-                </button>
-              </form>
-            </div>
-          </main>
-        </div>
-        <Footer />
+                <div className="col-md-6 mt-4 d-flex align-items-end">
+                   <div style={{ width: '100%', background: '#fff9f5', padding: '20px', borderRadius: '15px', border: '1px solid #ffeada' }}>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#c2410c' }}>
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        Please ensure all marked (*) fields are filled correctly before submitting. Profile pictures are automatically compressed for better performance.
+                      </p>
+                   </div>
+                </div>
+
+                <div className="col-12 mt-5 text-end">
+                  <hr style={{ borderColor: '#f1f5f9', marginBottom: '30px' }} />
+                  <button type="button" onClick={() => navigate(-1)} className="btn btn-outline-secondary me-3" style={{ padding: '12px 35px', borderRadius: '12px', fontWeight: '600' }}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" style={{ padding: '12px 50px', borderRadius: '12px', fontWeight: '600', backgroundColor: '#10b981', border: 'none', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.2)' }}>
+                    Save Employee
+                  </button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </main>
       </div>
-    </>
+      <Footer />
+    </div>
   );
 };
 
