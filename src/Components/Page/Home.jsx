@@ -9,7 +9,6 @@ import Menu from './Menu';
 import '../../index.css';
 
 // --- Chart Components ---
-
 const LineChart = ({ darkMode }) => {
   const chartRef = useRef(null);
   useEffect(() => {
@@ -74,7 +73,6 @@ const BarChart = ({ darkMode }) => {
 };
 
 // --- Sub-components ---
-
 const LiveTime = ({ darkMode }) => {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -107,7 +105,7 @@ const StatCard = ({ to, title, value, sub, icon: Icon, color, darkMode, gradient
   };
 
   return (
-    <div className="col-md-3">
+    <div className="col-xl-3 col-md-6"> {/* Bootstrap column updated for better PC/Laptop grid */}
       <Link to={to} className="text-decoration-none">
         <div className="p-4 h-100" style={cardStyle} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
           <div className="d-flex justify-content-between">
@@ -130,7 +128,6 @@ const StatCard = ({ to, title, value, sub, icon: Icon, color, darkMode, gradient
 };
 
 // --- Main Component ---
-
 const Home = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [stats, setStats] = useState({ earning: 0, departments: 0, employees: 0, users: 0, task: 0 });
@@ -161,10 +158,13 @@ const Home = () => {
 
   return (
     <div style={{ 
-      display: 'flex', flexDirection: 'column', 
-      width: '1890px', minHeight: '1024px', margin: '0 auto', 
-      background: theme.bg, color: theme.text, 
-      border: `1px solid ${theme.border}`, boxSizing: 'border-box' 
+      display: 'flex', 
+      flexDirection: 'column', 
+      width: '100%',             // Changed from 1890px
+      minHeight: '100vh',         // Changed from 1024px
+      background: theme.bg, 
+      color: theme.text, 
+      boxSizing: 'border-box' 
     }}>
       <Header />
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
@@ -174,7 +174,6 @@ const Home = () => {
           <div className="d-flex justify-content-between align-items-center mb-5 p-4 rounded-4" style={{ background: theme.cardBg, border: `1px solid ${theme.border}` }}>
             <div>
               <h2 className="fw-bold">Dashboard</h2>
-           
             </div>
             <div className="d-flex align-items-center gap-3">
               <LiveTime darkMode={darkMode} />
@@ -184,6 +183,7 @@ const Home = () => {
             </div>
           </div>
 
+          {/* Stat Cards Grid */}
           <div className="row g-4 mb-4">
             <StatCard darkMode={darkMode} to="/admin-salary" title="Total Earning" value={`$${stats.earning.toLocaleString()}`} sub="Monthly Revenue" icon={BsCashStack} color="#3b82f6" gradient={['#dbeafe', '#eff6ff']} />
             <StatCard darkMode={darkMode} to="/admin-department" title="Departments" value={stats.departments} sub="Active Units" icon={BsMortarboardFill} color="#06b6d4" gradient={['#cffafe', '#ecfeff']} />
@@ -200,13 +200,13 @@ const Home = () => {
 
           {/* Charts Row */}
           <div className="row g-4">
-            <div className="col-lg-7">
+            <div className="col-xl-7 col-lg-12">
               <div className="p-4 rounded-4 shadow-sm" style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, height: '400px' }}>
                 <h5 className="fw-bold mb-4">Revenue Growth Analysis</h5>
                 <div style={{ height: '300px' }}><LineChart darkMode={darkMode} /></div>
               </div>
             </div>
-            <div className="col-lg-5">
+            <div className="col-xl-5 col-lg-12">
               <div className="p-4 rounded-4 shadow-sm" style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, height: '400px' }}>
                 <h5 className="fw-bold mb-4">Staff by Department</h5>
                 <div style={{ height: '300px' }}><BarChart darkMode={darkMode} /></div>

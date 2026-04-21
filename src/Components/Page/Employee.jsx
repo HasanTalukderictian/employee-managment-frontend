@@ -21,8 +21,10 @@ const Employee = () => {
 
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
+    console.log("Current User Role:", storedRole);
     setRole(storedRole);
   }, []);
+  
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -65,37 +67,59 @@ const Employee = () => {
     saveAs(data, 'employees.xlsx');
   };
 
+  // --- Delete Functionality (Fixed & Added Back) ---
   const handleDelete = async (id) => {
     const token = localStorage.getItem("authToken");
     if (!token) return alert("Unauthorized!");
+    
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
         const response = await fetch(`${BASE_URL}/api/del-employee/${id}`, {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          headers: { 
+            Authorization: `Bearer ${token}`, 
+            "Content-Type": "application/json" 
+          },
         });
+        
         if (!response.ok) throw new Error("Delete failed");
+        
+        // Refresh the list after successful deletion
         fetchEmployees();
+        alert("Employee deleted successfully!");
       } catch (error) {
         alert(error.message);
       }
     }
   };
 
-  // --- Pagination Logic (Fixed) ---
+  // --- Pagination Logic ---
   const totalPages = Math.ceil(employees.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '1890px', height: '1024px', margin: '0 auto', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      width: '100%', 
+      minHeight: '100vh', 
+      margin: '0', 
+      background: '#f8fafc', 
+      boxSizing: 'border-box'
+    }}>
       <Header />
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
         <Menu />
-        <main style={{ flexGrow: 1, padding: "30px", overflowY: "auto", background: "#f1f5f9" }}>
+        <main style={{ 
+          flexGrow: 1, 
+          padding: "30px", 
+          overflowY: "auto", 
+          background: "#f1f5f9",
+          width: '100%' 
+        }}>
           
-          {/* Main Card */}
           <div style={{ 
             background: "#ffffff", 
             borderRadius: "20px", 
@@ -108,8 +132,8 @@ const Employee = () => {
           }}>
             
             {/* Action Row */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div style={{ position: 'relative', width: '45%' }}>
+            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+              <div style={{ position: 'relative', minWidth: '300px', flex: '1' }}>
                 <i className="bi bi-search" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}></i>
                 <input
                   type="text"
@@ -122,7 +146,7 @@ const Employee = () => {
                 />
               </div>
 
-              <div className="d-flex gap-2">
+              <div className="d-flex flex-wrap gap-2">
                 <button className="btn btn-primary" style={{ borderRadius: '10px', padding: '10px 20px', backgroundColor: '#10b981', border: 'none', fontWeight: '600' }} onClick={() => setSearchQuery(searchTerm.trim())}>
                   Run Filter
                 </button>
@@ -162,15 +186,15 @@ const Employee = () => {
                           <td className="px-4 py-3">
                             <div className="d-flex align-items-center">
                               <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '38px', height: '38px', background: '#ecfdf5', color: '#10b981', fontWeight: '700' }}>
-                                {employee.first_name[0]}
+                                {employee.first_name ? employee.first_name[0] : 'E'}
                               </div>
                               <span style={{ fontWeight: '600', color: '#1e293b' }}>{employee.first_name}</span>
                             </div>
                           </td>
-                          <td className="text-center text-muted">{employee.phone}</td>
+                          <td className="text-center text-muted small">{employee.phone}</td>
                           <td className="text-center">
                             <span style={{ 
-                              padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600',
+                              padding: '5px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
                               background: employee.status === 'Active' ? '#dcfce7' : '#fee2e2',
                               color: employee.status === 'Active' ? '#15803d' : '#b91c1c'
                             }}>
@@ -178,16 +202,25 @@ const Employee = () => {
                             </span>
                           </td>
                           <td className="text-center"><span className="badge bg-light text-dark border-0" style={{ padding: '6px 10px' }}>{employee.department?.name}</span></td>
-                          <td className="text-center text-muted">{employee.designation?.name}</td>
+                          <td className="text-center text-muted small">{employee.designation?.name}</td>
                           <td className="text-end px-4">
-                            <div className="btn-group shadow-sm rounded-3 overflow-hidden">
-                              <button className="btn btn-light btn-sm border-end" onClick={() => navigate(`/employee/view/${employee.id}`)}><i className="bi bi-eye text-primary"></i></button>
-                              {role?.toLowerCase() === 'admin' && (
+                            <div className="btn-group shadow-sm rounded-3 overflow-hidden border">
+                              {/* View Button */}
+                              <button className="btn btn-white btn-sm" title="View" onClick={() => navigate(`/employee/view/${employee.id}`)}>
+                                <i className="bi bi-eye text-primary"></i>
+                              </button>
+                              
+                              {/* Admin only buttons: Edit & Delete */}
+                             
                                 <>
-                                  <button className="btn btn-light btn-sm border-end" onClick={() => navigate(`/employee/edit/${employee.id}`)}><i className="bi bi-pencil text-success"></i></button>
-                                  <button className="btn btn-light btn-sm" onClick={() => handleDelete(employee.id)}><i className="bi bi-trash text-danger"></i></button>
+                                  <button className="btn btn-white btn-sm border-start" title="Edit" onClick={() => navigate(`/employee/edit/${employee.id}`)}>
+                                    <i className="bi bi-pencil text-success"></i>
+                                  </button>
+                                  <button className="btn btn-white btn-sm border-start" title="Delete" onClick={() => handleDelete(employee.id)}>
+                                    <i className="bi bi-trash text-danger"></i>
+                                  </button>
                                 </>
-                              )}
+                           
                             </div>
                           </td>
                         </tr>
@@ -201,7 +234,7 @@ const Employee = () => {
             )}
 
             {/* Pagination Controls */}
-            <div className="d-flex justify-content-between align-items-center mt-auto pt-4">
+            <div className="d-flex flex-wrap justify-content-between align-items-center mt-auto pt-4 gap-2">
               <p className="text-muted small mb-0">
                 Showing <b>{indexOfFirstItem + 1}</b> to <b>{Math.min(indexOfLastItem, employees.length)}</b> of <b>{employees.length}</b> employees
               </p>

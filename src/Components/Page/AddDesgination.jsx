@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Header from "./Header"; // Import if available
-import Menu from "./Menu"; // Import if available
+import toast, { Toaster } from "react-hot-toast"; // টোস্ট ইম্পোর্ট
+import Header from "./Header"; 
+import Menu from "./Menu"; 
 
 const AddDesgination = () => {
   const [name, setName] = useState("");
-
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const token = localStorage.getItem("authToken");
+    const loadingToast = toast.loading("Creating designation...");
 
     try {
       const response = await fetch(`${BASE_URL}/api/add-desi`, {
@@ -24,20 +24,24 @@ const AddDesgination = () => {
         body: JSON.stringify({ name }),
       });
 
-      const result = await response.json();
-      console.log("Server Response:", result);
-      alert("Designation create successfully!");
-
-      setName("");
-      navigate("/admin-desgination");
+      if (response.ok) {
+        toast.success("Designation created successfully!", { id: loadingToast });
+        setName("");
+        setTimeout(() => navigate("/admin-desgination"), 1000);
+      } else {
+        throw new Error("Failed to add");
+      }
     } catch (error) {
       console.error("API Error:", error);
-      alert("Failed to add employee.");
+      toast.error("Failed to create designation.", { id: loadingToast });
     }
   };
 
   return (
     <>
+      {/* টোস্ট মেসেজ দেখার জন্য এটি প্রয়োজন */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       <div
         style={{
           display: "flex",
@@ -46,66 +50,104 @@ const AddDesgination = () => {
           height: '1024px',
           margin: "0 auto",
           boxSizing: "border-box",
+          backgroundColor: "#f8f9fa"
         }}
       >
         <Header />
         <div style={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
           <Menu />
-          <main style={{ flexGrow: 1, padding: "20px", overflowY: "auto" }}>
-            <div className="container mt-4">
-              <div className="mb-4">
-                <Link to="/admin-department">
+          <main style={{ flexGrow: 1, padding: "40px", overflowY: "auto" }}>
+            <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+              
+              {/* Back Button */}
+              <div style={{ marginBottom: "25px" }}>
+                <Link to="/admin-desgination" style={{ textDecoration: 'none' }}>
                   <button
-                    className="btn"
                     style={{
-                      fontSize: "16px",
-                      backgroundColor: "transparent",
-                      border: "1px solid #ccc",
-                      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.15)",
-                      color: "black",
-                      fontWeight: "bold",
+                      padding: "10px 20px",
+                      fontSize: "15px",
+                      backgroundColor: "#fff",
+                      border: "1px solid #ddd",
+                      borderRadius: "8px",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                      color: "#333",
+                      fontWeight: "600",
                       cursor: "pointer",
-                      transition: "opacity 0.3s ease, box-shadow 0.3s ease"
+                      transition: "all 0.3s ease"
                     }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.opacity = "0.6";
-                      e.currentTarget.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.opacity = "1";
-                      e.currentTarget.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.15)";
-                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f1f1f1")}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
                   >
-                    ← Back
+                    ← Back to List
                   </button>
                 </Link>
               </div>
 
-              <form onSubmit={handleSubmit}
-               style={{
+              {/* Form Card */}
+              <form 
+                onSubmit={handleSubmit}
+                style={{
                   background: "#ffffff",
                   borderRadius: "16px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  padding: "30px",
-                  marginTop: "10px"
-                }}>
-                <div className="mb-3">
-                  <label htmlFor="name" className="form-label fs-5 text-start h2 d-block">
-                    Name
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                  padding: "40px",
+                  border: "1px solid #eee"
+                }}
+              >
+                <div style={{ marginBottom: "30px", borderBottom: "2px solid #28a745", paddingBottom: "10px", display: "inline-block" }}>
+                    <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#2d3436", margin: 0 }}>
+                        Add New Designation
+                    </h2>
+                </div>
+
+                <div className="mb-4">
+                  <label 
+                    htmlFor="name" 
+                    style={{ display: "block", marginBottom: "10px", fontWeight: "600", color: "#555", fontSize: "16px" }}
+                  >
+                    Designation Name
                   </label>
                   <input
                     type="text"
-                    className="form-control h2"
                     id="name"
+                    placeholder="e.g. Senior Software Engineer"
+                    style={{
+                      width: "100%",
+                      padding: "14px 16px",
+                      borderRadius: "10px",
+                      border: "1px solid #ced4da",
+                      fontSize: "16px",
+                      outline: "none",
+                      transition: "border-color 0.3s ease"
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = "#28a745")}
+                    onBlur={(e) => (e.target.style.borderColor = "#ced4da")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </div>
 
-                <div className="mt-4">
-                  <button type="submit" className="btn btn-warning text-white w-30">
-                    Submit
+                <div style={{ marginTop: "30px" }}>
+                  <button 
+                    type="submit" 
+                    style={{
+                      width: "160px",
+                      padding: "14px",
+                      backgroundColor: "#28a745",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "10px",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 6px rgba(40, 167, 69, 0.2)",
+                      transition: "transform 0.2s, background-color 0.3s"
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#218838")}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#28a745")}
+                  >
+                    Create Now
                   </button>
                 </div>
               </form>

@@ -3,6 +3,7 @@ import Header from './Header';
 import Menu from './Menu';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Department = () => {
   const [employees, setEmployees] = useState([]);
@@ -10,6 +11,10 @@ const Department = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -41,26 +46,36 @@ const Department = () => {
     fetchEmployees();
   }, [searchQuery]);
 
-  const handleDelete = async (id) => {
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setShowModal(true);
+  };
+
+  const confirmDelete = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
-      alert("You are not authorized. Please log in again.");
+      toast.error("You are not authorized. Please log in.");
+      setShowModal(false);
       return;
     }
-    if (window.confirm("Are you sure you want to delete this department?")) {
-      try {
-        const response = await fetch(`${BASE_URL}/api/del-dept/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) throw new Error("Delete failed");
-        fetchEmployees();
-      } catch (error) {
-        alert("Delete failed: " + error.message);
-      }
+
+    const loadingToast = toast.loading("Deleting department...");
+    
+    try {
+      const response = await fetch(`${BASE_URL}/api/del-dept/${deleteId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) throw new Error("Delete failed");
+      
+      toast.success("Department deleted successfully!", { id: loadingToast });
+      setShowModal(false);
+      fetchEmployees();
+    } catch (error) {
+      toast.error("Delete failed: " + error.message, { id: loadingToast });
     }
   };
 
@@ -70,7 +85,31 @@ const Department = () => {
   const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '1890px', height: '1024px', margin: '0 auto', border: '1px solid #ccc', boxSizing: 'border-box' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '1890px', height: '1024px', margin: '0 auto', border: '1px solid #ccc', boxSizing: 'border-box', position: 'relative' }}>
+      <Toaster position="top-center" reverseOrder={false} />
+      
+      {/* Custom Confirmation Modal */}
+      {showModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center',
+          alignItems: 'center', zIndex: 9999
+        }}>
+          <div style={{
+            background: 'white', padding: '30px', borderRadius: '15px',
+            width: '400px', textAlign: 'center', boxShadow: '0 5px 15px rgba(0,0,0,0.3)'
+          }}>
+            <i className="bi bi-exclamation-circle text-danger" style={{ fontSize: '3rem' }}></i>
+            <h3 className="mt-3" style={{ fontWeight: '700' }}>Are you sure?</h3>
+            <p className="text-muted">You won't be able to revert this department data!</p>
+            <div className="d-flex justify-content-center gap-3 mt-4">
+              <button className="btn btn-secondary px-4" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="btn btn-danger px-4" style={{ borderRadius: '8px' }} onClick={confirmDelete}>Yes, Delete it!</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Header />
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
         <Menu />
@@ -78,13 +117,11 @@ const Department = () => {
 
           <div style={{ background: "#ffffff", borderRadius: "15px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)", padding: "30px", minHeight: "85vh", position: "relative" }}>
 
-            {/* Page Title */}
             <div className="mb-4">
               <h4 style={{ fontWeight: "700", color: "#2c3e50" }}>Department Management</h4>
               <p className="text-muted small">Manage and organize all your company departments here.</p>
             </div>
 
-            {/* Top Bar: Search & Add */}
             <div className="d-flex justify-content-between align-items-center mb-4 p-3" style={{ background: "#f1f4f9", borderRadius: "12px" }}>
               <div className="d-flex" style={{ width: "60%" }}>
                 <input
@@ -155,7 +192,7 @@ const Department = () => {
                               <button
                                 className="btn btn-outline-danger btn-sm"
                                 style={{ borderRadius: "6px", padding: "6px 15px", transition: "0.3s" }}
-                                onClick={() => handleDelete(dept.id)}
+                                onClick={() => handleDeleteClick(dept.id)}
                               >
                                 <i className="bi bi-trash3 me-1"></i> Delete
                               </button>
@@ -174,7 +211,6 @@ const Department = () => {
                   </table>
                 </div>
 
-                {/* Modern Pagination */}
                 <div style={{ position: "absolute", bottom: "30px", left: "50%", transform: "translateX(-50%)" }}>
                   <nav>
                     <ul className="pagination mb-0" style={{ gap: "5px" }}>

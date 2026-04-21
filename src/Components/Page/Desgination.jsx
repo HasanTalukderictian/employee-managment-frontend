@@ -3,6 +3,7 @@ import Header from './Header';
 import Menu from './Menu';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast'; // Toast import
 
 const Desgination = () => {
   const [employees, setEmployees] = useState([]);
@@ -10,16 +11,17 @@ const Desgination = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [role, setRole] = useState(null);  // <-- Add role state
+  const [role, setRole] = useState(null);
 
-  // Pagination
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   useEffect(() => {
-    // Read role on mount
     const storedRole = localStorage.getItem('userRole');
     setRole(storedRole);
   }, []);
@@ -33,10 +35,8 @@ const Desgination = () => {
         if (searchQuery.trim()) {
           url += `?search=${encodeURIComponent(searchQuery)}`;
         }
-
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch data');
-
         const result = await response.json();
         setEmployees(Array.isArray(result.data) ? result.data : []);
         setCurrentPage(1);
@@ -47,211 +47,184 @@ const Desgination = () => {
         setLoading(false);
       }
     };
-
     fetchEmployees();
   }, [searchQuery]);
 
-  const handleDelete = async (id) => {
+  // ডিলিট কনফার্ম করার জন্য মোডাল ওপেন করা
+  const openDeleteModal = (id) => {
     if (role !== 'admin') {
-      alert('You are not authorized to delete designations.');
+      toast.error('You are not authorized to delete.');
       return;
     }
+    setDeleteId(id);
+    setShowModal(true);
+  };
 
+  const confirmDelete = async () => {
     const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert('You are not authorized. Please log in again.');
-      return;
+    const loadingToast = toast.loading("Deleting...");
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/del-desi/${deleteId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) throw new Error('Delete failed');
+      
+      setEmployees((prev) => prev.filter((emp) => emp.id !== deleteId));
+      toast.success("Designation deleted successfully!", { id: loadingToast });
+    } catch (error) {
+      toast.error('Delete failed: ' + error.message, { id: loadingToast });
+    } finally {
+      setShowModal(false);
+      setDeleteId(null);
     }
-
-    if (window.confirm('Are you sure you want to delete this designation?')) {
-      try {
-        const response = await fetch(`${BASE_URL}/api/del-desi/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) throw new Error('Delete failed');
-        setEmployees((prev) => prev.filter((emp) => emp.id !== id));
-      } catch (error) {
-        alert('Delete failed: ' + error.message);
-      }
-    }
   };
 
-  const handleSearch = () => {
-    setSearchQuery(searchTerm.trim());
-  };
+  const handleSearch = () => setSearchQuery(searchTerm.trim());
+  const handleKeyDown = (e) => { if (e.key === 'Enter') handleSearch(); };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSearch();
-  };
-
-  // Pagination logic
   const totalPages = Math.ceil(employees.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handlePageClick = (pageNum) => {
-    setCurrentPage(pageNum);
-  };
+  const handleNextPage = () => { if (currentPage < totalPages) setCurrentPage(currentPage + 1); };
+  const handlePrevPage = () => { if (currentPage > 1) setCurrentPage(currentPage - 1); };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '1890px',
-        height: '1024px',
-        margin: '0 auto',
-        border: '1px solid #ccc',
-        boxSizing: 'border-box',
-      }}
-    >
+    <div style={{ display: 'flex', flexDirection: 'column', width: '1890px', height: '1024px', margin: '0 auto', boxSizing: 'border-box' }}>
+      <Toaster position="top-right" />
       <Header />
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
         <Menu />
-        <main
-          style={{
-            flexGrow: 1,
-            padding: '40px',
-            background: '#f0eee7',
-            overflowY: 'auto',
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: '16px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              padding: '30px',
-              position: 'relative',
-              minHeight: '90vh',
-              paddingBottom: '100px',
-            }}
-          >
-            {/* Top Search & Add Bar */}
+        <main style={{ flexGrow: 1, padding: '40px', background: '#f8f9fa', overflowY: 'auto' }}>
+          
+          <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.05)', padding: '30px', position: 'relative', minHeight: '85vh' }}>
+            
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search name"
-                value={searchTerm}
-                style={{ width: '78%' }}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-              <button className="btn btn-primary ms-2" onClick={handleSearch}>
-                <i className="bi bi-search me-1"></i> Search
-              </button>
+              <div className="d-flex" style={{ width: '70%' }}>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search designation..."
+                  value={searchTerm}
+                  style={{ borderRadius: '8px 0 0 8px', border: '1px solid #ced4da' }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <button className="btn btn-primary" style={{ borderRadius: '0 8px 8px 0' }} onClick={handleSearch}>
+                  Search
+                </button>
+              </div>
 
-              {/* Show Add Designation button only if admin */}
-             
-                <Link to="/admin-add-desgination" className="ms-2">
-                  <button className="btn btn-success">Add Designation</button>
-                </Link>
-         
+              <Link to="/admin-add-desgination">
+                <button className="btn btn-success" style={{ padding: '10px 20px', borderRadius: '8px', fontWeight: '600' }}>
+                  + Add Designation
+                </button>
+              </Link>
             </div>
 
-            {/* Table */}
             {loading ? (
-              <div className="text-center my-4">Loading...</div>
-            ) : error ? (
-              <div className="text-danger">Error: {error}</div>
+              <div className="text-center my-5">
+                <div className="spinner-border text-primary" role="status"></div>
+                <p className="mt-2">Loading designations...</p>
+              </div>
             ) : (
-              <>
-                <div className="table-responsive">
-                  <table className="table table-bordered table-striped">
-                    <thead className="table-dark">
-                      <tr>
-                        <th className="text-center h6">Designation</th>
-                        <th className="text-center h6">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentEmployees.length > 0 ? (
-                        currentEmployees.map((employee) => (
-                          <tr key={employee.id}>
-                            <td className="text-center h6">{employee.name}</td>
-                            <td className="text-center">
-                              <div className="d-flex justify-content-center">
-                                {/* Show Delete button only if admin */}
-                                {role === 'admin' && (
-                                  <button
-                                    className="btn btn-danger btn-sm d-flex align-items-center"
-                                    onClick={() => handleDelete(employee.id)}
-                                  >
-                                    <i className="bi bi-trash me-1"></i> Delete
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="2" className="text-center">
-                            No designations found.
+              <div className="table-responsive">
+                <table className="table table-hover" style={{ border: '1px solid #eee' }}>
+                  <thead style={{ backgroundColor: '#f8f9fa' }}>
+                    <tr>
+                      <th style={{ padding: '15px', color: '#444' }}>Designation Name</th>
+                      <th className="text-center" style={{ padding: '15px', color: '#444' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentEmployees.length > 0 ? (
+                      currentEmployees.map((employee) => (
+                        <tr key={employee.id}>
+                          <td style={{ padding: '15px', verticalAlign: 'middle', fontWeight: '500' }}>{employee.name}</td>
+                          <td className="text-center" style={{ padding: '15px' }}>
+                            {role === 'admin' && (
+                              <button
+                                className="btn btn-outline-danger btn-sm"
+                                style={{ borderRadius: '6px', padding: '6px 15px' }}
+                                onClick={() => openDeleteModal(employee.id)}
+                              >
+                                Delete
+                              </button>
+                            )}
                           </td>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination - Fixed Bottom Center */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '30px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                  }}
-                >
-                  <nav>
-                    <ul className="pagination mb-0">
-                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={handlePrevPage}>
-                          <i className="bi bi-chevron-left"></i>
-                        </button>
-                      </li>
-
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <li
-                          key={i + 1}
-                          className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
-                        >
-                          <button className="page-link" onClick={() => handlePageClick(i + 1)}>
-                            {i + 1}
-                          </button>
-                        </li>
-                      ))}
-
-                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={handleNextPage}>
-                          <i className="bi bi-chevron-right"></i>
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
-              </>
+                      ))
+                    ) : (
+                      <tr><td colSpan="2" className="text-center py-4 text-muted">No data available</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             )}
+
+            {/* Pagination */}
+            <div style={{ position: 'absolute', bottom: '30px', left: '50%', transform: 'translateX(-50%)' }}>
+               <nav>
+                  <ul className="pagination mb-0">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                      <button className="page-link" onClick={handlePrevPage}>Previous</button>
+                    </li>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <li key={i + 1} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+                        <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
+                      </li>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                      <button className="page-link" onClick={handleNextPage}>Next</button>
+                    </li>
+                  </ul>
+               </nav>
+            </div>
           </div>
         </main>
       </div>
       <Footer />
+
+      {/* --- CUSTOM MODAL --- */}
+      {showModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center',
+          alignItems: 'center', zIndex: 9999
+        }}>
+          <div style={{
+            background: '#fff', padding: '30px', borderRadius: '15px',
+            width: '400px', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ fontSize: '50px', color: '#dc3545', marginBottom: '15px' }}>⚠️</div>
+            <h3>Are you sure?</h3>
+            <p style={{ color: '#666' }}>Do you really want to delete this designation? This action cannot be undone.</p>
+            <div style={{ marginTop: '25px', display: 'flex', justifyContent: 'center', gap: '15px' }}>
+              <button 
+                className="btn btn-secondary" 
+                style={{ padding: '10px 25px', borderRadius: '8px' }}
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-danger" 
+                style={{ padding: '10px 25px', borderRadius: '8px' }}
+                onClick={confirmDelete}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
