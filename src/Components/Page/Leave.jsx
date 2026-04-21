@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import toast, { Toaster } from 'react-hot-toast'; // Import Toast
+import toast, { Toaster } from 'react-hot-toast'; 
 import Header from './Header';
 import Menu from './Menu';
 import Footer from './Footer';
 
-const Leave = () => {
+const Leave = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [showModal, setShowModal] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
 
@@ -25,6 +25,17 @@ const Leave = () => {
   const [leaveRequests, setLeaveRequests] = useState([]); 
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // Theme configuration
+  const theme = {
+    bg: darkMode ? '#0f172a' : '#f4f7f6',
+    cardBg: darkMode ? '#1e293b' : '#ffffff',
+    text: darkMode ? '#f8fafc' : '#2c3e50',
+    border: darkMode ? '#334155' : '#eee',
+    tableHeaderBg: darkMode ? '#334155' : '#f8f9fa',
+    muted: darkMode ? '#94a3b8' : '#666',
+    inputBg: darkMode ? '#1e293b' : '#ffffff',
+  };
 
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
@@ -99,7 +110,6 @@ const Leave = () => {
       .then((res) => res.json())
       .then(() => {
         toast.success('Leave Balance Added');
-        // Refresh balances
         fetch(`${BASE_URL}/api/get-leaves`).then(res => res.json()).then(data => {
             if (data && Array.isArray(data)) setLeaveBalances(data);
             else if (data && Array.isArray(data.data)) setLeaveBalances(data.data);
@@ -130,7 +140,6 @@ const Leave = () => {
         toast.success('Leave Applied Successfully!');
         setShowApplyModal(false);
         setLeaveType(''); setStartDate(''); setEndDate(''); setReason('');
-        // Refresh lists
         fetch(`${BASE_URL}/api/my-leaves?employee_id=${userId}`).then(res => res.json()).then(data => {
             if (data && Array.isArray(data)) setLeaveRequests(data);
             else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
@@ -139,7 +148,6 @@ const Leave = () => {
       .catch(() => toast.error('Error applying for leave'));
   };
 
-  // Status Badge Helper
   const getStatusBadge = (status) => {
     const colors = {
       pending: '#f39c12',
@@ -157,18 +165,57 @@ const Leave = () => {
     );
   };
 
+  // Reusable Table Component for clean UI
+  const TableHeader = ({ children }) => (
+    <thead style={{ backgroundColor: theme.tableHeaderBg }}>
+      <tr>{children}</tr>
+    </thead>
+  );
+
+  const TableCell = ({ children, isBold, color, align = 'center' }) => (
+    <td style={{ 
+      padding: '15px', 
+      textAlign: align, 
+      color: color || theme.text, 
+      fontWeight: isBold ? 'bold' : 'normal',
+      borderBottom: `1px solid ${theme.border}`,
+      backgroundColor: 'transparent' // Force transparent
+    }}>
+      {children}
+    </td>
+  );
+
+  const TableHeadCell = ({ children }) => (
+    <th style={{ 
+      padding: '15px', 
+      textAlign: 'center', 
+      color: theme.text, 
+      borderBottom: `1px solid ${theme.border}`,
+      backgroundColor: 'transparent',
+      fontWeight: '700'
+    }}>
+      {children}
+    </th>
+  );
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '1890px', margin: '0 auto', boxSizing: 'border-box', backgroundColor: '#f4f7f6' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', backgroundColor: theme.bg, transition: '0.3s ease' }}>
       <Toaster position="top-right" reverseOrder={false} />
-      <Header />
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        <Menu />
+        <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
         <main style={{ flexGrow: 1, padding: '30px', overflowY: 'auto' }}>
-          <div style={{ background: '#fff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', padding: '35px', position: 'relative', minHeight: '85vh' }}>
+          <div style={{ 
+            background: theme.cardBg, 
+            borderRadius: '20px', 
+            boxShadow: darkMode ? '0 10px 30px rgba(0,0,0,0.4)' : '0 10px 30px rgba(0,0,0,0.05)', 
+            padding: '35px', 
+            border: `1px solid ${theme.border}`,
+            color: theme.text 
+          }}>
             
-            {/* Header Row */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-              <h2 style={{ fontWeight: '800', color: '#2c3e50', margin: 0 }}>Leave Management</h2>
+              <h2 style={{ fontWeight: '800', margin: 0 }}>Leave Management</h2>
               {role === 'admin' ? (
                 <button className="btn" style={{ backgroundColor: '#27ae60', color: '#fff', borderRadius: '8px', padding: '10px 25px', fontWeight: 'bold' }} onClick={() => setShowModal(true)}>+ Add Leave Balance</button>
               ) : (
@@ -176,76 +223,72 @@ const Leave = () => {
               )}
             </div>
 
-            {/* Leave Balance Section */}
-            <div className="section-title mb-3" style={{ borderLeft: '5px solid #2c3e50', paddingLeft: '15px' }}>
+            {/* Balances */}
+            <div className="section-title mb-3" style={{ borderLeft: `5px solid ${darkMode ? '#3498db' : '#2c3e50'}`, paddingLeft: '15px' }}>
                 <h5 style={{ margin: 0, fontWeight: '700' }}>Leave Balances</h5>
             </div>
-            <div className="table-responsive mb-5" style={{ borderRadius: '12px', border: '1px solid #eee', overflow: 'hidden' }}>
-              <table className="table table-hover mb-0">
-                <thead style={{ backgroundColor: '#f8f9fa' }}>
-                  <tr>
-                    <th className="text-center">Employee Name</th>
-                    <th className="text-center">Total Allotted</th>
-                    <th className="text-center">Taken</th>
-                    <th className="text-center">Remaining</th>
-                  </tr>
-                </thead>
+            <div className="table-responsive mb-5" style={{ borderRadius: '12px', border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'transparent' }}>
+                <TableHeader>
+                  <TableHeadCell>Employee Name</TableHeadCell>
+                  <TableHeadCell>Total Allotted</TableHeadCell>
+                  <TableHeadCell>Taken</TableHeadCell>
+                  <TableHeadCell>Remaining</TableHeadCell>
+                </TableHeader>
                 <tbody>
                   {leaveBalances.map((leave) => (
-                    <tr key={`${leave.employee_id}-${leave.created_at}`} style={{ verticalAlign: 'middle' }}>
-                      <td className="text-center fw-bold">{leave.employee?.first_name} {leave.employee?.last_name}</td>
-                      <td className="text-center">{leave.total_leave}</td>
-                      <td className="text-center text-danger">{leave.taken_leave}</td>
-                      <td className="text-center text-success fw-bold">{leave.remaining_leave}</td>
+                    <tr key={`${leave.employee_id}-${leave.created_at}`}>
+                      <TableCell isBold>{leave.employee?.first_name} {leave.employee?.last_name}</TableCell>
+                      <TableCell>{leave.total_leave}</TableCell>
+                      <TableCell color="#e74c3c">{leave.taken_leave}</TableCell>
+                      <TableCell color="#2ecc71" isBold>{leave.remaining_leave}</TableCell>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            {/* Leave Requests Section */}
+            {/* Requests */}
             <div className="section-title mb-3" style={{ borderLeft: '5px solid #3498db', paddingLeft: '15px' }}>
                 <h5 style={{ margin: 0, fontWeight: '700' }}>{role === 'admin' ? 'Recent User Requests' : 'My Leave History'}</h5>
             </div>
-            <div className="table-responsive" style={{ borderRadius: '12px', border: '1px solid #eee', overflow: 'hidden' }}>
-              <table className="table table-hover mb-0">
-                <thead style={{ backgroundColor: '#f8f9fa' }}>
-                  <tr>
-                    {role === 'admin' && <th className="text-center">Employee</th>}
-                    <th className="text-center">Type</th>
-                    <th className="text-center">Start Date</th>
-                    <th className="text-center">End Date</th>
-                    <th className="text-center">Reason</th>
-                    <th className="text-center">Status</th>
-                    {role === 'admin' && <th className="text-center">Actions</th>}
-                  </tr>
-                </thead>
+            <div className="table-responsive" style={{ borderRadius: '12px', border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'transparent' }}>
+                <TableHeader>
+                  {role === 'admin' && <TableHeadCell>Employee</TableHeadCell>}
+                  <TableHeadCell>Type</TableHeadCell>
+                  <TableHeadCell>Start Date</TableHeadCell>
+                  <TableHeadCell>End Date</TableHeadCell>
+                  <TableHeadCell>Reason</TableHeadCell>
+                  <TableHeadCell>Status</TableHeadCell>
+                  {role === 'admin' && <TableHeadCell>Actions</TableHeadCell>}
+                </TableHeader>
                 <tbody>
                   {leaveRequests.length > 0 ? leaveRequests.map((req) => (
-                    <tr key={req.id} style={{ verticalAlign: 'middle' }}>
-                      {role === 'admin' && <td className="text-center fw-bold">{req.employee?.first_name} {req.employee?.last_name}</td>}
-                      <td className="text-center">{req.leave_type}</td>
-                      <td className="text-center">{req.start_date}</td>
-                      <td className="text-center">{req.end_date}</td>
-                      <td className="text-center" style={{ maxWidth: '200px', fontSize: '14px', color: '#666' }}>{req.reason}</td>
-                      <td className="text-center">{getStatusBadge(req.status)}</td>
+                    <tr key={req.id}>
+                      {role === 'admin' && <TableCell isBold>{req.employee?.first_name} {req.employee?.last_name}</TableCell>}
+                      <TableCell>{req.leave_type}</TableCell>
+                      <TableCell>{req.start_date}</TableCell>
+                      <TableCell>{req.end_date}</TableCell>
+                      <TableCell align="center">
+                        <div style={{ maxWidth: '200px', fontSize: '13px', color: theme.muted, margin: '0 auto' }}>{req.reason}</div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(req.status)}</TableCell>
                       {role === 'admin' && (
-                        <td className="text-center">
+                        <TableCell>
                           {req.status === 'pending' ? (
                             <div className="btn-group">
-                              <button className="btn btn-success btn-sm" onClick={() => handleApprove(req.id)}>Approve</button>
+                              <button className="btn btn-success btn-sm me-1" onClick={() => handleApprove(req.id)}>Approve</button>
                               <button className="btn btn-danger btn-sm" onClick={() => handleReject(req.id)}>Reject</button>
                             </div>
                           ) : (
-                            <span className="text-muted small">Processed</span>
+                            <span style={{ color: theme.muted, fontSize: '12px' }}>Processed</span>
                           )}
-                        </td>
+                        </TableCell>
                       )}
                     </tr>
                   )) : (
-                    <tr>
-                      <td colSpan={role === 'admin' ? "7" : "5"} className="text-center py-4 text-muted">No leave requests found</td>
-                    </tr>
+                    <tr><TableCell colSpan="10" color={theme.muted}>No requests found</TableCell></tr>
                   )}
                 </tbody>
               </table>
@@ -254,34 +297,30 @@ const Leave = () => {
           </div>
         </main>
       </div>
-      <Footer />
+      <Footer darkMode={darkMode} />
 
-      {/* Modern Styled Modal for Add Leave */}
+      {/* Modals are kept with same theme fix */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 15px 40px rgba(0,0,0,0.2)' }}>
-              <div className="modal-header" style={{ borderBottom: '1px solid #eee' }}>
-                <h5 className="modal-title fw-bold">Update Leave Balance</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+            <div className="modal-content" style={{ background: theme.cardBg, color: theme.text, border: `1px solid ${theme.border}` }}>
+              <div className="modal-header" style={{ borderBottom: `1px solid ${theme.border}` }}>
+                <h5 className="modal-title fw-bold">Update Balance</h5>
+                <button type="button" className="btn-close" style={{ filter: darkMode ? 'invert(1)' : 'none' }} onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Select Employee</label>
-                    <select className="form-select" style={{ padding: '10px' }} value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)} required>
-                      <option value="">Select Employee</option>
-                      {employees.map((emp) => <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>)}
+                    <label className="fw-bold mb-1">Select Employee</label>
+                    <select className="form-select mb-3" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)} required>
+                      <option value="" style={{ background: theme.cardBg }}>Select One</option>
+                      {employees.map((emp) => <option key={emp.id} value={emp.id} style={{ background: theme.cardBg }}>{emp.first_name} {emp.last_name}</option>)}
                     </select>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Total Leave Quota</label>
-                    <input type="number" className="form-control" style={{ padding: '10px' }} placeholder="Enter number of days" value={totalLeave} onChange={(e) => setTotalLeave(e.target.value)} required />
-                  </div>
+                    <label className="fw-bold mb-1">Total Days</label>
+                    <input type="number" className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={totalLeave} onChange={(e) => setTotalLeave(e.target.value)} required />
                 </div>
-                <div className="modal-footer" style={{ borderTop: 'none' }}>
-                  <button type="button" className="btn btn-light" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary px-4">Save Changes</button>
+                <div className="modal-footer border-0">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save</button>
                 </div>
               </form>
             </div>
@@ -289,43 +328,34 @@ const Leave = () => {
         </div>
       )}
 
-      {/* Modern Styled Modal for Apply Leave */}
       {showApplyModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: '15px', border: 'none' }}>
-              <div className="modal-header">
-                <h5 className="modal-title fw-bold">Apply for Leave</h5>
-                <button type="button" className="btn-close" onClick={() => setShowApplyModal(false)}></button>
+            <div className="modal-content" style={{ background: theme.cardBg, color: theme.text, border: `1px solid ${theme.border}` }}>
+              <div className="modal-header" style={{ borderBottom: `1px solid ${theme.border}` }}>
+                <h5 className="modal-title fw-bold">Apply Leave</h5>
+                <button type="button" className="btn-close" style={{ filter: darkMode ? 'invert(1)' : 'none' }} onClick={() => setShowApplyModal(false)}></button>
               </div>
               <form onSubmit={handleApplySubmit}>
                 <div className="modal-body p-4">
-                  <div className="row">
-                    <div className="col-12 mb-3">
-                        <label className="form-label fw-bold">Leave Type</label>
-                        <select className="form-select" value={leaveType} onChange={(e) => setLeaveType(e.target.value)} required>
-                          <option value="">Select Category</option>
-                          <option value="Paid">Casual Leave</option>
-                          <option value="Unpaid">Sick Leave</option>
+                    <div className="mb-3">
+                        <label className="fw-bold">Type</label>
+                        <select className="form-select" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={leaveType} onChange={(e) => setLeaveType(e.target.value)} required>
+                          <option value="" style={{ background: theme.cardBg }}>Select Category</option>
+                          <option value="Paid" style={{ background: theme.cardBg }}>Casual Leave</option>
+                          <option value="Unpaid" style={{ background: theme.cardBg }}>Sick Leave</option>
                         </select>
                     </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">From</label>
-                        <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+                    <div className="row mb-3">
+                        <div className="col"><label className="fw-bold">From</label><input type="date" className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={startDate} onChange={(e) => setStartDate(e.target.value)} required /></div>
+                        <div className="col"><label className="fw-bold">To</label><input type="date" className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={endDate} onChange={(e) => setEndDate(e.target.value)} required /></div>
                     </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">To</label>
-                        <input type="date" className="form-control" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
-                    </div>
-                    <div className="col-12 mb-2">
-                        <label className="form-label fw-bold">Reason for Leave</label>
-                        <textarea className="form-control" placeholder="Briefly describe your reason..." value={reason} onChange={(e) => setReason(e.target.value)} rows="3" required></textarea>
-                    </div>
-                  </div>
+                    <label className="fw-bold">Reason</label>
+                    <textarea className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={reason} onChange={(e) => setReason(e.target.value)} rows="3" required></textarea>
                 </div>
                 <div className="modal-footer border-0">
-                  <button type="button" className="btn btn-light" onClick={() => setShowApplyModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary px-5" style={{ borderRadius: '8px' }}>Submit Request</button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowApplyModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary px-4">Submit</button>
                 </div>
               </form>
             </div>

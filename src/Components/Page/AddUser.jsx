@@ -6,7 +6,7 @@ import '../../App.css';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
-const AddUser = () => {
+const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [employeeId, setEmployeeId] = useState('');
@@ -17,6 +17,16 @@ const AddUser = () => {
 
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // Theme configuration
+  const theme = {
+    bg: darkMode ? "#0f172a" : "#f4f7f6",
+    cardBg: darkMode ? "#1e293b" : "#ffffff",
+    text: darkMode ? "#f8fafc" : "#2c3e50",
+    label: darkMode ? "#94a3b8" : "#6c757d",
+    border: darkMode ? "#334155" : "#f8f9fa",
+    inputBg: darkMode ? "#0f172a" : "#f8f9fa",
+  };
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -76,20 +86,35 @@ const AddUser = () => {
   const fadeClass = fadeOut ? 'fade-out' : '';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '1890px', height: '1024px', margin: '0 auto', boxSizing: 'border-box', backgroundColor: '#f4f7f6' }}>
-      {/* Toast Notification Container */}
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      width: '100%', 
+      minHeight: '100vh', 
+      backgroundColor: theme.bg, 
+      transition: '0.3s ease' 
+    }}>
       <Toaster position="top-right" reverseOrder={false} />
       
-      <Header />
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
       
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        <Menu />
+        <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
         
-        <main style={{ flexGrow: 1, padding: '40px', background: '#f0eee7', overflowY: 'auto' }}>
-          <div style={{ background: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', padding: '40px', maxWidth: '1100px', margin: '0 auto', minHeight: '80vh' }}>
+        <main style={{ flexGrow: 1, padding: '30px', overflowY: 'auto' }}>
+          <div style={{ 
+            background: theme.cardBg, 
+            borderRadius: '20px', 
+            boxShadow: darkMode ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.08)', 
+            padding: '40px', 
+            maxWidth: '1000px', 
+            margin: '0 auto', 
+            minHeight: '80vh',
+            border: darkMode ? `1px solid ${theme.border}` : 'none'
+          }}>
             
-            {/* Top Navigation Row */}
-            <div className="d-flex align-items-center mb-5" style={{ borderBottom: '2px solid #f8f9fa', paddingBottom: '20px' }}>
+            {/* Header Section */}
+            <div className="d-flex align-items-center mb-5" style={{ borderBottom: `2px solid ${theme.border}`, paddingBottom: '20px' }}>
               <button
                 className="btn btn-outline-primary shadow-sm d-flex align-items-center"
                 onClick={() => navigate(-1)}
@@ -97,23 +122,27 @@ const AddUser = () => {
               >
                 <i className="bi bi-arrow-left me-2"></i> Back
               </button>
-              <h2 className="mx-auto mb-0" style={{ fontWeight: '800', color: '#2c3e50', fontFamily: 'Inter, sans-serif' }}>
+              <h2 className="mx-auto mb-0" style={{ fontWeight: '800', color: theme.text, fontFamily: 'Inter, sans-serif' }}>
                 Create New User Account
               </h2>
             </div>
 
-            {/* Form Section */}
             <form onSubmit={handleSubmit} autoComplete="off">
-              {/* Row 1: Email & Password */}
               <div className="row mb-4">
                 <div className="col-md-6">
-                  <label className="form-label fw-bold text-secondary mb-2">Email Address</label>
+                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Email Address</label>
                   <input
                     type="email"
-                    name="new_user_email_field" // Unique name to prevent auto-fill
-                    autoComplete="one-time-code" // Extra trick to confuse browser autofill
+                    name="new_user_email_field"
+                    autoComplete="one-time-code"
                     className={`form-control form-control-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ backgroundColor: '#f8f9fa', borderRadius: '12px', fontSize: '16px', padding: '15px' }}
+                    style={{ 
+                      backgroundColor: theme.inputBg, 
+                      color: theme.text, 
+                      borderRadius: '12px', 
+                      fontSize: '16px', 
+                      padding: '15px' 
+                    }}
                     placeholder="Enter employee email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -121,13 +150,19 @@ const AddUser = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-bold text-secondary mb-2">Password</label>
+                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Password</label>
                   <input
                     type="password"
                     name="new_user_password_field" 
-                    autoComplete="new-password" // Strongly tells browser NOT to use saved passwords
+                    autoComplete="new-password"
                     className={`form-control form-control-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ backgroundColor: '#f8f9fa', borderRadius: '12px', fontSize: '16px', padding: '15px' }}
+                    style={{ 
+                      backgroundColor: theme.inputBg, 
+                      color: theme.text, 
+                      borderRadius: '12px', 
+                      fontSize: '16px', 
+                      padding: '15px' 
+                    }}
                     placeholder="Create a strong password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -136,34 +171,45 @@ const AddUser = () => {
                 </div>
               </div>
 
-              {/* Row 2: Role & Employee Selection */}
               <div className="row mb-5">
                 <div className="col-md-6">
-                  <label className="form-label fw-bold text-secondary mb-2">Assign Role</label>
+                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Assign Role</label>
                   <select
                     className={`form-select form-select-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ backgroundColor: '#f8f9fa', borderRadius: '12px', fontSize: '16px', padding: '15px' }}
+                    style={{ 
+                      backgroundColor: theme.inputBg, 
+                      color: theme.text, 
+                      borderRadius: '12px', 
+                      fontSize: '16px', 
+                      padding: '15px' 
+                    }}
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
                     required
                   >
-                    <option value="">-- Choose Access Level --</option>
-                    <option value="admin">Administrator</option>
-                    <option value="user">Standard User</option>
+                    <option value="" style={{ background: theme.cardBg }}>-- Choose Access Level --</option>
+                    <option value="admin" style={{ background: theme.cardBg }}>Administrator</option>
+                    <option value="user" style={{ background: theme.cardBg }}>Standard User</option>
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-bold text-secondary mb-2">Select Linked Employee</label>
+                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Select Linked Employee</label>
                   <select
                     className={`form-select form-select-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ backgroundColor: '#f8f9fa', borderRadius: '12px', fontSize: '16px', padding: '15px' }}
+                    style={{ 
+                      backgroundColor: theme.inputBg, 
+                      color: theme.text, 
+                      borderRadius: '12px', 
+                      fontSize: '16px', 
+                      padding: '15px' 
+                    }}
                     value={employeeId}
                     onChange={(e) => setEmployeeId(e.target.value)}
                     required
                   >
-                    <option value="">-- Select Employee --</option>
+                    <option value="" style={{ background: theme.cardBg }}>-- Select Employee --</option>
                     {employees.map((emp) => (
-                      <option key={emp.id} value={emp.id}>
+                      <option key={emp.id} value={emp.id} style={{ background: theme.cardBg }}>
                         {emp.first_name} {emp.last_name}
                       </option>
                     ))}
@@ -171,7 +217,6 @@ const AddUser = () => {
                 </div>
               </div>
 
-              {/* Action Button */}
               <div className="text-center mt-5">
                 <button 
                   type="submit" 
@@ -202,7 +247,7 @@ const AddUser = () => {
           </div>
         </main>
       </div>
-      <Footer />
+      <Footer darkMode={darkMode} />
     </div>
   );
 };

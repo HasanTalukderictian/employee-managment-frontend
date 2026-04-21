@@ -16,16 +16,16 @@ const Footer = ({ darkMode }) => {
         padding: '30px 40px',
         fontSize: '16px',
         borderTop: `1px solid ${borderColor}`,
-        width: '1890px', // আপনার ফিক্সড উইডথ
+        width: '100%', // FIXED: changed from 1890px to 100%
         margin: '0 auto',
         boxSizing: 'border-box',
         transition: 'all 0.3s ease'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
         
         {/* Left Side: Copyright Info */}
-        <div>
+        <div style={{ minWidth: '250px' }}>
           <p style={{ margin: 0, fontWeight: '500' }}>
             © {currentYear} <span style={{ color: '#10b981', fontWeight: '700' }}>Employee Management System</span>. All rights reserved.
           </p>

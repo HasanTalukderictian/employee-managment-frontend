@@ -5,7 +5,7 @@ import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 
-const AddEmployee = () => {
+const AddEmployee = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
@@ -29,6 +29,19 @@ const AddEmployee = () => {
   });
 
   const [errors, setErrors] = useState({});
+
+  // থিম ডাইনামিক কালারস
+  const theme = {
+    bg: darkMode ? '#0f172a' : '#f1f5f9',
+    cardBg: darkMode ? '#1e293b' : '#ffffff',
+    text: darkMode ? '#f8fafc' : '#1e293b',
+    label: darkMode ? '#94a3b8' : '#475569',
+    border: darkMode ? '#334155' : '#e2e8f0',
+    inputBg: darkMode ? '#0f172a' : '#fcfcfc',
+    noteBg: darkMode ? '#2d2016' : '#fff9f5',
+    noteText: darkMode ? '#fb923c' : '#c2410c',
+    noteBorder: darkMode ? '#432c1c' : '#ffeada'
+  };
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/get-dept`).then(res => res.json()).then(response => {
@@ -105,17 +118,18 @@ const AddEmployee = () => {
   };
 
   const inputStyle = {
-    borderRadius: '10px',
-    border: '1px solid #e2e8f0',
+    borderRadius: '12px',
+    border: `1px solid ${theme.border}`,
     padding: '12px 15px',
     fontSize: '15px',
     transition: 'all 0.3s ease',
-    backgroundColor: '#fcfcfc'
+    backgroundColor: theme.inputBg,
+    color: theme.text
   };
 
   const labelStyle = {
     fontWeight: '600',
-    color: '#475569',
+    color: theme.label,
     marginBottom: '8px',
     fontSize: '14px',
     display: 'block'
@@ -125,39 +139,44 @@ const AddEmployee = () => {
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      width: '100%',             // Fixed 1890px remove kore 100% kora holo
+      width: '100%', 
       minHeight: '100vh', 
-      margin: '0', 
-      background: '#f8fafc',
-      boxSizing: 'border-box'
+      background: theme.bg,
+      boxSizing: 'border-box',
+      transition: 'all 0.3s ease'
     }}>
-      <Header />
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+      
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        <Menu />
+        <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+        
         <main style={{ 
           flexGrow: 1, 
-          padding: "30px",        // Padding laptop er jonno aktu optimal kora holo
-          background: "#f1f5f9", 
+          padding: "30px", 
+          background: theme.bg, 
           overflowY: 'auto',
-          width: '100%' 
+          width: '100%',
+          transition: 'all 0.4s ease'
         }}>
           
           <div style={{ 
-            background: "#fff", 
-            borderRadius: "20px", 
-            boxShadow: "0 10px 25px rgba(0,0,0,0.05)", 
-            padding: "30px",      // Internal padding optimal kora holo
+            background: theme.cardBg, 
+            borderRadius: "24px", 
+            boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.4)" : "0 10px 25px rgba(0,0,0,0.05)", 
+            padding: "35px", 
             width: '100%',
-            maxWidth: '1600px',   // Onek boro screen e jate aktu gochano thake
-            margin: '0 auto' 
+            maxWidth: '1400px', 
+            margin: '0 auto',
+            border: `1px solid ${theme.border}`,
+            transition: 'all 0.3s ease'
           }}>
             
             <div className="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
-              <button onClick={() => navigate(-1)} className="btn btn-light shadow-sm" style={{ borderRadius: '10px', fontWeight: '600', color: '#64748b' }}>
+              <button onClick={() => navigate(-1)} className={`btn ${darkMode ? 'btn-dark' : 'btn-light'} shadow-sm`} style={{ borderRadius: '10px', fontWeight: '600' }}>
                 <i className="bi bi-arrow-left me-2"></i>Back to List
               </button>
-              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0, textAlign: 'center' }}>Add New Employee</h2>
-              <div className="d-none d-md-block" style={{ width: '120px' }}></div> {/* Spacer only for desktop */}
+              <h2 style={{ fontSize: '26px', fontWeight: '700', color: theme.text, margin: 0 }}>Add New Employee</h2>
+              <div className="d-none d-md-block" style={{ width: '120px' }}></div>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -165,7 +184,9 @@ const AddEmployee = () => {
                 
                 {/* Personal Info Section */}
                 <div className="col-12 mb-2">
-                  <h5 style={{ color: '#10b981', fontWeight: '700', borderBottom: '2px solid #ecfdf5', paddingBottom: '10px' }}>Personal Information</h5>
+                  <h5 style={{ color: '#10b981', fontWeight: '700', borderBottom: `2px solid ${darkMode ? '#064e3b' : '#ecfdf5'}`, paddingBottom: '10px' }}>
+                    Personal Information
+                  </h5>
                 </div>
 
                 <div className="col-xl-4 col-md-6">
@@ -208,7 +229,9 @@ const AddEmployee = () => {
 
                 {/* Job Info Section */}
                 <div className="col-12 mt-5 mb-2">
-                  <h5 style={{ color: '#10b981', fontWeight: '700', borderBottom: '2px solid #ecfdf5', paddingBottom: '10px' }}>Employment Details</h5>
+                  <h5 style={{ color: '#10b981', fontWeight: '700', borderBottom: `2px solid ${darkMode ? '#064e3b' : '#ecfdf5'}`, paddingBottom: '10px' }}>
+                    Employment Details
+                  </h5>
                 </div>
 
                 <div className="col-xl-4 col-md-6">
@@ -240,32 +263,31 @@ const AddEmployee = () => {
                 {/* Profile Upload Section */}
                 <div className="col-xl-6 col-md-12 mt-4">
                   <label style={labelStyle}>Profile Picture *</label>
-                  <div style={{ border: '2px dashed #e2e8f0', borderRadius: '15px', padding: '20px', textAlign: 'center', background: '#f8fafc' }}>
-                    <input type="file" name="profile_picture" className="form-control mb-3 shadow-sm" onChange={handleChange} accept="image/*" />
+                  <div style={{ border: `2px dashed ${theme.border}`, borderRadius: '15px', padding: '25px', textAlign: 'center', background: theme.inputBg }}>
+                    <input type="file" name="profile_picture" className={`form-control mb-3 ${darkMode ? 'bg-dark text-light border-secondary' : ''}`} onChange={handleChange} accept="image/*" />
                     {imagePreview && (
                       <div className="mt-2 position-relative d-inline-block">
-                        <img src={imagePreview} alt="Preview" style={{ width: '120px', height: '120px', borderRadius: '12px', objectFit: 'cover', border: '3px solid #fff', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }} />
-                        <button type="button" onClick={() => setImagePreview(null)} className="btn btn-danger btn-sm position-absolute shadow-sm" style={{ top: '-10px', right: '-10px', borderRadius: '50%', padding: '2px 6px' }}>×</button>
+                        <img src={imagePreview} alt="Preview" style={{ width: '130px', height: '130px', borderRadius: '14px', objectFit: 'cover', border: `4px solid ${theme.cardBg}`, boxShadow: '0 5px 15px rgba(0,0,0,0.2)' }} />
+                        <button type="button" onClick={() => {setImagePreview(null); setFormData(p => ({...p, profile_picture: null}))}} className="btn btn-danger btn-sm position-absolute shadow-sm" style={{ top: '-10px', right: '-10px', borderRadius: '50%', width: '28px', height: '28px', padding: 0 }}>×</button>
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div className="col-xl-6 col-md-12 mt-4 d-flex align-items-center">
-                   <div style={{ width: '100%', background: '#fff9f5', padding: '25px', borderRadius: '15px', border: '1px solid #ffeada' }}>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#c2410c', lineHeight: '1.6' }}>
+                   <div style={{ width: '100%', background: theme.noteBg, padding: '25px', borderRadius: '15px', border: `1px solid ${theme.noteBorder}` }}>
+                      <p style={{ margin: 0, fontSize: '14px', color: theme.noteText, lineHeight: '1.6' }}>
                         <i className="bi bi-info-circle-fill me-2"></i>
                         <strong>Note:</strong> Please ensure all marked (*) fields are filled correctly. 
-                        Profile pictures are automatically compressed to ensure system speed. 
-                        Use a clear square image for best results.
+                        Profile pictures are automatically compressed for system speed. 
                       </p>
                    </div>
                 </div>
 
                 <div className="col-12 mt-5 text-end">
-                  <hr style={{ borderColor: '#f1f5f9', marginBottom: '30px' }} />
+                  <hr style={{ borderColor: theme.border, marginBottom: '30px' }} />
                   <div className="d-flex flex-wrap justify-content-end gap-3">
-                    <button type="button" onClick={() => navigate(-1)} className="btn btn-outline-secondary" style={{ padding: '12px 35px', borderRadius: '12px', fontWeight: '600' }}>Cancel</button>
+                    <button type="button" onClick={() => navigate(-1)} className={`btn ${darkMode ? 'btn-outline-light' : 'btn-outline-secondary'}`} style={{ padding: '12px 35px', borderRadius: '12px', fontWeight: '600' }}>Cancel</button>
                     <button type="submit" className="btn btn-primary" style={{ padding: '12px 50px', borderRadius: '12px', fontWeight: '600', backgroundColor: '#10b981', border: 'none', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.2)' }}>
                       Save Employee
                     </button>
@@ -277,7 +299,7 @@ const AddEmployee = () => {
           </div>
         </main>
       </div>
-      <Footer />
+      <Footer darkMode={darkMode} />
     </div>
   );
 };

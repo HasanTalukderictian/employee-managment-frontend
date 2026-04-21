@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { IoMdSunny, IoMdMoon } from "react-icons/io";
 
-const Header = ({ darkMode }) => {
+const Header = ({ darkMode, setDarkMode }) => {
   const [role, setRole] = useState(null);
 
   useEffect(() => {
@@ -12,6 +13,7 @@ const Header = ({ darkMode }) => {
   const headerBg = darkMode ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.8)';
   const textColor = darkMode ? '#f8fafc' : '#1e293b';
   const borderColor = darkMode ? '#334155' : '#e2e8f0';
+  const iconBg = darkMode ? '#1e293b' : '#f1f5f9';
 
   return (
     <header
@@ -29,9 +31,10 @@ const Header = ({ darkMode }) => {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        width: '1890px', // আপনার ফিক্সড উইডথ
+        width: '100%',
         margin: '0 auto',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        transition: 'all 0.3s ease'
       }}
     >
       {/* Left section: Logo + Title */}
@@ -44,7 +47,6 @@ const Header = ({ darkMode }) => {
             borderRadius: "14px",
             background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             boxShadow: '0 8px 15px rgba(16, 185, 129, 0.2)',
-            transition: 'transform 0.3s ease'
           }}
         >
           <i
@@ -75,9 +77,9 @@ const Header = ({ darkMode }) => {
       {/* Right section: Tools + Profile */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         
-        {/* Search Bar - Optional addition for attractiveness */}
+        {/* Search Bar */}
         <div className="d-none d-xl-flex align-items-center px-3 py-2 rounded-pill" 
-             style={{ background: darkMode ? '#1e293b' : '#f1f5f9', border: `1px solid ${borderColor}` }}>
+             style={{ background: iconBg, border: `1px solid ${borderColor}` }}>
           <i className="bi bi-search" style={{ color: '#94a3b8' }}></i>
           <input 
             type="text" 
@@ -86,10 +88,31 @@ const Header = ({ darkMode }) => {
           />
         </div>
 
+        {/* --- Dark/Light Mode Toggle --- */}
+        <div 
+          onClick={() => setDarkMode(!darkMode)}
+          className="shadow-sm"
+          style={{
+            cursor: 'pointer',
+            width: "42px",
+            height: "42px",
+            borderRadius: "12px",
+            background: iconBg,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            border: `1px solid ${borderColor}`,
+            transition: 'all 0.3s ease'
+          }}
+          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {darkMode ? <IoMdSunny color="#fbbf24" size={22}/> : <IoMdMoon color="#6366f1" size={22}/>}
+        </div>
+
         {/* Notification */}
         <div className="position-relative" style={{ cursor: 'pointer' }}>
           <div
-            className="d-flex justify-content-center align-items-center"
+            className="d-flex justify-content-center align-items-center shadow-sm"
             style={{
               width: "42px",
               height: "42px",
@@ -102,7 +125,7 @@ const Header = ({ darkMode }) => {
             <i className="bi bi-bell" style={{ fontSize: "20px", color: "#10b981" }}></i>
           </div>
           <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                style={{ fontSize: '10px', padding: '4px 6px', border: '2px solid white' }}>
+                style={{ fontSize: '10px', padding: '4px 6px', border: darkMode ? '2px solid #1e293b' : '2px solid white' }}>
             3
           </span>
         </div>
@@ -129,7 +152,7 @@ const Header = ({ darkMode }) => {
             <div style={{
               width: '12px', height: '12px', background: '#10b981', 
               borderRadius: '50%', position: 'absolute', bottom: '-2px', right: '-2px',
-              border: '2px solid white'
+              border: darkMode ? '2px solid #1e293b' : '2px solid white'
             }}></div>
           </div>
         </div>

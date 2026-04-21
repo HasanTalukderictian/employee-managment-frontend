@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
-const Employee = () => {
+const Employee = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,12 +19,21 @@ const Employee = () => {
   const BASE_URL = import.meta.env.VITE_BASE_URL;
   const [role, setRole] = useState(null);
 
+  // থিম ডাইনামিক কালারস
+  const theme = {
+    bg: darkMode ? '#0f172a' : '#f1f5f9',
+    cardBg: darkMode ? '#1e293b' : '#ffffff',
+    text: darkMode ? '#f8fafc' : '#1e293b',
+    border: darkMode ? '#334155' : '#e2e8f0',
+    tableHeader: darkMode ? '#0f172a' : '#f8fafc',
+    muted: darkMode ? '#94a3b8' : '#64748b',
+    inputBg: darkMode ? '#0f172a' : '#fff'
+  };
+
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
-    console.log("Current User Role:", storedRole);
     setRole(storedRole);
   }, []);
-  
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -67,7 +76,6 @@ const Employee = () => {
     saveAs(data, 'employees.xlsx');
   };
 
-  // --- Delete Functionality (Fixed & Added Back) ---
   const handleDelete = async (id) => {
     const token = localStorage.getItem("authToken");
     if (!token) return alert("Unauthorized!");
@@ -81,10 +89,7 @@ const Employee = () => {
             "Content-Type": "application/json" 
           },
         });
-        
         if (!response.ok) throw new Error("Delete failed");
-        
-        // Refresh the list after successful deletion
         fetchEmployees();
         alert("Employee deleted successfully!");
       } catch (error) {
@@ -93,7 +98,6 @@ const Employee = () => {
     }
   };
 
-  // --- Pagination Logic ---
   const totalPages = Math.ceil(employees.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -105,58 +109,61 @@ const Employee = () => {
       flexDirection: 'column', 
       width: '100%', 
       minHeight: '100vh', 
-      margin: '0', 
-      background: '#f8fafc', 
-      boxSizing: 'border-box'
+      background: theme.bg, 
+      transition: 'all 0.3s ease'
     }}>
-      <Header />
-      <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        <Menu />
-        <main style={{ 
-          flexGrow: 1, 
-          padding: "30px", 
-          overflowY: "auto", 
-          background: "#f1f5f9",
-          width: '100%' 
-        }}>
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+      
+      <div style={{ display: 'flex', flexGrow: 1 }}>
+        <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+        
+        <main style={{ flexGrow: 1, padding: "30px", width: '100%', transition: 'all 0.4s ease' }}>
           
           <div style={{ 
-            background: "#ffffff", 
-            borderRadius: "20px", 
-            boxShadow: "0 10px 25px rgba(0,0,0,0.05)", 
+            background: theme.cardBg, 
+            borderRadius: "24px", 
+            boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 25px rgba(0,0,0,0.05)", 
             padding: "30px", 
             minHeight: "100%", 
-            position: 'relative',
+            border: `1px solid ${theme.border}`,
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            transition: 'all 0.3s ease'
           }}>
             
-            {/* Action Row */}
+            {/* Search and Action Buttons */}
             <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
               <div style={{ position: 'relative', minWidth: '300px', flex: '1' }}>
-                <i className="bi bi-search" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}></i>
+                <i className="bi bi-search" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: theme.muted }}></i>
                 <input
                   type="text"
-                  className="form-control"
+                  className="form-control shadow-sm"
                   placeholder="Search employees..."
                   value={searchTerm}
-                  style={{ paddingLeft: '45px', borderRadius: '12px', border: '1px solid #e2e8f0', height: '48px' }}
+                  style={{ 
+                    paddingLeft: '45px', 
+                    borderRadius: '14px', 
+                    background: theme.inputBg,
+                    border: `1px solid ${theme.border}`, 
+                    color: theme.text,
+                    height: '50px' 
+                  }}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && setSearchQuery(searchTerm.trim())}
                 />
               </div>
 
               <div className="d-flex flex-wrap gap-2">
-                <button className="btn btn-primary" style={{ borderRadius: '10px', padding: '10px 20px', backgroundColor: '#10b981', border: 'none', fontWeight: '600' }} onClick={() => setSearchQuery(searchTerm.trim())}>
-                  Run Filter
+                <button className="btn btn-primary shadow-sm" style={{ borderRadius: '12px', padding: '10px 24px', backgroundColor: '#10b981', border: 'none', fontWeight: '600' }} onClick={() => setSearchQuery(searchTerm.trim())}>
+                  Filter
                 </button>
                 <Link to="/admin-add-employee">
-                  <button className="btn btn-dark" style={{ borderRadius: '10px', padding: '10px 20px', fontWeight: '600' }}>
+                  <button className="btn shadow-sm" style={{ borderRadius: '12px', padding: '10px 24px', fontWeight: '600', backgroundColor: darkMode ? '#334155' : '#1e293b', color: '#fff' }}>
                     <i className="bi bi-plus-lg me-2"></i>Add Employee
                   </button>
                 </Link>
-                <button className="btn btn-outline-success" style={{ borderRadius: '10px', padding: '10px 20px', fontWeight: '600' }} onClick={handleDownloadExcel}>
-                  <i className="bi bi-file-earmark-excel me-2"></i>Export Excel
+                <button className="btn btn-outline-success shadow-sm" style={{ borderRadius: '12px', padding: '10px 24px', fontWeight: '600' }} onClick={handleDownloadExcel}>
+                  <i className="bi bi-file-earmark-excel me-2"></i>Export
                 </button>
               </div>
             </div>
@@ -167,10 +174,10 @@ const Employee = () => {
             ) : error ? (
               <div className="alert alert-danger">{error}</div>
             ) : (
-              <div className="table-responsive" style={{ borderRadius: '15px', border: '1px solid #f1f5f9', flexGrow: 1 }}>
-                <table className="table table-hover align-middle mb-0">
-                  <thead style={{ background: '#f8fafc' }}>
-                    <tr style={{ fontSize: '13px', color: '#64748b', letterSpacing: '0.5px' }}>
+              <div className="table-responsive" style={{ borderRadius: '18px', border: `1px solid ${theme.border}`, flexGrow: 1, overflow: 'hidden' }}>
+                <table className="table table-hover align-middle mb-0" style={{ color: theme.text, background: 'transparent' }}>
+                  <thead style={{ background: theme.tableHeader }}>
+                    <tr style={{ fontSize: '13px', color: theme.muted, letterSpacing: '0.5px', borderBottom: `1px solid ${theme.border}` }}>
                       <th className="px-4 py-3 border-0">NAME</th>
                       <th className="text-center py-3 border-0">CONTACT</th>
                       <th className="text-center py-3 border-0">STATUS</th>
@@ -182,77 +189,81 @@ const Employee = () => {
                   <tbody>
                     {currentEmployees.length > 0 ? (
                       currentEmployees.map((employee) => (
-                        <tr key={employee.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td className="px-4 py-3">
+                        <tr key={employee.id} style={{ 
+                          borderBottom: `1px solid ${theme.border}`,
+                          backgroundColor: theme.cardBg, // ডার্ক মোডে সাদা ভাব দূর করবে
+                          transition: 'background 0.3s'
+                        }}>
+                          <td className="px-4 py-3" style={{ background: 'transparent', color: theme.text }}>
                             <div className="d-flex align-items-center">
-                              <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '38px', height: '38px', background: '#ecfdf5', color: '#10b981', fontWeight: '700' }}>
+                              <div className="rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style={{ width: '40px', height: '40px', background: darkMode ? '#0f172a' : '#ecfdf5', color: '#10b981', fontWeight: '700' }}>
                                 {employee.first_name ? employee.first_name[0] : 'E'}
                               </div>
-                              <span style={{ fontWeight: '600', color: '#1e293b' }}>{employee.first_name}</span>
+                              <span style={{ fontWeight: '600' }}>{employee.first_name}</span>
                             </div>
                           </td>
-                          <td className="text-center text-muted small">{employee.phone}</td>
-                          <td className="text-center">
+                          <td className="text-center small" style={{ background: 'transparent', color: theme.muted }}>{employee.phone}</td>
+                          <td className="text-center" style={{ background: 'transparent' }}>
                             <span style={{ 
-                              padding: '5px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
-                              background: employee.status === 'Active' ? '#dcfce7' : '#fee2e2',
-                              color: employee.status === 'Active' ? '#15803d' : '#b91c1c'
+                              padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
+                              background: employee.status === 'Active' ? (darkMode ? '#064e3b' : '#dcfce7') : (darkMode ? '#7f1d1d' : '#fee2e2'),
+                              color: employee.status === 'Active' ? (darkMode ? '#34d399' : '#15803d') : (darkMode ? '#f87171' : '#b91c1c')
                             }}>
                               {employee.status}
                             </span>
                           </td>
-                          <td className="text-center"><span className="badge bg-light text-dark border-0" style={{ padding: '6px 10px' }}>{employee.department?.name}</span></td>
-                          <td className="text-center text-muted small">{employee.designation?.name}</td>
-                          <td className="text-end px-4">
-                            <div className="btn-group shadow-sm rounded-3 overflow-hidden border">
-                              {/* View Button */}
-                              <button className="btn btn-white btn-sm" title="View" onClick={() => navigate(`/employee/view/${employee.id}`)}>
+                          <td className="text-center" style={{ background: 'transparent' }}>
+                            <span className="badge" style={{ 
+                              padding: '7px 12px', fontWeight: '500', borderRadius: '8px',
+                              background: darkMode ? '#334155' : '#f1f5f9', color: theme.text
+                            }}>
+                              {employee.department?.name}
+                            </span>
+                          </td>
+                          <td className="text-center small" style={{ background: 'transparent', color: theme.muted }}>{employee.designation?.name}</td>
+                          <td className="text-end px-4" style={{ background: 'transparent' }}>
+                            <div className={`btn-group shadow-sm rounded-3 overflow-hidden border ${darkMode ? 'border-secondary' : ''}`}>
+                              <button className={`btn btn-sm ${darkMode ? 'btn-dark' : 'btn-white'}`} style={{ border: 'none' }} onClick={() => navigate(`/employee/view/${employee.id}`)}>
                                 <i className="bi bi-eye text-primary"></i>
                               </button>
-                              
-                              {/* Admin only buttons: Edit & Delete */}
-                             
-                                <>
-                                  <button className="btn btn-white btn-sm border-start" title="Edit" onClick={() => navigate(`/employee/edit/${employee.id}`)}>
-                                    <i className="bi bi-pencil text-success"></i>
-                                  </button>
-                                  <button className="btn btn-white btn-sm border-start" title="Delete" onClick={() => handleDelete(employee.id)}>
-                                    <i className="bi bi-trash text-danger"></i>
-                                  </button>
-                                </>
-                           
+                              <button className={`btn btn-sm border-start ${darkMode ? 'btn-dark border-secondary' : 'btn-white'}`} style={{ border: 'none' }} onClick={() => navigate(`/employee/edit/${employee.id}`)}>
+                                <i className="bi bi-pencil text-success"></i>
+                              </button>
+                              <button className={`btn btn-sm border-start ${darkMode ? 'btn-dark border-secondary' : 'btn-white'}`} style={{ border: 'none' }} onClick={() => handleDelete(employee.id)}>
+                                <i className="bi bi-trash text-danger"></i>
+                              </button>
                             </div>
                           </td>
                         </tr>
                       ))
                     ) : (
-                      <tr><td colSpan="6" className="text-center p-5 text-muted">No employees found.</td></tr>
+                      <tr><td colSpan="6" className="text-center p-5" style={{ background: theme.cardBg, color: theme.muted }}>No employees found.</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
             )}
 
-            {/* Pagination Controls */}
+            {/* Pagination */}
             <div className="d-flex flex-wrap justify-content-between align-items-center mt-auto pt-4 gap-2">
-              <p className="text-muted small mb-0">
-                Showing <b>{indexOfFirstItem + 1}</b> to <b>{Math.min(indexOfLastItem, employees.length)}</b> of <b>{employees.length}</b> employees
+              <p className="small mb-0" style={{ color: theme.muted }}>
+                Showing <b>{indexOfFirstItem + 1}</b> to <b>{Math.min(indexOfLastItem, employees.length)}</b> of <b>{employees.length}</b>
               </p>
               <nav>
                 <ul className="pagination pagination-sm mb-0 gap-1">
                   <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                    <button className="page-link rounded-3 border-0" style={{ background: '#f1f5f9', color: '#1e293b' }} onClick={() => setCurrentPage(currentPage - 1)}>
+                    <button className="page-link rounded-3 border-0 shadow-sm" style={{ background: theme.tableHeader, color: theme.text }} onClick={() => setCurrentPage(currentPage - 1)}>
                       <i className="bi bi-chevron-left"></i>
                     </button>
                   </li>
                   {[...Array(totalPages)].map((_, i) => (
                     <li key={i} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
                       <button 
-                        className="page-link rounded-3 border-0 mx-1" 
+                        className="page-link rounded-3 border-0 mx-1 shadow-sm" 
                         style={{ 
-                          width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          background: currentPage === i + 1 ? '#10b981' : '#f1f5f9',
-                          color: currentPage === i + 1 ? '#fff' : '#1e293b'
+                          width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: currentPage === i + 1 ? '#10b981' : theme.tableHeader,
+                          color: currentPage === i + 1 ? '#fff' : theme.text
                         }} 
                         onClick={() => setCurrentPage(i + 1)}
                       >
@@ -261,18 +272,17 @@ const Employee = () => {
                     </li>
                   ))}
                   <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                    <button className="page-link rounded-3 border-0" style={{ background: '#f1f5f9', color: '#1e293b' }} onClick={() => setCurrentPage(currentPage + 1)}>
+                    <button className="page-link rounded-3 border-0 shadow-sm" style={{ background: theme.tableHeader, color: theme.text }} onClick={() => setCurrentPage(currentPage + 1)}>
                       <i className="bi bi-chevron-right"></i>
                     </button>
                   </li>
                 </ul>
               </nav>
             </div>
-
           </div>
         </main>
       </div>
-      <Footer />
+      <Footer darkMode={darkMode} />
     </div>
   );
 };

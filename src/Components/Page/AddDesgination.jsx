@@ -1,13 +1,26 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast"; // টোস্ট ইম্পোর্ট
+import toast, { Toaster } from "react-hot-toast";
 import Header from "./Header"; 
 import Menu from "./Menu"; 
 
-const AddDesgination = () => {
+const AddDesgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [name, setName] = useState("");
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // থিম ডাইনামিক কালারস
+  const theme = {
+    bg: darkMode ? '#0f172a' : '#f8f9fa',
+    cardBg: darkMode ? '#1e293b' : '#ffffff',
+    text: darkMode ? '#f8fafc' : '#2d3436',
+    labelText: darkMode ? '#94a3b8' : '#555',
+    border: darkMode ? '#334155' : '#eee',
+    inputBg: darkMode ? '#0f172a' : '#ffffff',
+    inputBorder: darkMode ? '#334155' : '#ced4da',
+    btnBackBg: darkMode ? '#1e293b' : '#fff',
+    btnBackText: darkMode ? '#f8fafc' : '#333'
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,25 +52,32 @@ const AddDesgination = () => {
 
   return (
     <>
-      {/* টোস্ট মেসেজ দেখার জন্য এটি প্রয়োজন */}
       <Toaster position="top-right" reverseOrder={false} />
 
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          width: '1890px',
-          height: '1024px',
+          width: '100%',
+          minHeight: '100vh',
           margin: "0 auto",
           boxSizing: "border-box",
-          backgroundColor: "#f8f9fa"
+          backgroundColor: theme.bg,
+          transition: "all 0.3s ease"
         }}
       >
-        <Header />
+        <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+        
         <div style={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
-          <Menu />
-          <main style={{ flexGrow: 1, padding: "40px", overflowY: "auto" }}>
-            <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+          
+          <main style={{ 
+            flexGrow: 1, 
+            padding: "20px", 
+            overflowY: "auto",
+            transition: "all 0.3s ease" 
+          }}>
+            <div style={{ maxWidth: "800px", margin: "0 auto", width: "100%" }}>
               
               {/* Back Button */}
               <div style={{ marginBottom: "25px" }}>
@@ -66,17 +86,17 @@ const AddDesgination = () => {
                     style={{
                       padding: "10px 20px",
                       fontSize: "15px",
-                      backgroundColor: "#fff",
-                      border: "1px solid #ddd",
+                      backgroundColor: theme.btnBackBg,
+                      border: `1px solid ${theme.border}`,
                       borderRadius: "8px",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                      color: "#333",
+                      boxShadow: darkMode ? "0 2px 4px rgba(0,0,0,0.2)" : "0 2px 4px rgba(0,0,0,0.05)",
+                      color: theme.btnBackText,
                       fontWeight: "600",
                       cursor: "pointer",
                       transition: "all 0.3s ease"
                     }}
-                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f1f1f1")}
-                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = darkMode ? "#334155" : "#f1f1f1")}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = theme.btnBackBg)}
                   >
                     ← Back to List
                   </button>
@@ -87,15 +107,21 @@ const AddDesgination = () => {
               <form 
                 onSubmit={handleSubmit}
                 style={{
-                  background: "#ffffff",
+                  background: theme.cardBg,
                   borderRadius: "16px",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                  padding: "40px",
-                  border: "1px solid #eee"
+                  boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 30px rgba(0,0,0,0.08)",
+                  padding: "clamp(20px, 5vw, 40px)",
+                  border: `1px solid ${theme.border}`,
+                  transition: "all 0.3s ease"
                 }}
               >
-                <div style={{ marginBottom: "30px", borderBottom: "2px solid #28a745", paddingBottom: "10px", display: "inline-block" }}>
-                    <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#2d3436", margin: 0 }}>
+                <div style={{ 
+                  marginBottom: "30px", 
+                  borderBottom: `2px solid ${darkMode ? '#22c55e' : '#28a745'}`, 
+                  paddingBottom: "10px", 
+                  display: "inline-block" 
+                }}>
+                    <h2 style={{ fontSize: "24px", fontWeight: "700", color: theme.text, margin: 0 }}>
                         Add New Designation
                     </h2>
                 </div>
@@ -103,7 +129,7 @@ const AddDesgination = () => {
                 <div className="mb-4">
                   <label 
                     htmlFor="name" 
-                    style={{ display: "block", marginBottom: "10px", fontWeight: "600", color: "#555", fontSize: "16px" }}
+                    style={{ display: "block", marginBottom: "10px", fontWeight: "600", color: theme.labelText, fontSize: "16px" }}
                   >
                     Designation Name
                   </label>
@@ -115,13 +141,16 @@ const AddDesgination = () => {
                       width: "100%",
                       padding: "14px 16px",
                       borderRadius: "10px",
-                      border: "1px solid #ced4da",
+                      border: `1px solid ${theme.inputBorder}`,
+                      background: theme.inputBg,
+                      color: theme.text,
                       fontSize: "16px",
                       outline: "none",
-                      transition: "border-color 0.3s ease"
+                      boxSizing: "border-box",
+                      transition: "all 0.3s ease"
                     }}
                     onFocus={(e) => (e.target.style.borderColor = "#28a745")}
-                    onBlur={(e) => (e.target.style.borderColor = "#ced4da")}
+                    onBlur={(e) => (e.target.style.borderColor = theme.inputBorder)}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -132,7 +161,8 @@ const AddDesgination = () => {
                   <button 
                     type="submit" 
                     style={{
-                      width: "160px",
+                      width: "100%",
+                      maxWidth: "160px",
                       padding: "14px",
                       backgroundColor: "#28a745",
                       color: "white",
