@@ -1,138 +1,150 @@
+import React, { useRef, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { IoMdTrendingUp } from "react-icons/io";
+import { BsCashStack, BsMortarboardFill, BsPeopleFill, BsPersonFill, BsCheck2Circle, BsGraphUpArrow, BsBuilding } from "react-icons/bs";
+import Chart from 'chart.js/auto';
 import Header from './Header';
 import Footer from './Footer';
 import Menu from './Menu';
 import '../../index.css';
-import { useRef, useEffect, useState } from 'react';
-import Chart from 'chart.js/auto';
-import {  Link } from 'react-router-dom'; // <-- Make sure this is imported
 
-// LiveTime component to show live clock
-const LiveTime = () => {
+// --- Chart Components ---
+const LineChart = ({ darkMode }) => {
+  const chartRef = useRef(null);
+  useEffect(() => {
+    const ctx = chartRef.current.getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [{
+          label: 'Revenue',
+          data: [4000, 5500, 5000, 7500, 9000, 8500, 11000],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#10b981',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { grid: { color: darkMode ? 'rgba(255,255,255,0.1)' : '#e2e8f0' }, ticks: { color: darkMode ? '#94a3b8' : '#64748b' } },
+          x: { grid: { display: false }, ticks: { color: darkMode ? '#94a3b8' : '#64748b' } }
+        }
+      }
+    });
+    return () => chart.destroy();
+  }, [darkMode]);
+  return <canvas ref={chartRef} />;
+};
+
+const BarChart = ({ darkMode }) => {
+  const chartRef = useRef(null);
+  useEffect(() => {
+    const ctx = chartRef.current.getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['HR', 'IT', 'Sales', 'Admin'],
+        datasets: [{
+          label: 'Staff',
+          data: [12, 19, 15, 8],
+          backgroundColor: ['#3b82f6', '#06b6d4', '#10b981', '#8b5cf6'],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: darkMode ? 'rgba(255,255,255,0.1)' : '#e2e8f0' }, ticks: { color: darkMode ? '#94a3b8' : '#64748b' } },
+          x: { grid: { display: false }, ticks: { color: darkMode ? '#94a3b8' : '#64748b' } }
+        }
+      }
+    });
+    return () => chart.destroy();
+  }, [darkMode]);
+  return <canvas ref={chartRef} />;
+};
+
+// --- Sub-components ---
+const LiveTime = ({ darkMode }) => {
   const [time, setTime] = useState(new Date());
-
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div style={{ fontSize: '1.25rem', fontWeight: '500', color: '#1fcf4eff' }}>
+    <div style={{ 
+      fontSize: '1rem', fontWeight: '700', 
+      color: '#10b981',
+      background: darkMode ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)',
+      padding: '8px 20px', borderRadius: '50px',
+      border: `1px solid ${darkMode ? '#334155' : '#e2e8f0'}`
+    }}>
       {time.toLocaleTimeString()}
     </div>
   );
 };
 
-// LineChart Component
-const LineChart = () => {
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
+const StatCard = ({ to, title, value, sub, icon: Icon, color, darkMode, gradient }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const cardStyle = {
+    background: darkMode ? 'rgba(30, 41, 59, 0.7)' : `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})`,
+    backdropFilter: 'blur(10px)',
+    border: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.5)',
+    borderRadius: '24px',
+    transition: 'all 0.4s ease',
+    transform: isHovered ? 'translateY(-10px)' : 'translateY(0)',
+    boxShadow: isHovered ? '0 15px 30px rgba(0,0,0,0.12)' : '0 4px 6px rgba(0,0,0,0.05)',
+  };
 
-  useEffect(() => {
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-    }
-
-    chartInstance.current = new Chart(chartRef.current, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [
-          {
-            label: 'Visitors',
-            data: [30, 45, 28, 60, 42, 75, 50, 90],
-            borderColor: '#0d6efd',
-            backgroundColor: 'rgba(13, 110, 253, 0.2)',
-            tension: 0.4, // smooth curve
-            fill: true,
-            pointBackgroundColor: '#0d6efd',
-          },
-          {
-            label: 'Sales',
-            data: [10, 25, 18, 40, 30, 55, 35, 70],
-            borderColor: '#e0a800',
-            backgroundColor: 'rgba(224, 168, 0, 0.2)',
-            tension: 0.4,
-            fill: true,
-            pointBackgroundColor: '#e0a800',
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'top' },
-        },
-        scales: {
-          y: { beginAtZero: true },
-        },
-      },
-    });
-  }, []);
-
-  return <canvas ref={chartRef} height={100} />;
+  return (
+    <div className="col-xl-3 col-md-6">
+      <Link to={to} className="text-decoration-none">
+        <div className="p-4 h-100" style={cardStyle} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+          <div className="d-flex justify-content-between">
+            <div className="rounded-4 d-flex align-items-center justify-content-center" style={{ width: '50px', height: '50px', backgroundColor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+              <Icon size={26} color={color} />
+            </div>
+            <div style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
+              <IoMdTrendingUp size={18} /> +12%
+            </div>
+          </div>
+          <div className="mt-4">
+            <h6 style={{ color: darkMode ? '#94a3b8' : '#64748b', fontWeight: '600' }}>{title}</h6>
+            <h2 style={{ color: darkMode ? '#f8fafc' : '#1e293b', fontWeight: '800', margin: '0' }}>{value}</h2>
+            <p className="mb-0 mt-1" style={{ fontSize: '0.85rem', color: darkMode ? '#64748b' : '#94a3b8' }}>{sub}</p>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
 };
 
-
-// BarChart Component
-const BarChart = () => {
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
-
-  useEffect(() => {
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-    }
-
-    chartInstance.current = new Chart(chartRef.current, {
-      type: 'bar',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [
-          {
-            label: '2020',
-            data: [20, 35, 30, 25, 40, 50, 30, 35],
-            backgroundColor: '#e0a800',
-          },
-          {
-            label: '2021',
-            data: [15, 25, 22, 30, 28, 45, 25, 40],
-            backgroundColor: '#0d6efd',
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
-  }, []);
-
-  return <canvas ref={chartRef} height={100} />;
-};
-
-// Home Component
-const Home = () => {
-  const [stats, setStats] = useState({
-    earning: 0,
-    departments: 0,
-    employees: 0,
-    users: 0,
-  });
+// --- Main Component ---
+const Home = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
+  const [stats, setStats] = useState({ earning: 0, departments: 0, employees: 0, users: 0, task: 0 });
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  const theme = {
+    bg: darkMode ? '#0f172a' : '#f8f9fa',
+    cardBg: darkMode ? '#1e293b' : '#ffffff',
+    text: darkMode ? '#f8fafc' : '#1e293b',
+    border: darkMode ? '#334155' : '#e2e8f0'
+  };
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/get-all-data`)
       .then((res) => res.json())
       .then((data) => {
-        console.log('Data', data); // now logs after fetch & JSON parsing
-
-        const totalEarning =
-          data.salary?.reduce((sum, item) => sum + parseFloat(item.basic), 0) || 0;
-
+        const totalEarning = data.salary?.reduce((sum, item) => sum + parseFloat(item.basic), 0) || 0;
         setStats({
           earning: totalEarning,
           departments: data.department?.length || 0,
@@ -141,232 +153,84 @@ const Home = () => {
           task: data.task?.length || 0,
         });
       })
-      .catch((err) => console.error('Error loading dashboard data:', err));
-  }, []);
+      .catch((err) => console.error(err));
+  }, [BASE_URL]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '1890px',
-        height: '1024px',
-        margin: '0 auto',
-        border: '1px solid #ccc',
-        boxSizing: 'border-box',
-      }}
-    >
-      <Header />
-      <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        <Menu />
-        <main
-          style={{
-            flexGrow: 1,
-            padding: '40px',
-            background: '#f0eee7',
-            overflowY: 'auto',
-          }}
-        >
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      width: '100%', 
+      minHeight: '100vh', 
+      background: theme.bg, 
+      color: theme.text, 
+      boxSizing: 'border-box',
+      transition: 'background 0.3s ease'
+    }}>
+      {/* Header receives darkMode and setDarkMode */}
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
-          {/* Top Stats Cards with links */}
-
-
-
-          <div className="p-4 rounded shadow-sm mb-3" style={{ backgroundColor: 'white' }}>
-
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">Dashboard</h2>
-              <div style={{ fontSize: '1.25rem', fontWeight: 500, color: '#333' }}>
-                <LiveTime />
-              </div>
+      <div style={{ display: 'flex', flexGrow: 1 }}>
+        {/* Menu receives expand state */}
+        <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+        
+        {/* Main Content Area: Margin and Width adjust based on Sidebar */}
+        <main style={{ 
+          flexGrow: 1, 
+          padding: '30px', 
+          marginLeft: isExpanded ? '0px' : '0px', // Managed by flexbox
+          transition: 'all 0.4s ease',
+          width: '100%',
+          overflowX: 'hidden'
+        }}>
+          
+          {/* Dashboard Title & Time */}
+          <div className="d-flex justify-content-between align-items-center mb-5 p-4 rounded-4 shadow-sm" 
+               style={{ background: theme.cardBg, border: `1px solid ${theme.border}` }}>
+            <div>
+              <h2 className="fw-bold m-0" style={{ color: theme.text }}>Dashboard</h2>
+              <p className="text-muted m-0" style={{ fontSize: '14px' }}>Welcome back to your management panel.</p>
             </div>
-
-            {/* Row of cards */}
-            <div className="row g-4">
-
-              {/* Salary */}
-              <div className="col-md-3">
-                <Link to="/admin-salary" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #d6e0ff, #f0f4ff)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-                        <i className="bi bi-cash-stack fs-4 text-primary"></i>
-
-                      </div>
-                      <div className="h4 text-dark mb-0">Salary</div>
-                    </div>
-                    <div className="h4 fw-bold text-dark">${stats.earning.toLocaleString()}</div>
-                    <small className="text-muted">All Salary</small>
-                  </div>
-                </Link>
-              </div>
-
-              {/* Departments */}
-              <div className="col-md-3">
-                <Link to="/admin-department" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #d0ebff, #f0f9ff)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-                        <i className="bi bi-mortarboard-fill fs-4 text-info"></i>
-                      </div>
-                      <div className="h4 text-dark">Departments</div>
-
-                    </div>
-
-                    <div className="h4 text-dark">{stats.departments}</div>
-                    <small className="text-muted">Registered Departments</small>
-                  </div>
-                </Link>
-              </div>
-
-              {/* Employees */}
-              <div className="col-md-3">
-                <Link to="/admin-employee" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #f3d9fa, #f8eaff)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-
-                        <i className="bi bi-people-fill fs-4 text-success"></i>
-                      </div>
-                      <div className="h4 text-dark">Employees</div>
-
-                    </div>
-
-                    <div className="h4 text-dark">{stats.employees}</div>
-                    <div className="fw-semibold text-dark">Total Employees</div>
-
-                  </div>
-                </Link>
-              </div>
-
-              {/* Users */}
-              <div className="col-md-3">
-                <Link to="/admin-users" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #ffe5d9, #fff4f0)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-                        <i className="bi bi-person-fill fs-4 text-purple"></i>
-                      </div>
-                      <div className="h4 text-dark">Users</div>
-
-                    </div>
-                    <div className="h4 text-dark">{stats.users}</div>
-                    <div className="fw-semibold text-dark">Total Users</div>
-
-                  </div>
-                </Link>
-              </div>
-
-              {/* Total ongoing Task */}
-              <div className="col-md-3">
-                <Link to="/admin-task" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #e9f7ef, #f4fff7)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-                        <i className="bi bi-check2-circle fs-4 text-success"></i>
-                      </div>
-                      <div className="fs-5 fw-bold text-dark">{stats.task || 0}</div>
-                    </div>
-                    <div className="fw-semibold text-dark">Tasks</div>
-                    <small className="text-muted">On Going Tasks</small>
-                  </div>
-                </Link>
-              </div>
-
-              {/* Total Leads */}
-              <div className="col-md-3">
-                <Link to="/leads" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #d3f9d8, #f0fff4)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-                        <i className="bi bi-people-fill fs-4 text-success"></i>
-                      </div>
-                      <div className="fs-5 fw-bold text-dark">{stats.leads || 0}</div>
-                    </div>
-                    <div className="fw-semibold text-dark">Total Leads</div>
-                    <small className="text-muted">All leads</small>
-                  </div>
-                </Link>
-              </div>
-
-              {/* New Leads */}
-              <div className="col-md-3">
-                <Link to="/recent-leads" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #f4fce3, #fdfff4)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-                        <i className="bi bi-graph-up-arrow fs-4 text-success"></i>
-                      </div>
-                      <div className="fs-5 fw-bold text-dark">{stats.newLeads || 0}</div>
-                    </div>
-                    <div className="fw-semibold text-dark">New Leads</div>
-                    <small className="text-muted">Recent leads</small>
-                  </div>
-                </Link>
-              </div>
-
-              {/* Branches */}
-              <div className="col-md-3">
-                <Link to="/branches" className="text-decoration-none">
-                  <div className="p-4 rounded shadow-sm" style={{ background: 'linear-gradient(135deg, #fff3bf, #fff9e6)' }}>
-                    <div className="d-flex align-items-center mb-3">
-                      <div className="bg-white rounded-circle shadow d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
-                        <i className="bi bi-building fs-4 text-warning"></i>
-                      </div>
-                      <div className="fs-5 fw-bold text-dark">{stats.branches || 0}</div>
-                    </div>
-                    <div className="fw-semibold text-dark">Total Branches</div>
-                    <small className="text-muted">All branches</small>
-                  </div>
-                </Link>
-              </div>
-
-              {/* Repeat for other cards... */}
-
+            <div className="d-flex align-items-center gap-3">
+              <LiveTime darkMode={darkMode} />
             </div>
           </div>
 
-
-
-
-
-          {/* Parallel Chart Section */}
+          {/* Stat Cards Grid - Row 1 */}
           <div className="row g-4 mb-4">
-            {/* Bar Chart */}
-            <div className="col-md-6">
-              <div className="bg-white border rounded p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="mb-0">Result</h5>
-                  <button className="btn btn-warning btn-sm">Check Now</button>
-                </div>
-                <div className="p-3 bg-light">
-                  <BarChart />
-                </div>
+            <StatCard darkMode={darkMode} to="/admin-salary" title="Total Earning" value={`$${stats.earning.toLocaleString()}`} sub="Monthly Revenue" icon={BsCashStack} color="#3b82f6" gradient={['#dbeafe', '#eff6ff']} />
+            <StatCard darkMode={darkMode} to="/admin-department" title="Departments" value={stats.departments} sub="Active Units" icon={BsMortarboardFill} color="#06b6d4" gradient={['#cffafe', '#ecfeff']} />
+            <StatCard darkMode={darkMode} to="/admin-employee" title="Employees" value={stats.employees} sub="Total Staff" icon={BsPeopleFill} color="#10b981" gradient={['#dcfce7', '#f0fdf4']} />
+            <StatCard darkMode={darkMode} to="/admin-users" title="System Users" value={stats.users} sub="Active Accounts" icon={BsPersonFill} color="#8b5cf6" gradient={['#ede9fe', '#f5f3ff']} />
+          </div>
+
+          {/* Stat Cards Grid - Row 2 */}
+          <div className="row g-4 mb-5">
+             <StatCard darkMode={darkMode} to="/admin-task" title="Ongoing Tasks" value={stats.task} sub="In Progress" icon={BsCheck2Circle} color="#f59e0b" gradient={['#fef3c7', '#fffbeb']} />
+             <StatCard darkMode={darkMode} to="/recent-leads" title="New Leads" value="24" sub="Last 24 Hours" icon={BsGraphUpArrow} color="#ec4899" gradient={['#fce7f3', '#fdf2f8']} />
+             <StatCard darkMode={darkMode} to="/branches" title="Branches" value="08" sub="Global Locations" icon={BsBuilding} color="#64748b" gradient={['#f1f5f9', '#f8fafc']} />
+             <StatCard darkMode={darkMode} to="/analytics" title="Performance" value="92%" sub="Efficiency Rate" icon={IoMdTrendingUp} color="#10b981" gradient={['#dcfce7', '#f0fdf4']} />
+          </div>
+
+          {/* Charts Row */}
+          <div className="row g-4 mb-4">
+            <div className="col-xl-7 col-lg-12">
+              <div className="p-4 rounded-4 shadow-sm" style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, height: '450px' }}>
+                <h5 className="fw-bold mb-4">Revenue Growth Analysis</h5>
+                <div style={{ height: '350px' }}><LineChart darkMode={darkMode} /></div>
               </div>
             </div>
-
-            {/* Line Chart + Calendar */}
-            <div className="col-md-6">
-              <div className="row g-4">
-                <div className="col-12">
-
-                  <div className="col-12">
-                    <div className="bg-white border rounded p-4" style={{ height: '350px' }}>
-                      <LineChart />
-                    </div>
-                  </div>
-                </div>
-
+            <div className="col-xl-5 col-lg-12">
+              <div className="p-4 rounded-4 shadow-sm" style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, height: '450px' }}>
+                <h5 className="fw-bold mb-4">Staff by Department</h5>
+                <div style={{ height: '350px' }}><BarChart darkMode={darkMode} /></div>
               </div>
             </div>
           </div>
-
-
 
         </main>
       </div>
-      <Footer />
+      <Footer darkMode={darkMode} />
     </div>
   );
 };

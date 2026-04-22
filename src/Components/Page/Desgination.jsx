@@ -3,255 +3,252 @@ import Header from './Header';
 import Menu from './Menu';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
-const Desgination = () => {
+const Desgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [role, setRole] = useState(null);  // <-- Add role state
+  const [role, setRole] = useState(null);
 
-  // Pagination
+  const [showModal, setShowModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
+  // Sidebar width logic
+  const sidebarWidth = isExpanded ? '260px' : '80px';
+
+  // Strict Theme Configuration
+  const theme = {
+    bg: darkMode ? '#0f172a' : '#f8f9fa',
+    cardBg: darkMode ? '#1e293b' : '#ffffff',
+    text: darkMode ? '#f8fafc' : '#1e293b',
+    border: darkMode ? '#334155' : '#e2e8f0',
+    tableHeader: darkMode ? '#0f172a' : '#f1f5f9',
+    inputBg: darkMode ? '#0f172a' : '#ffffff',
+    muted: darkMode ? '#94a3b8' : '#64748b'
+  };
+
   useEffect(() => {
-    // Read role on mount
-    const storedRole = localStorage.getItem('userRole');
-    setRole(storedRole);
+    setRole(localStorage.getItem('userRole'));
   }, []);
 
   useEffect(() => {
     const fetchEmployees = async () => {
       setLoading(true);
-      setError(null);
       try {
         let url = `${BASE_URL}/api/get-desi`;
         if (searchQuery.trim()) {
           url += `?search=${encodeURIComponent(searchQuery)}`;
         }
-
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch data');
-
         const result = await response.json();
         setEmployees(Array.isArray(result.data) ? result.data : []);
         setCurrentPage(1);
       } catch (error) {
-        setError(error.message);
         setEmployees([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchEmployees();
-  }, [searchQuery]);
+  }, [searchQuery, BASE_URL]);
 
-  const handleDelete = async (id) => {
-    if (role !== 'admin') {
-      alert('You are not authorized to delete designations.');
-      return;
-    }
-
+  const confirmDelete = async () => {
     const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert('You are not authorized. Please log in again.');
-      return;
-    }
-
-    if (window.confirm('Are you sure you want to delete this designation?')) {
-      try {
-        const response = await fetch(`${BASE_URL}/api/del-desi/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) throw new Error('Delete failed');
-        setEmployees((prev) => prev.filter((emp) => emp.id !== id));
-      } catch (error) {
-        alert('Delete failed: ' + error.message);
+    const loadingToast = toast.loading("Deleting...");
+    try {
+      const response = await fetch(`${BASE_URL}/api/del-desi/${deleteId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        setEmployees((prev) => prev.filter((emp) => emp.id !== deleteId));
+        toast.success("Deleted successfully!", { id: loadingToast });
       }
+    } catch (error) {
+      toast.error('Delete failed', { id: loadingToast });
+    } finally {
+      setShowModal(false);
     }
   };
 
-  const handleSearch = () => {
-    setSearchQuery(searchTerm.trim());
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSearch();
-  };
-
-  // Pagination logic
+  const currentEmployees = employees.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(employees.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handlePageClick = (pageNum) => {
-    setCurrentPage(pageNum);
-  };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '1890px',
-        height: '1024px',
-        margin: '0 auto',
-        border: '1px solid #ccc',
-        boxSizing: 'border-box',
-      }}
-    >
-      <Header />
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      width: '100%', 
+      minHeight: '100vh', 
+      background: theme.bg, 
+      color: theme.text,
+      transition: 'all 0.3s ease' 
+    }}>
+      <Toaster position="top-right" />
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+      
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        <Menu />
-        <main
-          style={{
-            flexGrow: 1,
-            padding: '40px',
-            background: '#f0eee7',
-            overflowY: 'auto',
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: '16px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              padding: '30px',
-              position: 'relative',
-              minHeight: '90vh',
-              paddingBottom: '100px',
-            }}
-          >
-            {/* Top Search & Add Bar */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search name"
-                value={searchTerm}
-                style={{ width: '78%' }}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-              <button className="btn btn-primary ms-2" onClick={handleSearch}>
-                <i className="bi bi-search me-1"></i> Search
-              </button>
-
-              {/* Show Add Designation button only if admin */}
-              {role === 'admin' && (
-                <Link to="/admin-add-desgination" className="ms-2">
-                  <button className="btn btn-success">Add Designation</button>
-                </Link>
-              )}
+        <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+        
+        <main style={{ 
+          flexGrow: 1, 
+          padding: '25px', 
+          width: `calc(100% - ${sidebarWidth})`,
+          transition: 'all 0.3s ease',
+          overflowY: 'auto'
+        }}>
+          <div style={{ 
+            background: theme.cardBg, 
+            borderRadius: '20px', 
+            padding: '30px', 
+            border: `1px solid ${theme.border}`,
+            boxShadow: darkMode ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.05)',
+            minHeight: '80vh'
+          }}>
+            
+            {/* Action Bar */}
+            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+              <div className="d-flex" style={{ maxWidth: '450px', flexGrow: 1 }}>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search designation..."
+                  style={{ 
+                    borderRadius: '12px 0 0 12px', 
+                    background: theme.inputBg, 
+                    color: theme.text, 
+                    border: `1px solid ${theme.border}`,
+                    padding: '12px'
+                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button 
+                  className="btn btn-primary px-4" 
+                  style={{ borderRadius: '0 12px 12px 0' }}
+                  onClick={() => setSearchQuery(searchTerm)}
+                >
+                  <i className="bi bi-search"></i>
+                </button>
+              </div>
+              <Link to="/admin-add-desgination">
+                <button className="btn btn-success px-4 py-2" style={{ borderRadius: '12px', fontWeight: '700' }}>
+                  <i className="bi bi-plus-lg me-2"></i> Add New
+                </button>
+              </Link>
             </div>
 
-            {/* Table */}
+            {/* Table Area */}
             {loading ? (
-              <div className="text-center my-4">Loading...</div>
-            ) : error ? (
-              <div className="text-danger">Error: {error}</div>
+              <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>
             ) : (
-              <>
-                <div className="table-responsive">
-                  <table className="table table-bordered table-striped">
-                    <thead className="table-dark">
-                      <tr>
-                        <th className="text-center h6">Designation</th>
-                        <th className="text-center h6">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentEmployees.length > 0 ? (
-                        currentEmployees.map((employee) => (
-                          <tr key={employee.id}>
-                            <td className="text-center h6">{employee.name}</td>
-                            <td className="text-center">
-                              <div className="d-flex justify-content-center">
-                                {/* Show Delete button only if admin */}
-                                {role === 'admin' && (
-                                  <button
-                                    className="btn btn-danger btn-sm d-flex align-items-center"
-                                    onClick={() => handleDelete(employee.id)}
-                                  >
-                                    <i className="bi bi-trash me-1"></i> Delete
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="2" className="text-center">
-                            No designations found.
+              <div className="table-responsive" style={{ borderRadius: '15px' }}>
+                <table className="table" style={{ color: theme.text, marginBottom: 0 }}>
+                  <thead>
+                    <tr style={{ background: theme.tableHeader }}>
+                      <th style={{ 
+                        padding: '20px', 
+                        color: theme.text, 
+                        borderBottom: `2px solid ${theme.border}`,
+                        background: 'transparent' // Force transparent to show header bg
+                      }}>Designation Name</th>
+                      <th className="text-center" style={{ 
+                        padding: '20px', 
+                        color: theme.text, 
+                        borderBottom: `2px solid ${theme.border}`,
+                        background: 'transparent'
+                      }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentEmployees.length > 0 ? (
+                      currentEmployees.map((item) => (
+                        <tr key={item.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
+                          <td style={{ 
+                            padding: '15px 20px', 
+                            color: theme.text, 
+                            background: 'transparent',
+                            verticalAlign: 'middle'
+                          }}>{item.name}</td>
+                          <td className="text-center" style={{ padding: '15px 20px', background: 'transparent' }}>
+                           
+                              <button 
+                                className="btn btn-outline-danger btn-sm"
+                                style={{ borderRadius: '8px', padding: '5px 15px' }}
+                                onClick={() => { setDeleteId(item.id); setShowModal(true); }}
+                              >
+                                <i className="bi bi-trash3 me-1"></i> Delete
+                              </button>
+                           
                           </td>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="2" className="text-center py-5" style={{ color: theme.muted, background: 'transparent' }}>
+                          No designations found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-                {/* Pagination - Fixed Bottom Center */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '30px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                  }}
-                >
-                  <nav>
-                    <ul className="pagination mb-0">
-                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={handlePrevPage}>
-                          <i className="bi bi-chevron-left"></i>
-                        </button>
-                      </li>
-
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <li
-                          key={i + 1}
-                          className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
-                        >
-                          <button className="page-link" onClick={() => handlePageClick(i + 1)}>
-                            {i + 1}
-                          </button>
-                        </li>
-                      ))}
-
-                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={handleNextPage}>
-                          <i className="bi bi-chevron-right"></i>
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
-              </>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center mt-5 gap-2">
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button 
+                    key={i+1}
+                    className={`btn ${currentPage === i+1 ? 'btn-primary' : ''}`}
+                    style={{ 
+                      borderRadius: '10px', 
+                      background: currentPage === i+1 ? '#059669' : theme.inputBg,
+                      color: currentPage === i+1 ? '#fff' : theme.text,
+                      border: `1px solid ${theme.border}`,
+                      minWidth: '40px'
+                    }}
+                    onClick={() => setCurrentPage(i+1)}
+                  >
+                    {i+1}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         </main>
       </div>
-      <Footer />
+
+      <Footer darkMode={darkMode} />
+
+      {/* Delete Modal */}
+      {showModal && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', 
+          display: 'flex', justifyContent: 'center', alignItems: 'center', 
+          zIndex: 9999, backdropFilter: 'blur(4px)' 
+        }}>
+          <div style={{ 
+            background: theme.cardBg, padding: '30px', borderRadius: '20px', 
+            width: '350px', textAlign: 'center', border: `1px solid ${theme.border}`, 
+            color: theme.text 
+          }}>
+            <i className="bi bi-exclamation-octagon text-danger" style={{ fontSize: '3rem' }}></i>
+            <h4 className="mt-3 fw-bold">Are you sure?</h4>
+            <p style={{ color: theme.muted }}>This action cannot be undone.</p>
+            <div className="d-flex gap-3 mt-4">
+              <button className="btn btn-light w-100" style={{ borderRadius: '10px' }} onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="btn btn-danger w-100" style={{ borderRadius: '10px' }} onClick={confirmDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

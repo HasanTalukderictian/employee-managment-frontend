@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast'; 
 import Header from './Header';
 import Menu from './Menu';
 import Footer from './Footer';
 
-const Leave = () => {
+const Leave = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [showModal, setShowModal] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
 
@@ -21,24 +22,32 @@ const Leave = () => {
   const [reason, setReason] = useState('');
 
   const userId = localStorage.getItem('employeeId');
-
-  const [leaveRequests, setLeaveRequests] = useState([]); // admin OR user requests
+  const [leaveRequests, setLeaveRequests] = useState([]); 
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // Theme configuration
+  const theme = {
+    bg: darkMode ? '#0f172a' : '#f4f7f6',
+    cardBg: darkMode ? '#1e293b' : '#ffffff',
+    text: darkMode ? '#f8fafc' : '#2c3e50',
+    border: darkMode ? '#334155' : '#eee',
+    tableHeaderBg: darkMode ? '#334155' : '#f8f9fa',
+    muted: darkMode ? '#94a3b8' : '#666',
+    inputBg: darkMode ? '#1e293b' : '#ffffff',
+  };
 
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
     setRole(storedRole);
   }, []);
 
-  // Fetch employees & leave balances on mount
+  // Fetch employees & leave balances
   useEffect(() => {
     fetch(`${BASE_URL}/api/get-emplyee`)
       .then((res) => res.json())
       .then((data) => {
-        if (data && Array.isArray(data.data)) {
-          setEmployees(data.data);
-        }
+        if (data && Array.isArray(data.data)) setEmployees(data.data);
       })
       .catch((err) => console.error('Error fetching employees:', err));
 
@@ -51,29 +60,20 @@ const Leave = () => {
       .catch((err) => console.error('Error fetching leave balances:', err));
   }, []);
 
-  // Fetch leave requests (admin or user)
+  // Fetch leave requests
   useEffect(() => {
-    if (role === 'admin') {
-      fetch(`${BASE_URL}/api/get-apply-leave`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && Array.isArray(data)) setLeaveRequests(data);
-          else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
-        })
-        .catch((err) => console.error('Error fetching leave requests:', err));
-    } else {
-      // For regular users: fetch only their own leave requests
-      fetch(`${BASE_URL}/api/my-leaves`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && Array.isArray(data)) setLeaveRequests(data);
-          else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
-        })
-        .catch((err) => console.error('Error fetching user leave requests:', err));
-    }
+    if (!role) return;
+    const endpoint = role === 'admin' ? `${BASE_URL}/api/get-apply-leave` : `${BASE_URL}/api/my-leaves`;
+    
+    fetch(endpoint)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data)) setLeaveRequests(data);
+        else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
+      })
+      .catch((err) => console.error('Error fetching leave requests:', err));
   }, [role]);
 
-  // Approve Leave Request
   const handleApprove = (id) => {
     fetch(`${BASE_URL}/api/leave-requests/${id}/approve`, {
       method: 'POST',
@@ -82,10 +82,11 @@ const Leave = () => {
       .then((res) => res.json())
       .then(() => {
         setLeaveRequests((prev) => prev.filter((req) => req.id !== id));
-      });
+        toast.success('Leave Approved Successfully');
+      })
+      .catch(() => toast.error('Approval Failed'));
   };
 
-  // Reject Leave Request
   const handleReject = (id) => {
     fetch(`${BASE_URL}/api/leave-requests/${id}/reject`, {
       method: 'POST',
@@ -94,10 +95,11 @@ const Leave = () => {
       .then((res) => res.json())
       .then(() => {
         setLeaveRequests((prev) => prev.filter((req) => req.id !== id));
-      });
+        toast.error('Leave Request Rejected');
+      })
+      .catch(() => toast.error('Rejection Failed'));
   };
 
-  // Handle Add Leave (Admin)
   const handleSubmit = (e) => {
     e.preventDefault();
     fetch(`${BASE_URL}/api/add-leaves`, {
@@ -107,36 +109,26 @@ const Leave = () => {
     })
       .then((res) => res.json())
       .then(() => {
-        fetch('${BASE_URL}/api/get-leaves')
-          .then((res) => res.json())
-          .then((data) => {
+        toast.success('Leave Balance Added');
+        fetch(`${BASE_URL}/api/get-leaves`).then(res => res.json()).then(data => {
             if (data && Array.isArray(data)) setLeaveBalances(data);
             else if (data && Array.isArray(data.data)) setLeaveBalances(data.data);
-          });
+        });
         setShowModal(false);
         setSelectedEmployee('');
         setTotalLeave('');
       })
-      .catch((err) => console.error('Error saving leave balance:', err));
+      .catch(() => toast.error('Failed to save leave balance'));
   };
 
-  // Handle Apply Leave (User)
   const handleApplySubmit = (e) => {
     e.preventDefault();
-
     if (!userId) {
-      console.error("Employee ID is missing!");
-      alert("Your session is missing employee ID. Please login again.");
+      toast.error("Employee ID is missing! Please login again.");
       return;
     }
 
-    const applyData = {
-      employee_id: userId, // must be valid
-      leave_type: leaveType,
-      start_date: startDate,
-      end_date: endDate,
-      reason,
-    };
+    const applyData = { employee_id: userId, leave_type: leaveType, start_date: startDate, end_date: endDate, reason };
 
     fetch(`${BASE_URL}/api/apply-leave`, {
       method: 'POST',
@@ -145,198 +137,227 @@ const Leave = () => {
     })
       .then((res) => res.json())
       .then(() => {
+        toast.success('Leave Applied Successfully!');
         setShowApplyModal(false);
-        setLeaveType('');
-        setStartDate('');
-        setEndDate('');
-        setReason('');
-        // Refresh user leave requests
-        // Fetch only current user's leaves
-        
-        if (userId) {
-          fetch(`${BASE_URL}/api/my-leaves?employee_id=${userId}`)
-            .then((res) => res.json())
-            .then((data) => {
-              if (data && Array.isArray(data)) setLeaveRequests(data);
-              else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
-            })
-            .catch((err) => console.error('Error fetching user leave requests:', err));
-        } else {
-          console.error('No employeeId found in localStorage');
-        }
-
-
+        setLeaveType(''); setStartDate(''); setEndDate(''); setReason('');
+        fetch(`${BASE_URL}/api/my-leaves?employee_id=${userId}`).then(res => res.json()).then(data => {
+            if (data && Array.isArray(data)) setLeaveRequests(data);
+            else if (data && Array.isArray(data.data)) setLeaveRequests(data.data);
+        });
       })
-      .catch((err) => console.error('Error applying leave:', err));
+      .catch(() => toast.error('Error applying for leave'));
   };
 
+  const getStatusBadge = (status) => {
+    const colors = {
+      pending: '#f39c12',
+      approved: '#2ecc71',
+      rejected: '#e74c3c'
+    };
+    return (
+      <span style={{ 
+        backgroundColor: colors[status.toLowerCase()] || '#95a5a6', 
+        color: '#fff', padding: '5px 12px', borderRadius: '20px', 
+        fontSize: '12px', fontWeight: 'bold', textTransform: 'capitalize' 
+      }}>
+        {status}
+      </span>
+    );
+  };
+
+  // Reusable Table Component for clean UI
+  const TableHeader = ({ children }) => (
+    <thead style={{ backgroundColor: theme.tableHeaderBg }}>
+      <tr>{children}</tr>
+    </thead>
+  );
+
+  const TableCell = ({ children, isBold, color, align = 'center' }) => (
+    <td style={{ 
+      padding: '15px', 
+      textAlign: align, 
+      color: color || theme.text, 
+      fontWeight: isBold ? 'bold' : 'normal',
+      borderBottom: `1px solid ${theme.border}`,
+      backgroundColor: 'transparent' // Force transparent
+    }}>
+      {children}
+    </td>
+  );
+
+  const TableHeadCell = ({ children }) => (
+    <th style={{ 
+      padding: '15px', 
+      textAlign: 'center', 
+      color: theme.text, 
+      borderBottom: `1px solid ${theme.border}`,
+      backgroundColor: 'transparent',
+      fontWeight: '700'
+    }}>
+      {children}
+    </th>
+  );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '1890px', margin: '0 auto', border: '1px solid #ccc', boxSizing: 'border-box' }}>
-      <Header />
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', backgroundColor: theme.bg, transition: '0.3s ease' }}>
+      <Toaster position="top-right" reverseOrder={false} />
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        <Menu />
-        <main style={{ flexGrow: 1, padding: '40px', background: '#f0eee7', overflowY: 'auto' }}>
-          <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', padding: '30px', position: 'relative', minHeight: '90vh', paddingBottom: '100px' }}>
-            {/* Header Row */}
-            <div style={{ position: 'relative', marginBottom: '20px' }}>
-              <h1 className="text-center mb-0" style={{ fontWeight: 'bold' }}>Leave Management</h1>
-              <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '10px' }}>
-                {role === 'admin' ? (
-                  <button className="btn btn-success" onClick={() => setShowModal(true)}>Add Leave</button>
-                ) : (
-                  <button className="btn btn-primary" onClick={() => setShowApplyModal(true)}>Apply</button>
-                )}
-              </div>
+        <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+        <main style={{ flexGrow: 1, padding: '30px', overflowY: 'auto' }}>
+          <div style={{ 
+            background: theme.cardBg, 
+            borderRadius: '20px', 
+            boxShadow: darkMode ? '0 10px 30px rgba(0,0,0,0.4)' : '0 10px 30px rgba(0,0,0,0.05)', 
+            padding: '35px', 
+            border: `1px solid ${theme.border}`,
+            color: theme.text 
+          }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+              <h2 style={{ fontWeight: '800', margin: 0 }}>Leave Management</h2>
+              {role === 'admin' ? (
+                <button className="btn" style={{ backgroundColor: '#27ae60', color: '#fff', borderRadius: '8px', padding: '10px 25px', fontWeight: 'bold' }} onClick={() => setShowModal(true)}>+ Add Leave Balance</button>
+              ) : (
+                <button className="btn" style={{ backgroundColor: '#3498db', color: '#fff', borderRadius: '8px', padding: '10px 25px', fontWeight: 'bold' }} onClick={() => setShowApplyModal(true)}>Apply for Leave</button>
+              )}
             </div>
 
-            {/* Leave Balance Table */}
-            <div className="table-responsive">
-              <table className="table table-bordered table-striped">
-                <thead className="table-dark">
-                  <tr>
-                    <th className="text-center h6">Name</th>
-                    <th className="text-center h6">Total Leave</th>
-                    <th className="text-center h6">Taken Leave</th>
-                    <th className="text-center h6">Remaining</th>
-                    <th className="text-center h6">Request</th>
-                  </tr>
-                </thead>
+            {/* Balances */}
+            <div className="section-title mb-3" style={{ borderLeft: `5px solid ${darkMode ? '#3498db' : '#2c3e50'}`, paddingLeft: '15px' }}>
+                <h5 style={{ margin: 0, fontWeight: '700' }}>Leave Balances</h5>
+            </div>
+            <div className="table-responsive mb-5" style={{ borderRadius: '12px', border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'transparent' }}>
+                <TableHeader>
+                  <TableHeadCell>Employee Name</TableHeadCell>
+                  <TableHeadCell>Total Allotted</TableHeadCell>
+                  <TableHeadCell>Taken</TableHeadCell>
+                  <TableHeadCell>Remaining</TableHeadCell>
+                </TableHeader>
                 <tbody>
                   {leaveBalances.map((leave) => (
                     <tr key={`${leave.employee_id}-${leave.created_at}`}>
-                      <td className="text-center">{leave.employee.first_name} {leave.employee.last_name}</td>
-                      <td className="text-center">{leave.total_leave}</td>
-                      <td className="text-center">{leave.taken_leave}</td>
-                      <td className="text-center">{leave.remaining_leave}</td>
-                      <td className="text-center"></td>
+                      <TableCell isBold>{leave.employee?.first_name} {leave.employee?.last_name}</TableCell>
+                      <TableCell>{leave.total_leave}</TableCell>
+                      <TableCell color="#e74c3c">{leave.taken_leave}</TableCell>
+                      <TableCell color="#2ecc71" isBold>{leave.remaining_leave}</TableCell>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            {/* Leave Requests Table (Admin or User) */}
-            <div className="mt-5">
-              <h3>{role === 'admin' ? 'User Leave Requests' : 'My Leave Requests'}</h3>
-              <div className="table-responsive">
-                <table className="table table-bordered table-striped">
-                  <thead className="table-dark">
-                    <tr>
-                      {role === 'admin' && <th className="text-center h6">Employee</th>}
-                      <th className="text-center h6">Leave Type</th>
-                      <th className="text-center h6">Start Date</th>
-                      <th className="text-center h6">End Date</th>
-                      <th className="text-center h6">Reason</th>
-                      <th className="text-center h6">Status</th>
-                      {role === 'admin' && <th className="text-center h6">Actions</th>}
+            {/* Requests */}
+            <div className="section-title mb-3" style={{ borderLeft: '5px solid #3498db', paddingLeft: '15px' }}>
+                <h5 style={{ margin: 0, fontWeight: '700' }}>{role === 'admin' ? 'Recent User Requests' : 'My Leave History'}</h5>
+            </div>
+            <div className="table-responsive" style={{ borderRadius: '12px', border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'transparent' }}>
+                <TableHeader>
+                  {role === 'admin' && <TableHeadCell>Employee</TableHeadCell>}
+                  <TableHeadCell>Type</TableHeadCell>
+                  <TableHeadCell>Start Date</TableHeadCell>
+                  <TableHeadCell>End Date</TableHeadCell>
+                  <TableHeadCell>Reason</TableHeadCell>
+                  <TableHeadCell>Status</TableHeadCell>
+                  {role === 'admin' && <TableHeadCell>Actions</TableHeadCell>}
+                </TableHeader>
+                <tbody>
+                  {leaveRequests.length > 0 ? leaveRequests.map((req) => (
+                    <tr key={req.id}>
+                      {role === 'admin' && <TableCell isBold>{req.employee?.first_name} {req.employee?.last_name}</TableCell>}
+                      <TableCell>{req.leave_type}</TableCell>
+                      <TableCell>{req.start_date}</TableCell>
+                      <TableCell>{req.end_date}</TableCell>
+                      <TableCell align="center">
+                        <div style={{ maxWidth: '200px', fontSize: '13px', color: theme.muted, margin: '0 auto' }}>{req.reason}</div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(req.status)}</TableCell>
+                      {role === 'admin' && (
+                        <TableCell>
+                          {req.status === 'pending' ? (
+                            <div className="btn-group">
+                              <button className="btn btn-success btn-sm me-1" onClick={() => handleApprove(req.id)}>Approve</button>
+                              <button className="btn btn-danger btn-sm" onClick={() => handleReject(req.id)}>Reject</button>
+                            </div>
+                          ) : (
+                            <span style={{ color: theme.muted, fontSize: '12px' }}>Processed</span>
+                          )}
+                        </TableCell>
+                      )}
                     </tr>
-                  </thead>
-                  <tbody>
-                    {leaveRequests.length > 0 ? leaveRequests.map((req) => (
-                      <tr key={req.id}>
-                        {role === 'admin' && <td className="text-center">{req.employee?.first_name} {req.employee?.last_name}</td>}
-                        <td className="text-center">{req.leave_type}</td>
-                        <td className="text-center">{req.start_date}</td>
-                        <td className="text-center">{req.end_date}</td>
-                        <td className="text-center">{req.reason}</td>
-                        <td className="text-center">{req.status}</td>
-                        {role === 'admin' && (
-                          <td className="text-center">
-                            {req.status === 'pending' && (
-                              <>
-                                <button className="btn btn-success btn-sm me-2" onClick={() => handleApprove(req.id)}>Approve</button>
-                                <button className="btn btn-danger btn-sm" onClick={() => handleReject(req.id)}>Reject</button>
-                              </>
-                            )}
-                          </td>
-                        )}
-                      </tr>
-                    )) : (
-                      <tr>
-                        <td colSpan={role === 'admin' ? "7" : "5"} className="text-center">No leave requests found</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                  )) : (
+                    <tr><TableCell colSpan="10" color={theme.muted}>No requests found</TableCell></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
           </div>
         </main>
       </div>
-      <Footer />
+      <Footer darkMode={darkMode} />
 
-      {/* Admin Add Leave Modal */}
+      {/* Modals are kept with same theme fix */}
       {showModal && (
-        <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add Leave</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ background: theme.cardBg, color: theme.text, border: `1px solid ${theme.border}` }}>
+              <div className="modal-header" style={{ borderBottom: `1px solid ${theme.border}` }}>
+                <h5 className="modal-title fw-bold">Update Balance</h5>
+                <button type="button" className="btn-close" style={{ filter: darkMode ? 'invert(1)' : 'none' }} onClick={() => setShowModal(false)}></button>
               </div>
-              <div className="modal-body">
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label className="form-label">Employee Name</label>
-                    <select className="form-select" value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)} required>
-                      <option value="">Select Employee</option>
-                      {employees.map((emp) => <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>)}
+              <form onSubmit={handleSubmit}>
+                <div className="modal-body p-4">
+                    <label className="fw-bold mb-1">Select Employee</label>
+                    <select className="form-select mb-3" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)} required>
+                      <option value="" style={{ background: theme.cardBg }}>Select One</option>
+                      {employees.map((emp) => <option key={emp.id} value={emp.id} style={{ background: theme.cardBg }}>{emp.first_name} {emp.last_name}</option>)}
                     </select>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Total Leave</label>
-                    <input type="number" className="form-control" value={totalLeave} onChange={(e) => setTotalLeave(e.target.value)} required />
-                  </div>
-                  <div className="text-end">
-                    <button type="button" className="btn btn-secondary me-2" onClick={() => setShowModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save</button>
-                  </div>
-                </form>
-              </div>
+                    <label className="fw-bold mb-1">Total Days</label>
+                    <input type="number" className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={totalLeave} onChange={(e) => setTotalLeave(e.target.value)} required />
+                </div>
+                <div className="modal-footer border-0">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       )}
 
-      {/* User Apply Leave Modal */}
       {showApplyModal && (
-        <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Apply for Leave</h5>
-                <button type="button" className="btn-close" onClick={() => setShowApplyModal(false)}></button>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ background: theme.cardBg, color: theme.text, border: `1px solid ${theme.border}` }}>
+              <div className="modal-header" style={{ borderBottom: `1px solid ${theme.border}` }}>
+                <h5 className="modal-title fw-bold">Apply Leave</h5>
+                <button type="button" className="btn-close" style={{ filter: darkMode ? 'invert(1)' : 'none' }} onClick={() => setShowApplyModal(false)}></button>
               </div>
-              <div className="modal-body">
-                <form onSubmit={handleApplySubmit}>
-                  <div className="mb-3">
-                    <label className="form-label">Leave Type</label>
-                    <select className="form-select" value={leaveType} onChange={(e) => setLeaveType(e.target.value)} required>
-                      <option value="">Select Leave Type</option>
-                      <option value="Paid">Casual Leave</option>
-                      <option value="Unpaid">Sick Leave</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Start Date</label>
-                    <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">End Date</label>
-                    <input type="date" className="form-control" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Reason</label>
-                    <textarea className="form-control" value={reason} onChange={(e) => setReason(e.target.value)} rows="3" required></textarea>
-                  </div>
-                  <div className="text-end">
-                    <button type="button" className="btn btn-secondary me-2" onClick={() => setShowApplyModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Submit</button>
-                  </div>
-                </form>
-              </div>
+              <form onSubmit={handleApplySubmit}>
+                <div className="modal-body p-4">
+                    <div className="mb-3">
+                        <label className="fw-bold">Type</label>
+                        <select className="form-select" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={leaveType} onChange={(e) => setLeaveType(e.target.value)} required>
+                          <option value="" style={{ background: theme.cardBg }}>Select Category</option>
+                          <option value="Paid" style={{ background: theme.cardBg }}>Casual Leave</option>
+                          <option value="Unpaid" style={{ background: theme.cardBg }}>Sick Leave</option>
+                        </select>
+                    </div>
+                    <div className="row mb-3">
+                        <div className="col"><label className="fw-bold">From</label><input type="date" className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={startDate} onChange={(e) => setStartDate(e.target.value)} required /></div>
+                        <div className="col"><label className="fw-bold">To</label><input type="date" className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={endDate} onChange={(e) => setEndDate(e.target.value)} required /></div>
+                    </div>
+                    <label className="fw-bold">Reason</label>
+                    <textarea className="form-control" style={{ background: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }} value={reason} onChange={(e) => setReason(e.target.value)} rows="3" required></textarea>
+                </div>
+                <div className="modal-footer border-0">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowApplyModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary px-4">Submit</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
