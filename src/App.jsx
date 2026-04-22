@@ -51,7 +51,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<AdminLogin />} />
+        <Route path='/' element={<UserLogin />} />
         <Route path='/login' element={<UserLogin />} />
 
         {/* সব রাউটে commonProps পাস করা হয়েছে */}

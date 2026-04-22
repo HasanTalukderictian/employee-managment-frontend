@@ -39,7 +39,7 @@ const Employee = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     setLoading(true);
     setError(null);
     try {
-      let url = `${BASE_URL}/api/get-emplyee`;
+      let url = `${BASE_URL}/api/get-employee`;
       if (searchQuery.trim()) {
         url += `?search=${encodeURIComponent(searchQuery)}`;
       }
