@@ -176,7 +176,7 @@ const Desgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                             verticalAlign: 'middle'
                           }}>{item.name}</td>
                           <td className="text-center" style={{ padding: '15px 20px', background: 'transparent' }}>
-                            {role === 'admin' && (
+                           
                               <button 
                                 className="btn btn-outline-danger btn-sm"
                                 style={{ borderRadius: '8px', padding: '5px 15px' }}
@@ -184,7 +184,7 @@ const Desgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                               >
                                 <i className="bi bi-trash3 me-1"></i> Delete
                               </button>
-                            )}
+                           
                           </td>
                         </tr>
                       ))

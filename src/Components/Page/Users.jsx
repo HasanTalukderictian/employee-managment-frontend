@@ -62,10 +62,10 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
   // Table Cell Component to ensure visibility
   const TableCell = ({ children, isBold, color, align = "left", ps }) => (
-    <td style={{ 
-      padding: "20px", 
-      textAlign: align, 
-      color: color || theme.text, 
+    <td style={{
+      padding: "20px",
+      textAlign: align,
+      color: color || theme.text,
       fontWeight: isBold ? "bold" : "normal",
       borderBottom: `1px solid ${theme.border}`,
       backgroundColor: "transparent",
@@ -79,21 +79,21 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     <div style={{ display: "flex", flexDirection: "column", width: "100%", minHeight: "100vh", backgroundColor: theme.bg, transition: "0.3s" }}>
       <Toaster position="top-right" />
       <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-      
+
       <div style={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
         <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
-        
+
         <main style={{ flexGrow: 1, padding: "30px", overflowY: "auto" }}>
-          <div style={{ 
-            background: theme.cardBg, 
-            borderRadius: "20px", 
-            boxShadow: darkMode ? "0 10px 40px rgba(0,0,0,0.3)" : "0 10px 40px rgba(0,0,0,0.05)", 
-            padding: "40px", 
+          <div style={{
+            background: theme.cardBg,
+            borderRadius: "20px",
+            boxShadow: darkMode ? "0 10px 40px rgba(0,0,0,0.3)" : "0 10px 40px rgba(0,0,0,0.05)",
+            padding: "40px",
             minHeight: "85vh",
             border: `1px solid ${theme.border}`,
             color: theme.text
           }}>
-            
+
             {/* Top Action Bar */}
             <div className="row align-items-center mb-5">
               <div className="col-md-8">
@@ -133,6 +133,9 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                         <th style={{ padding: "15px 20px", color: theme.text, textAlign: "left", borderBottom: `2px solid ${theme.border}` }}>EMPLOYEE</th>
                         <th style={{ padding: "15px 20px", color: theme.text, textAlign: "center", borderBottom: `2px solid ${theme.border}` }}>DESIGNATION</th>
                         <th style={{ padding: "15px 20px", color: theme.text, textAlign: "center", borderBottom: `2px solid ${theme.border}` }}>EMAIL</th>
+                        <th style={{ padding: "15px 20px", textAlign: "center", borderBottom: `2px solid ${theme.border}` }}>
+                          ROLE
+                        </th>
                         <th style={{ padding: "15px 20px", color: theme.text, textAlign: "right", borderBottom: `2px solid ${theme.border}` }}>ACTION</th>
                       </tr>
                     </thead>
@@ -143,10 +146,10 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                             {user.employee ? `${user.employee.first_name} ${user.employee.last_name}` : "N/A"}
                           </TableCell>
                           <TableCell align="center">
-                            <span style={{ 
-                              backgroundColor: darkMode ? "#334155" : "#eef2ff", 
-                              color: darkMode ? "#818cf8" : "#4f46e5", 
-                              padding: "6px 12px", 
+                            <span style={{
+                              backgroundColor: darkMode ? "#334155" : "#eef2ff",
+                              color: darkMode ? "#818cf8" : "#4f46e5",
+                              padding: "6px 12px",
                               borderRadius: "8px",
                               fontSize: "13px",
                               fontWeight: "600"
@@ -155,13 +158,27 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                             </span>
                           </TableCell>
                           <TableCell align="center" color={theme.muted}>{user.email}</TableCell>
+
+                          <TableCell align="center">
+                            <span style={{
+                              backgroundColor: user.role === "admin" ? "#fee2e2" : "#e0f2fe",
+                              color: user.role === "admin" ? "#dc2626" : "#0369a1",
+                              padding: "6px 12px",
+                              borderRadius: "8px",
+                              fontSize: "13px",
+                              fontWeight: "600",
+                              textTransform: "capitalize"
+                            }}>
+                              {user.role}
+                            </span>
+                          </TableCell>
                           <TableCell align="right">
-                            <button 
-                              className="btn btn-sm" 
+                            <button
+                              className="btn btn-sm"
                               onClick={() => setUserToDelete(user.id)}
-                              style={{ 
-                                padding: "8px 12px", 
-                                borderRadius: "8px", 
+                              style={{
+                                padding: "8px 12px",
+                                borderRadius: "8px",
                                 background: darkMode ? "#451a1a" : "#fff5f5",
                                 color: "#ef4444",
                                 border: "none"
@@ -178,18 +195,18 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
                 {/* Pagination */}
                 <div className="mt-4 d-flex justify-content-center">
-                   <nav>
+                  <nav>
                     <ul className="pagination">
                       <li className={`page-item ${currentPage === 1 && 'disabled'}`}>
-                        <button className="page-link border-0 shadow-none" 
+                        <button className="page-link border-0 shadow-none"
                           style={{ background: "transparent", color: theme.text }}
                           onClick={() => setCurrentPage(v => v - 1)}>Prev</button>
                       </li>
                       {[...Array(Math.ceil(users.length / itemsPerPage))].map((_, i) => (
                         <li key={i} className={`page-item ${currentPage === i + 1 && 'active'}`}>
-                          <button className="page-link border-0 mx-1 rounded shadow-sm" 
-                            style={{ 
-                              background: currentPage === i + 1 ? "#4f46e5" : theme.cardBg, 
+                          <button className="page-link border-0 mx-1 rounded shadow-sm"
+                            style={{
+                              background: currentPage === i + 1 ? "#4f46e5" : theme.cardBg,
                               color: currentPage === i + 1 ? "#fff" : theme.text,
                               border: `1px solid ${theme.border}`
                             }}
@@ -197,12 +214,12 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                         </li>
                       ))}
                       <li className={`page-item ${currentPage === Math.ceil(users.length / itemsPerPage) && 'disabled'}`}>
-                        <button className="page-link border-0 shadow-none" 
+                        <button className="page-link border-0 shadow-none"
                           style={{ background: "transparent", color: theme.text }}
                           onClick={() => setCurrentPage(v => v + 1)}>Next</button>
                       </li>
                     </ul>
-                   </nav>
+                  </nav>
                 </div>
               </>
             )}
@@ -218,7 +235,7 @@ const Users = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
             <div className="modal-content border-0 shadow" style={{ borderRadius: "20px", background: theme.cardBg, color: theme.text }}>
               <div className="modal-body text-center p-5">
                 <div className="mb-3">
-                    <i className="bi bi-exclamation-octagon text-danger" style={{ fontSize: "4rem" }}></i>
+                  <i className="bi bi-exclamation-octagon text-danger" style={{ fontSize: "4rem" }}></i>
                 </div>
                 <h4 className="fw-bold">Are you sure?</h4>
                 <p style={{ color: theme.muted }}>You won't be able to revert this employee's data!</p>
