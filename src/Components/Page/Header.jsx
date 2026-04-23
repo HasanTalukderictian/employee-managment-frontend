@@ -212,7 +212,7 @@ const Header = ({ darkMode, setDarkMode }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div className="text-end">
             <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: textColor }}>
-              Hasan Talukder
+              Hello
             </p>
             <small style={{ color: '#10b981' }}>
               {role || 'User'}

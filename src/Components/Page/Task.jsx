@@ -13,8 +13,8 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
         status: "Pending",
     });
     const [showModal, setShowModal] = useState(false);
-    const [employeeId, setEmployeeId] = useState(null);
 
+    // API URLs
     const API_BASE_URL = "http://localhost:8000/api/tasks"; 
     const API_ADD_TASK_URL = "http://localhost:8000/api/add-task";
 
@@ -29,14 +29,10 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
         modalBg: darkMode ? "#1e293b" : "#ffffff",
     };
 
-    useEffect(() => {
-        const id = localStorage.getItem('employeeId');
-        setEmployeeId(id);
-    }, []);
-
+    // Fetch Tasks
     useEffect(() => {
         const role = localStorage.getItem("userRole");
-        const id = localStorage.getItem("employeeId");
+        const id = localStorage.getItem("employee_id");
         let url = API_BASE_URL;
 
         if (role !== "admin" && id) {
@@ -62,13 +58,15 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     const getBadgeClass = (status) => {
         switch (status) {
             case "Completed": return "bg-success text-white";
-            case "Pending": return darkMode ? "bg-warning text-dark" : "bg-warning text-dark";
+            case "Pending": return "bg-warning text-dark";
             case "Overdue": return "bg-danger text-white";
             default: return "bg-secondary text-white";
         }
     };
 
     const handleStatusChange = (id, newStatus) => {
+        const currentId = localStorage.getItem('employee_id'); // সরাসরি আইডি নেওয়া হয়েছে
+        
         fetch(`${API_BASE_URL}/${id}`, {
             method: "POST",
             headers: {
@@ -77,14 +75,14 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
             },
             body: JSON.stringify({
                 status: newStatus,
-                employee_id: employeeId,
+                employee_id: currentId, 
             }),
         })
             .then((res) => res.json())
             .then((updatedTask) => {
                 setTasks((prev) =>
                     prev.map((task) =>
-                        task.id === id ? { ...task, ...updatedTask } : task
+                        task.id === id ? { ...task, status: newStatus } : task
                     )
                 );
                 toast.success("Status updated!");
@@ -94,11 +92,18 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
     const handleAddTask = (e) => {
         e.preventDefault();
+        const currentId = localStorage.getItem('employee_id'); // সরাসরি আইডি নেওয়া হয়েছে
+
+        if (!currentId) {
+            toast.error("Employee ID missing. Please login again.");
+            return;
+        }
+
         const taskData = {
             title: newTask.title,
             due_date: newTask.dueDate,
             status: newTask.status,
-            employee_id: employeeId,
+            employee_id: currentId,
             activities: [{ logged_at: new Date().toISOString(), description: "Task Created" }],
         };
 
@@ -110,14 +115,21 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
             },
             body: JSON.stringify(taskData),
         })
-            .then((res) => res.json())
+            .then(async (res) => {
+                const data = await res.json();
+                if (!res.ok) throw data;
+                return data;
+            })
             .then((savedTask) => {
                 setTasks((prev) => [...prev, savedTask]);
                 setNewTask({ title: "", dueDate: "", status: "Pending" });
                 setShowModal(false);
                 toast.success("Task added!");
             })
-            .catch((err) => console.error("Error adding task:", err));
+            .catch((err) => {
+                console.error("Error adding task:", err);
+                toast.error(err.message || "Something went wrong");
+            });
     };
 
     return (
@@ -129,7 +141,6 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                 <main style={{ flexGrow: 1, padding: "25px", overflowY: "auto" }}>
                     <h2 style={{ color: theme.text, marginBottom: '25px', fontWeight: '700' }}>Task Management</h2>
 
-                    {/* Stats Cards */}
                     <div className="row g-3 mb-4">
                         {[
                             { label: "Total Tasks", count: tasks.length, icon: "bi-list-task", color: "info", gradient: "linear-gradient(135deg, #e0f7fa, #ffffff)" },
@@ -159,7 +170,6 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                         </button>
                     )}
 
-                    {/* Task Table Card */}
                     <div className="card shadow-sm border-0" style={{ backgroundColor: theme.cardBg, borderRadius: '15px', overflow: 'hidden' }}>
                         <div className="card-header fw-bold py-3" style={{ background: darkMode ? "#2d3748" : "#fff", color: theme.text, borderBottom: `1px solid ${theme.border}` }}>
                             <i className="bi bi-table me-2"></i> Tasks Overview
@@ -216,7 +226,6 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                         </div>
                     </div>
 
-                    {/* Modal for New Task */}
                     {showModal && (
                         <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.7)", backdropFilter: 'blur(4px)' }}>
                             <div className="modal-dialog modal-dialog-centered">

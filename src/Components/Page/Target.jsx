@@ -16,6 +16,8 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 15;
+  const [role, setRole] = useState(localStorage.getItem('userRole'));
+  const [userId, setUserId] = useState(localStorage.getItem('employeeId'));
 
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -51,8 +53,25 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     try {
       const response = await fetch(`${BASE_URL}/api/get-targets`);
       const result = await response.json();
-      setTargets(Array.isArray(result.data) ? result.data : []);
-    } catch (error) { console.log(error); } finally { setLoading(false); }
+      const allData = Array.isArray(result.data) ? result.data : [];
+
+      // 🔥 পিন-পয়েন্ট ফিল্টারিং লজিক
+      const currentRole = localStorage.getItem('userRole');
+      const currentEmpId = localStorage.getItem('employee_id');
+
+      if (currentRole === 'admin') {
+        setTargets(allData); // অ্যাডমিন হলে সব ডেটা
+      } else {
+        // ইউজার হলে শুধু নিজের ডেটা (String এ কনভার্ট করে চেক করা হয়েছে যেন টাইপ এরর না হয়)
+        const myData = allData.filter(item => String(item.employee_id) === String(currentEmpId));
+        setTargets(myData);
+      }
+    } catch (error) { 
+      console.error(error); 
+      toast.error("Failed to load targets");
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const fetchEmployees = async () => {
@@ -66,6 +85,9 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   useEffect(() => {
     fetchTargets();
     fetchEmployees();
+    // রোল এবং আইডি আপডেট হলে যেন পুনরায় চেক করে
+    setRole(localStorage.getItem('userRole'));
+    setUserId(localStorage.getItem('employeeId'));
   }, []);
 
   const handleChange = (e) => {
@@ -145,8 +167,11 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h4 style={{ color: theme.text, fontWeight: '700', margin: 0 }}>Sales Targets</h4>
-                <p style={{ color: theme.muted, fontSize: '14px', margin: 0 }}>Monitor performance ({targets.length} total)</p>
+                <p style={{ color: theme.muted, fontSize: '14px', margin: 0 }}>
+                  {role === 'admin' ? `Monitor performance (${targets.length} total)` : 'My Personal Target Status'}
+                </p>
               </div>
+             {role === 'admin' && (
               <button 
                 className="btn btn-primary shadow-sm" 
                 style={{ borderRadius: '12px', padding: '10px 24px', fontWeight: '600', backgroundColor: '#10b981', border: 'none' }}
@@ -154,6 +179,7 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
               >
                 <i className="bi bi-plus-lg me-2"></i>Set Target
               </button>
+             )}
             </div>
 
             {loading ? (
@@ -199,8 +225,14 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                               <small>{progress.toFixed(0)}%</small>
                             </td>
                             <td className="text-end px-4">
-                               <i className="bi bi-pencil-square text-success me-3" style={{cursor:'pointer'}} onClick={() => handleEdit(item)}></i>
-                               <i className="bi bi-trash text-danger" style={{cursor:'pointer'}} onClick={() => confirmDelete(item.id)}></i>
+                               {role === 'admin' ? (
+                                   <>
+                                     <i className="bi bi-pencil-square text-success me-3" style={{cursor:'pointer'}} onClick={() => handleEdit(item)}></i>
+                                     <i className="bi bi-trash text-danger" style={{cursor:'pointer'}} onClick={() => confirmDelete(item.id)}></i>
+                                   </>
+                               ) : (
+                                   <span className="badge bg-light text-dark border">View Only</span>
+                               )}
                             </td>
                           </tr>
                         );
@@ -209,7 +241,6 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                   </table>
                 </div>
 
-                {/* --- Pagination Controls --- */}
                 {totalPages > 1 && (
                   <div className="d-flex justify-content-end mt-4">
                     <nav>
@@ -259,7 +290,7 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
             )}
           </div>
 
-          {/* ... (বাকি মোডাল কোডগুলো আগের মতোই থাকবে) ... */}
+          {/* Modals remain the same but logically secured for admin only via fetch check */}
           {showModal && (
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
               <form onSubmit={handleSubmit} style={{ background: theme.cardBg, width: '450px', padding: '30px', borderRadius: '24px', border: `1px solid ${theme.border}`, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
