@@ -31,7 +31,7 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/get-emplyee`);
+        const response = await fetch(`${BASE_URL}/api/get-employee`);
         const result = await response.json();
         setEmployees(Array.isArray(result.data) ? result.data : []);
       } catch (error) {
