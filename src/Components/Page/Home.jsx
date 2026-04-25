@@ -200,7 +200,7 @@ const Home = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
           {/* Stat Cards Grid - Row 1 */}
           <div className="row g-4 mb-4">
-            <StatCard darkMode={darkMode} to="/admin-salary" title="Total Earning" value={`$${stats.earning.toLocaleString()}`} sub="Monthly Revenue" icon={BsCashStack} color="#3b82f6" gradient={['#dbeafe', '#eff6ff']} />
+            <StatCard darkMode={darkMode} to="/admin-salary" title="Total Salary" value={`$${stats.earning.toLocaleString()}`} sub="Monthly Revenue" icon={BsCashStack} color="#3b82f6" gradient={['#dbeafe', '#eff6ff']} />
             <StatCard darkMode={darkMode} to="/admin-department" title="Departments" value={stats.departments} sub="Active Units" icon={BsMortarboardFill} color="#06b6d4" gradient={['#cffafe', '#ecfeff']} />
             <StatCard darkMode={darkMode} to="/admin-employee" title="Employees" value={stats.employees} sub="Total Staff" icon={BsPeopleFill} color="#10b981" gradient={['#dcfce7', '#f0fdf4']} />
             <StatCard darkMode={darkMode} to="/admin-users" title="System Users" value={stats.users} sub="Active Accounts" icon={BsPersonFill} color="#8b5cf6" gradient={['#ede9fe', '#f5f3ff']} />

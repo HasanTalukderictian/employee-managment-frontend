@@ -28,6 +28,9 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     const API_BASE_URL = "http://localhost:8000/api/tasks";
     const API_ADD_TASK_URL = "http://localhost:8000/api/add-task";
 
+    // const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+    // const API_ADD_TASK_URL = import.meta.env.VITE_BASE_URL;
+
     // Theme Config
     const theme = {
         bg: darkMode ? "#0f172a" : "#f8f9fa",
