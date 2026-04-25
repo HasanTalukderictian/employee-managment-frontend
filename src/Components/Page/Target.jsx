@@ -13,6 +13,10 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
 
+  // Filtering States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterMonth, setFilterMonth] = useState("All");
+
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 15;
@@ -40,11 +44,19 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     inputBg: darkMode ? '#1e293b' : '#fff'
   };
 
-  // Pagination Logic
+  // 🔥 Filtering Logic based on Search and Month
+  const filteredTargets = targets.filter(item => {
+    const fullName = `${item.employee?.first_name} ${item.employee?.last_name}`.toLowerCase();
+    const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+    const matchesMonth = filterMonth === "All" || item.month === filterMonth;
+    return matchesSearch && matchesMonth;
+  });
+
+  // Pagination Calculation based on Filtered Data
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = targets.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(targets.length / recordsPerPage);
+  const currentRecords = filteredTargets.slice(indexOfFirstRecord, indexOfLastRecord);
+  const totalPages = Math.ceil(filteredTargets.length / recordsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -55,14 +67,12 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
       const result = await response.json();
       const allData = Array.isArray(result.data) ? result.data : [];
 
-      // 🔥 পিন-পয়েন্ট ফিল্টারিং লজিক
       const currentRole = localStorage.getItem('userRole');
       const currentEmpId = localStorage.getItem('employee_id');
 
       if (currentRole === 'admin') {
-        setTargets(allData); // অ্যাডমিন হলে সব ডেটা
+        setTargets(allData);
       } else {
-        // ইউজার হলে শুধু নিজের ডেটা (String এ কনভার্ট করে চেক করা হয়েছে যেন টাইপ এরর না হয়)
         const myData = allData.filter(item => String(item.employee_id) === String(currentEmpId));
         setTargets(myData);
       }
@@ -85,7 +95,6 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   useEffect(() => {
     fetchTargets();
     fetchEmployees();
-    // রোল এবং আইডি আপডেট হলে যেন পুনরায় চেক করে
     setRole(localStorage.getItem('userRole'));
     setUserId(localStorage.getItem('employeeId'));
   }, []);
@@ -161,14 +170,15 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
         <main style={{ flexGrow: 1, padding: "30px", width: '100%', position: 'relative' }}>
           <div style={{ 
             background: theme.cardBg, borderRadius: "24px", padding: "30px", 
-            border: `1px solid ${theme.border}`, boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 25px rgba(0,0,0,0.05)"
+            border: `1px solid ${theme.border}`, boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 25px rgba(0,0,0,0.05)",
+            display: 'flex', flexDirection: 'column', minHeight: '80vh' // Ensures parent pushes footer/pagination
           }}>
             
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h4 style={{ color: theme.text, fontWeight: '700', margin: 0 }}>Sales Targets</h4>
                 <p style={{ color: theme.muted, fontSize: '14px', margin: 0 }}>
-                  {role === 'admin' ? `Monitor performance (${targets.length} total)` : 'My Personal Target Status'}
+                  {role === 'admin' ? `Monitor performance (${filteredTargets.length} result found)` : 'My Personal Target Status'}
                 </p>
               </div>
              {role === 'admin' && (
@@ -182,10 +192,40 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
              )}
             </div>
 
+            {/* 🔥 Filtering Section */}
+            <div className="row g-3 mb-4 align-items-center">
+                <div className="col-md-4">
+                    <div className="position-relative">
+                        <i className="bi bi-search position-absolute" style={{ left: '15px', top: '50%', transform: 'translateY(-50%)', color: theme.muted }}></i>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            placeholder="Search by employee name..." 
+                            value={searchQuery}
+                            onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                            style={{ paddingLeft: '45px', borderRadius: '12px', background: theme.inputBg, border: `1px solid ${theme.border}`, color: theme.text }}
+                        />
+                    </div>
+                </div>
+                <div className="col-md-3">
+                    <select 
+                        className="form-select shadow-sm" 
+                        style={{ borderRadius: '12px', background: theme.inputBg, border: `1px solid ${theme.border}`, color: theme.text }}
+                        value={filterMonth}
+                        onChange={(e) => { setFilterMonth(e.target.value); setCurrentPage(1); }}
+                    >
+                        <option value="All">All Months</option>
+                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                            <option key={m} value={m}>{m}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
             {loading ? (
               <div className="text-center p-5"><div className="spinner-border text-success" role="status"></div></div>
             ) : (
-              <>
+              <div style={{ flexGrow: 1 }}>
                 <div className="table-responsive" style={{ borderRadius: '18px', border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
                   <table className="table table-hover align-middle mb-0" style={{ color: theme.text, background: 'transparent' }}>
                     <thead style={{ background: theme.tableHeader }}>
@@ -199,7 +239,7 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {currentRecords.map((item) => {
+                      {currentRecords.length > 0 ? currentRecords.map((item) => {
                         const progress = Math.min((item.achieved_value / item.target_value) * 100, 100) || 0;
                         return (
                           <tr key={item.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
@@ -207,7 +247,7 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                               <div className="d-flex align-items-center">
                                  <div className="rounded-circle d-flex align-items-center justify-content-center me-3" 
                                       style={{ width: '38px', height: '38px', background: '#10b98120', color: '#10b981', fontWeight: '700' }}>
-                                   {item.employee?.first_name?.[0]}
+                                    {item.employee?.first_name?.[0]}
                                  </div>
                                  <div>
                                    <div style={{ fontWeight: '600' }}>{item.employee?.first_name} {item.employee?.last_name}</div>
@@ -236,13 +276,16 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                             </td>
                           </tr>
                         );
-                      })}
+                      }) : (
+                        <tr><td colSpan="6" className="text-center py-5" style={{ color: theme.muted }}>No records found matching your filters.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
 
+                {/* 🔥 Pagination at Bottom Right */}
                 {totalPages > 1 && (
-                  <div className="d-flex justify-content-end mt-4">
+                  <div className="d-flex justify-content-end mt-auto pt-4">
                     <nav>
                       <ul className="pagination mb-0" style={{ gap: '5px' }}>
                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -286,11 +329,11 @@ const TargetList = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                     </nav>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
 
-          {/* Modals remain the same but logically secured for admin only via fetch check */}
+          {/* Modal Section */}
           {showModal && (
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
               <form onSubmit={handleSubmit} style={{ background: theme.cardBg, width: '450px', padding: '30px', borderRadius: '24px', border: `1px solid ${theme.border}`, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>

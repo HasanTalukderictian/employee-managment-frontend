@@ -6,7 +6,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
+    // ১. প্রথমে স্টেটগুলো ডিক্লেয়ার করতে হবে
     const [tasks, setTasks] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [newTask, setNewTask] = useState({
         title: "",
         dueDate: "",
@@ -14,8 +16,16 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     });
     const [showModal, setShowModal] = useState(false);
 
+    const itemsPerPage = 15;
+
+    // ২. স্টেট ডিক্লেয়ার করার পর ক্যালকুলেশন করতে হবে
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentTasks = tasks.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(tasks.length / itemsPerPage);
+
     // API URLs
-    const API_BASE_URL = "http://localhost:8000/api/tasks"; 
+    const API_BASE_URL = "http://localhost:8000/api/tasks";
     const API_ADD_TASK_URL = "http://localhost:8000/api/add-task";
 
     // Theme Config
@@ -65,8 +75,8 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     };
 
     const handleStatusChange = (id, newStatus) => {
-        const currentId = localStorage.getItem('employee_id'); // সরাসরি আইডি নেওয়া হয়েছে
-        
+        const currentId = localStorage.getItem('employee_id');
+
         fetch(`${API_BASE_URL}/${id}`, {
             method: "POST",
             headers: {
@@ -75,11 +85,11 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
             },
             body: JSON.stringify({
                 status: newStatus,
-                employee_id: currentId, 
+                employee_id: currentId,
             }),
         })
             .then((res) => res.json())
-            .then((updatedTask) => {
+            .then(() => {
                 setTasks((prev) =>
                     prev.map((task) =>
                         task.id === id ? { ...task, status: newStatus } : task
@@ -92,7 +102,7 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
     const handleAddTask = (e) => {
         e.preventDefault();
-        const currentId = localStorage.getItem('employee_id'); // সরাসরি আইডি নেওয়া হয়েছে
+        const currentId = localStorage.getItem('employee_id');
 
         if (!currentId) {
             toast.error("Employee ID missing. Please login again.");
@@ -137,7 +147,7 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
             <Header darkMode={darkMode} setDarkMode={setDarkMode} />
             <div style={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
                 <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
-                
+
                 <main style={{ flexGrow: 1, padding: "25px", overflowY: "auto" }}>
                     <h2 style={{ color: theme.text, marginBottom: '25px', fontWeight: '700' }}>Task Management</h2>
 
@@ -149,11 +159,11 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                             { label: "Overdue", count: tasks.filter(t => t.status === "Overdue").length, icon: "bi-exclamation-circle", color: "danger", gradient: "linear-gradient(135deg, #ffcdd2, #ffffff)" }
                         ].map((stat, i) => (
                             <div key={i} className="col-md-3 col-sm-6">
-                                <div className="p-4 rounded shadow-sm border-0" 
-                                     style={{ background: darkMode ? theme.cardBg : stat.gradient, borderLeft: darkMode ? `4px solid var(--bs-${stat.color})` : 'none' }}>
+                                <div className="p-4 rounded shadow-sm border-0"
+                                    style={{ background: darkMode ? theme.cardBg : stat.gradient, borderLeft: darkMode ? `4px solid var(--bs-${stat.color})` : 'none' }}>
                                     <div className="d-flex align-items-center mb-2">
                                         <div className={`bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center me-3`}
-                                             style={{ width: '45px', height: '45px' }}>
+                                            style={{ width: '45px', height: '45px' }}>
                                             <i className={`bi ${stat.icon} fs-4 text-${stat.color}`}></i>
                                         </div>
                                         <div className="fs-4 fw-bold" style={{ color: theme.text }}>{stat.count}</div>
@@ -187,7 +197,7 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tasks.map((task) => (
+                                        {currentTasks.map((task) => (
                                             <tr key={task.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
                                                 {localStorage.getItem("userRole") === "admin" && (
                                                     <td className="px-4 py-3" style={{ color: theme.tableText }}>
@@ -198,6 +208,7 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                                                 <td className="px-4 py-3" style={{ color: theme.tableText }}>{task.due_date}</td>
                                                 <td className="px-4 py-3">
                                                     <select
+                                                        disabled={localStorage.getItem("userRole") === "admin"}
                                                         className={`form-select form-select-sm border-0 shadow-sm ${getBadgeClass(task.status)}`}
                                                         style={{ width: '130px', borderRadius: '8px', cursor: 'pointer' }}
                                                         value={task.status}
@@ -213,7 +224,7 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                                                         task.activities.slice(-1).map((act, idx) => (
                                                             <div key={idx} className="small">
                                                                 <span className="text-primary fw-bold">●</span> {act.description}
-                                                                <br/><span className="text-muted" style={{ fontSize: '11px' }}>{new Date(act.logged_at).toLocaleDateString()}</span>
+                                                                <br /><span className="text-muted" style={{ fontSize: '11px' }}>{new Date(act.logged_at).toLocaleDateString()}</span>
                                                             </div>
                                                         ))
                                                     )}
@@ -226,13 +237,41 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                         </div>
                     </div>
 
+                    <div className="d-flex justify-content-end p-3">
+                        <nav>
+                            <ul className="pagination mb-0">
+                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                    <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>
+                                        Previous
+                                    </button>
+                                </li>
+
+                                {[...Array(totalPages)].map((_, index) => (
+                                    <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                        <button className="page-link" onClick={() => setCurrentPage(index + 1)}>
+                                            {index + 1}
+                                        </button>
+                                    </li>
+                                ))}
+
+                                <li className={`page-item ${currentPage === (totalPages || 1) ? 'disabled' : ''}`}>
+                                    <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>
+                                        Next
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
                     {showModal && (
                         <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.7)", backdropFilter: 'blur(4px)' }}>
                             <div className="modal-dialog modal-dialog-centered">
                                 <div className="modal-content border-0" style={{ backgroundColor: theme.modalBg, color: theme.text, borderRadius: '15px' }}>
                                     <div className="modal-header border-0 pb-0">
                                         <h5 className="modal-title fw-bold">Add New Task</h5>
-                                        <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
+                                        <button type="button" className="btn-close" 
+                                            style={{ filter: darkMode ? 'invert(1)' : 'none' }} 
+                                            onClick={() => setShowModal(false)}></button>
                                     </div>
                                     <form onSubmit={handleAddTask}>
                                         <div className="modal-body p-4">
