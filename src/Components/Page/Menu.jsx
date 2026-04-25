@@ -36,17 +36,18 @@ const Menu = ({ darkMode, isExpanded, setIsExpanded }) => {
     }
   };
 
-  const menuItems = [
-    { name: 'Dashboard', icon: 'bi-speedometer2', route: '/admin-home' },
-    { name: 'Employee', icon: 'bi-people', route: '/admin-employee', adminOnly: true },
-    { name: 'Department', icon: 'bi-diagram-3', route: '/admin-department', adminOnly: true }, // adminOnly flag
-    { name: 'Designation', icon: 'bi-person-badge', route: '/admin-desgination', adminOnly: true }, // adminOnly flag
-    { name: 'Salary', icon: 'bi-currency-dollar', route: '/admin-salary' },
-    { name: 'Leave', icon: 'bi-calendar-check', route: '/admin-leave' },
-    { name: 'Users', icon: 'bi-person-lines-fill', route: '/admin-users', adminOnly: true }, // adminOnly flag
-    { name: 'Target', icon: 'bi-clipboard-check', route: '/admin-target' },
-    { name: 'Task', icon: 'bi-clipboard-check', route: '/admin-task' },
-    { name: 'Logout', icon: 'bi-box-arrow-right', isLogout: true },
+const menuItems = [
+    { name: 'Dashboard', icon: 'bi-grid-1x2-fill', route: '/admin-home' },
+    { name: 'Employee', icon: 'bi-people-fill', route: '/admin-employee', adminOnly: true },
+    { name: 'Department', icon: 'bi-building-gear', route: '/admin-department', adminOnly: true },
+    { name: 'Designation', icon: 'bi-person-vcard', route: '/admin-desgination', adminOnly: true },
+    { name: 'Salary', icon: 'bi-cash-stack', route: '/admin-salary' },
+    { name: 'Leave', icon: 'bi-calendar2-check', route: '/admin-leave' },
+    { name: 'Users', icon: 'bi-person-lock', route: '/admin-users', adminOnly: true },
+    { name: 'Target', icon: 'bi-bullseye', route: '/admin-target' }, // Target এর জন্য Bullseye বেশি মানানসই
+    { name: 'Attendance', icon: 'bi-clock-history', route: '/admin-attendance' }, // Attendance এর জন্য ঘড়ি বা হিস্ট্রি
+    { name: 'Task', icon: 'bi-list-task', route: '/admin-task' }, // Task এর জন্য লিস্ট আইকন
+    { name: 'Logout', icon: 'bi-power', route: null, isLogout: true }, // Logout এর জন্য পাওয়ার আইকনও সুন্দর লাগে
   ];
 
   // ফিল্টার করা মেনু: যদি রোল এডমিন না হয়, তবে adminOnly আইটেমগুলো বাদ যাবে

@@ -145,12 +145,14 @@ const Home = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
       .then((res) => res.json())
       .then((data) => {
         const totalEarning = data.salary?.reduce((sum, item) => sum + parseFloat(item.basic), 0) || 0;
+        const totalTargetValue = data.target?.reduce((sum, item) => sum + parseFloat(item.target_value), 0) || 0;
         setStats({
           earning: totalEarning,
           departments: data.department?.length || 0,
           employees: data.employee?.length || 0,
           users: data.usersmodel?.length || 0,
           task: data.task?.length || 0,
+          target: totalTargetValue,
         });
       })
       .catch((err) => console.error(err));
@@ -198,7 +200,7 @@ const Home = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
           {/* Stat Cards Grid - Row 1 */}
           <div className="row g-4 mb-4">
-            <StatCard darkMode={darkMode} to="/admin-salary" title="Total Earning" value={`$${stats.earning.toLocaleString()}`} sub="Monthly Revenue" icon={BsCashStack} color="#3b82f6" gradient={['#dbeafe', '#eff6ff']} />
+            <StatCard darkMode={darkMode} to="/admin-salary" title="Total Salary" value={`$${stats.earning.toLocaleString()}`} sub="Monthly Revenue" icon={BsCashStack} color="#3b82f6" gradient={['#dbeafe', '#eff6ff']} />
             <StatCard darkMode={darkMode} to="/admin-department" title="Departments" value={stats.departments} sub="Active Units" icon={BsMortarboardFill} color="#06b6d4" gradient={['#cffafe', '#ecfeff']} />
             <StatCard darkMode={darkMode} to="/admin-employee" title="Employees" value={stats.employees} sub="Total Staff" icon={BsPeopleFill} color="#10b981" gradient={['#dcfce7', '#f0fdf4']} />
             <StatCard darkMode={darkMode} to="/admin-users" title="System Users" value={stats.users} sub="Active Accounts" icon={BsPersonFill} color="#8b5cf6" gradient={['#ede9fe', '#f5f3ff']} />
@@ -207,7 +209,7 @@ const Home = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
           {/* Stat Cards Grid - Row 2 */}
           <div className="row g-4 mb-5">
              <StatCard darkMode={darkMode} to="/admin-task" title="Ongoing Tasks" value={stats.task} sub="In Progress" icon={BsCheck2Circle} color="#f59e0b" gradient={['#fef3c7', '#fffbeb']} />
-             <StatCard darkMode={darkMode} to="/recent-leads" title="New Leads" value="24" sub="Last 24 Hours" icon={BsGraphUpArrow} color="#ec4899" gradient={['#fce7f3', '#fdf2f8']} />
+             <StatCard darkMode={darkMode} to="/admin-target" title="Total Target" value={stats.target} sub="Last 24 Hours" icon={BsGraphUpArrow} color="#ec4899" gradient={['#fce7f3', '#fdf2f8']} />
              <StatCard darkMode={darkMode} to="/branches" title="Branches" value="08" sub="Global Locations" icon={BsBuilding} color="#64748b" gradient={['#f1f5f9', '#f8fafc']} />
              <StatCard darkMode={darkMode} to="/analytics" title="Performance" value="92%" sub="Efficiency Rate" icon={IoMdTrendingUp} color="#10b981" gradient={['#dcfce7', '#f0fdf4']} />
           </div>

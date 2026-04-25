@@ -32,7 +32,7 @@ const UserLogin = () => {
                 localStorage.setItem("authToken", data.token);
                 localStorage.setItem("isAdminLoggedIn", true); // Keeping consistency with your logic
                 localStorage.setItem('userRole', data.data.role);
-                localStorage.setItem('employeeId', data.data.employee_id);
+                   localStorage.setItem("employee_id", data.data.employee_id);
 
                 setTimeout(() => navigate("/admin-home"), 1000);
             } else {

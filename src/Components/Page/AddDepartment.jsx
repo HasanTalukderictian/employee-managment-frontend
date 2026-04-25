@@ -80,9 +80,22 @@ const AddDepartment = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => 
           
           <div style={{ maxWidth: "900px", margin: "0 auto", width: "100%" }}>
             
-            {/* Back Button Section */}
-            <div style={{ marginBottom: "20px" }}>
-              <Link to="/admin-department" style={{ textDecoration: "none" }}>
+            
+
+            {/* Form Card */}
+            <form 
+              onSubmit={handleSubmit}
+              style={{
+                background: theme.cardBg,
+                borderRadius: "20px",
+                boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 25px rgba(0,0,0,0.05)",
+                padding: "40px",
+                border: `1px solid ${theme.border}`,
+                transition: 'all 0.3s ease'
+              }}
+            >
+
+               <Link to="/admin-department" style={{ textDecoration: "none" }}>
                 <button
                   style={{
                     padding: "10px 20px",
@@ -105,20 +118,6 @@ const AddDepartment = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => 
                   <i className="bi bi-arrow-left"></i> Back to List
                 </button>
               </Link>
-            </div>
-
-            {/* Form Card */}
-            <form 
-              onSubmit={handleSubmit}
-              style={{
-                background: theme.cardBg,
-                borderRadius: "20px",
-                boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 25px rgba(0,0,0,0.05)",
-                padding: "40px",
-                border: `1px solid ${theme.border}`,
-                transition: 'all 0.3s ease'
-              }}
-            >
               <div style={{ marginBottom: "35px" }}>
                 <h2 style={{ 
                   fontSize: "24px", 

@@ -1,161 +1,236 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { IoMdSunny, IoMdMoon } from "react-icons/io";
 
 const Header = ({ darkMode, setDarkMode }) => {
   const [role, setRole] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
 
+  const dropdownRef = useRef(null);
+    const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // =========================
+  // FETCH NOTIFICATIONS
+  // =========================
+
+  console.log("EMPLOYEE ID:", localStorage.getItem("employee_id"));
+  const fetchNotifications = async (empId) => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/get-notification/${empId}`);
+      const result = await res.json();
+
+      const list = result.data || [];
+
+      setNotifications(list);
+      setUnreadCount(list.filter(n => n.read_at === null).length);
+
+    } catch (err) {
+      console.error("Notification Fetch Error:", err);
+    }
+  };
+
+  // =========================
+  // INIT
+  // =========================
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
+    const employeeId = localStorage.getItem("employee_id"); // 🔥 MUST BE employee.id
+
     setRole(storedRole);
+
+    console.log("employee_id:", employeeId);
+
+    if (employeeId) {
+      fetchNotifications(employeeId);
+    }
   }, []);
 
-  // Theme based styles
-  const headerBg = darkMode ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.8)';
-  const textColor = darkMode ? '#f8fafc' : '#1e293b';
-  const borderColor = darkMode ? '#334155' : '#e2e8f0';
-  const iconBg = darkMode ? '#1e293b' : '#f1f5f9';
+  // =========================
+  // CLOSE DROPDOWN OUTSIDE CLICK
+  // =========================
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // =========================
+  // THEME
+  // =========================
+  const borderColor = darkMode ? '#334155' : '#e2e8f0';
+  const textColor = darkMode ? '#f8fafc' : '#1e293b';
+
+  // =========================
+  // UI
+  // =========================
   return (
     <header
       style={{
-        background: headerBg,
-        backdropFilter: 'blur(10px)',
-        color: textColor,
-        padding: '12px 40px',
-        userSelect: 'none',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        padding: '12px 40px',
         borderBottom: `1px solid ${borderColor}`,
-        boxShadow: darkMode ? '0 4px 20px rgba(0,0,0,0.3)' : '0 2px 15px rgba(0,0,0,0.05)',
+        background: darkMode ? '#1e293b' : '#fff',
         position: 'sticky',
         top: 0,
-        zIndex: 1000,
-        width: '100%',
-        margin: '0 auto',
-        boxSizing: 'border-box',
-        transition: 'all 0.3s ease'
+        zIndex: 1000
       }}
     >
-      {/* Left section: Logo + Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <div
-          className="shadow-sm d-flex justify-content-center align-items-center"
-          style={{
-            width: "50px",
-            height: "50px",
-            borderRadius: "14px",
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            boxShadow: '0 8px 15px rgba(16, 185, 129, 0.2)',
-          }}
-        >
-          <i
-            className="bi bi-person-workspace"
-            style={{ fontSize: "24px", color: "#fff" }}
-          ></i>
-        </div>
 
-        <div>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "24px",
-              fontWeight: "800",
-              letterSpacing: '-0.5px',
-              color: "#10b981",
-              textTransform: 'uppercase'
-            }}
-          >
-            Hasan's <span style={{ color: darkMode ? '#94a3b8' : '#64748b', fontWeight: '400' }}>EMS</span>
-          </h1>
-          <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>
-            CRM Management System
-          </p>
-        </div>
+      {/* LEFT */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <h1 style={{ fontSize: '20px', color: '#10b981', margin: 0 }}>
+          HASAN'S EMS
+        </h1>
       </div>
 
-      {/* Right section: Tools + Profile */}
+      {/* RIGHT */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        
-        {/* Search Bar */}
-        <div className="d-none d-xl-flex align-items-center px-3 py-2 rounded-pill" 
-             style={{ background: iconBg, border: `1px solid ${borderColor}` }}>
-          <i className="bi bi-search" style={{ color: '#94a3b8' }}></i>
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            style={{ background: 'none', border: 'none', outline: 'none', marginLeft: '10px', fontSize: '14px', color: textColor }}
-          />
-        </div>
 
-        {/* --- Dark/Light Mode Toggle --- */}
-        <div 
+        {/* DARK MODE */}
+        <div
           onClick={() => setDarkMode(!darkMode)}
-          className="shadow-sm"
-          style={{
-            cursor: 'pointer',
-            width: "42px",
-            height: "42px",
-            borderRadius: "12px",
-            background: iconBg,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            border: `1px solid ${borderColor}`,
-            transition: 'all 0.3s ease'
-          }}
-          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          style={{ cursor: 'pointer' }}
         >
-          {darkMode ? <IoMdSunny color="#fbbf24" size={22}/> : <IoMdMoon color="#6366f1" size={22}/>}
+          {darkMode
+            ? <IoMdSunny color="#fbbf24" size={22} />
+            : <IoMdMoon color="#6366f1" size={22} />
+          }
         </div>
 
-        {/* Notification */}
-        <div className="position-relative" style={{ cursor: 'pointer' }}>
+        {/* NOTIFICATION */}
+        <div ref={dropdownRef} style={{ position: 'relative' }}>
+
+          {/* BELL */}
           <div
-            className="d-flex justify-content-center align-items-center shadow-sm"
+            onClick={() => setShowDropdown(!showDropdown)}
             style={{
               width: "42px",
               height: "42px",
               borderRadius: "12px",
-              background: darkMode ? '#1e293b' : '#fff',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
               border: `1px solid ${borderColor}`,
-              transition: 'all 0.3s ease'
+              cursor: 'pointer',
+              position: 'relative'
             }}
           >
-            <i className="bi bi-bell" style={{ fontSize: "20px", color: "#10b981" }}></i>
+            <i className="bi bi-bell" style={{ fontSize: "20px", color: "#10b981" }} />
+
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  background: '#ef4444',
+                  color: 'white',
+                  borderRadius: '50%',
+                  padding: '2px 6px',
+                  fontSize: '10px',
+                  fontWeight: 'bold'
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
           </div>
-          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                style={{ fontSize: '10px', padding: '4px 6px', border: darkMode ? '2px solid #1e293b' : '2px solid white' }}>
-            3
-          </span>
+
+          {/* DROPDOWN */}
+          {showDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '55px',
+                width: '320px',
+                background: darkMode ? '#1e293b' : '#fff',
+                border: `1px solid ${borderColor}`,
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                maxHeight: '400px',
+                overflowY: 'auto'
+              }}
+            >
+
+              <div style={{
+                padding: '12px',
+                fontWeight: 'bold',
+                borderBottom: `1px solid ${borderColor}`,
+                color: textColor
+              }}>
+                Notifications
+              </div>
+
+              {notifications.length === 0 ? (
+                <div style={{
+                  padding: '20px',
+                  textAlign: 'center',
+                  color: '#94a3b8'
+                }}>
+                  No notifications
+                </div>
+              ) : (
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    style={{
+                      padding: '12px',
+                      borderBottom: `1px solid ${borderColor}`,
+                      background: n.read_at
+                        ? 'transparent'
+                        : (darkMode ? '#2d3748' : '#f0fff4')
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: textColor }}>
+                      {n.data?.message}
+                    </div>
+
+                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                      Month: {n.data?.month} | Target: {n.data?.target_value}
+                    </div>
+
+                    <div style={{ fontSize: '10px', color: '#64748b' }}>
+                      {new Date(n.created_at).toLocaleString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
-        {/* User Profile info */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '15px', borderLeft: `1px solid ${borderColor}` }}>
+        {/* PROFILE */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div className="text-end">
-            <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: textColor }}>Hasan Talukder</p>
-            <p style={{ margin: 0, fontSize: '11px', color: '#10b981', fontWeight: '600' }}>{role || 'Administrator'}</p>
+            <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: textColor }}>
+              Hello
+            </p>
+            <small style={{ color: '#10b981' }}>
+              {role || 'User'}
+            </small>
           </div>
-          <div style={{ position: 'relative' }}>
-            <img
-              src="https://i.ibb.co.com/jvFR7NXv/IMG-2688.jpg"
-              alt="Profile"
-              style={{
-                width: '45px',
-                height: '45px',
-                borderRadius: '14px',
-                objectFit: 'cover',
-                border: `2px solid #10b981`,
-                padding: '2px'
-              }}
-            />
-            <div style={{
-              width: '12px', height: '12px', background: '#10b981', 
-              borderRadius: '50%', position: 'absolute', bottom: '-2px', right: '-2px',
-              border: darkMode ? '2px solid #1e293b' : '2px solid white'
-            }}></div>
-          </div>
+
+          <img
+            src="https://i.ibb.co.com/jvFR7NXv/IMG-2688.jpg"
+            alt="Profile"
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              objectFit: 'cover'
+            }}
+          />
         </div>
+
       </div>
     </header>
   );

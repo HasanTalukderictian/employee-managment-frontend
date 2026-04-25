@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
-import Header from "./Header"; 
-import Menu from "./Menu"; 
+import Header from "./Header";
+import Menu from "./Menu";
 
 const AddDesgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const [name, setName] = useState("");
@@ -67,21 +67,38 @@ const AddDesgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) =>
         }}
       >
         <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-        
+
         <div style={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
           <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
-          
-          <main style={{ 
-            flexGrow: 1, 
-            padding: "20px", 
+
+          <main style={{
+            flexGrow: 1,
+            padding: "20px",
             overflowY: "auto",
-            transition: "all 0.3s ease" 
+            transition: "all 0.3s ease"
           }}>
             <div style={{ maxWidth: "800px", margin: "0 auto", width: "100%" }}>
-              
-              {/* Back Button */}
-              <div style={{ marginBottom: "25px" }}>
-                <Link to="/admin-desgination" style={{ textDecoration: 'none' }}>
+
+
+
+
+              {/* Form Card */}
+              <form
+                onSubmit={handleSubmit}
+                style={{
+                  background: theme.cardBg,
+                  borderRadius: "16px",
+                  boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 30px rgba(0,0,0,0.08)",
+                  padding: "clamp(20px, 5vw, 40px)",
+                  border: `1px solid ${theme.border}`,
+                  transition: "all 0.3s ease",
+                  display: "flex",          // Flexbox যোগ করা হয়েছে
+                  flexDirection: "column",   // কলাম অনুযায়ী সাজানো
+                  alignItems: "flex-start"   // সবকিছু একদম বাম দিক থেকে শুরু হবে
+                }}
+              >
+                {/* Back Button Container */}
+                <Link to="/admin-desgination" style={{ textDecoration: 'none', marginBottom: "20px" }}>
                   <button
                     style={{
                       padding: "10px 20px",
@@ -93,43 +110,34 @@ const AddDesgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) =>
                       color: theme.btnBackText,
                       fontWeight: "600",
                       cursor: "pointer",
-                      transition: "all 0.3s ease"
+                      transition: "all 0.3s ease",
+                      display: "flex",
+                      alignItems: "center"
                     }}
                     onMouseOver={(e) => (e.currentTarget.style.backgroundColor = darkMode ? "#334155" : "#f1f1f1")}
                     onMouseOut={(e) => (e.currentTarget.style.backgroundColor = theme.btnBackBg)}
                   >
-                    ← Back to List
+                    <i className="bi bi-arrow-left me-2"></i> Back to List
                   </button>
                 </Link>
-              </div>
 
-              {/* Form Card */}
-              <form 
-                onSubmit={handleSubmit}
-                style={{
-                  background: theme.cardBg,
-                  borderRadius: "16px",
-                  boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.3)" : "0 10px 30px rgba(0,0,0,0.08)",
-                  padding: "clamp(20px, 5vw, 40px)",
-                  border: `1px solid ${theme.border}`,
-                  transition: "all 0.3s ease"
-                }}
-              >
-                <div style={{ 
-                  marginBottom: "30px", 
-                  borderBottom: `2px solid ${darkMode ? '#22c55e' : '#28a745'}`, 
-                  paddingBottom: "10px", 
-                  display: "inline-block" 
+                {/* Heading Container */}
+                <div style={{
+                  marginBottom: "30px",
+                  borderBottom: `2px solid ${darkMode ? '#22c55e' : '#28a745'}`,
+                  paddingBottom: "10px",
+                  width: "fit-content" // বর্ডারটি শুধু লেখার নিচেই থাকবে
                 }}>
-                    <h2 style={{ fontSize: "24px", fontWeight: "700", color: theme.text, margin: 0 }}>
-                        Add New Designation
-                    </h2>
+                  <h2 style={{ fontSize: "24px", fontWeight: "700", color: theme.text, margin: 0 }}>
+                    Add New Designation
+                  </h2>
                 </div>
 
-                <div className="mb-4">
-                  <label 
-                    htmlFor="name" 
-                    style={{ display: "block", marginBottom: "10px", fontWeight: "600", color: theme.labelText, fontSize: "16px" }}
+                {/* Input Field - Width 100% রাখা হয়েছে */}
+                <div className="mb-4" style={{ width: "100%" }}>
+                  <label
+                    htmlFor="name"
+                    style={{ display: "block", marginBottom: "10px", fontWeight: "600", color: theme.labelText, fontSize: "16px", textAlign: "left" }}
                   >
                     Designation Name
                   </label>
@@ -157,12 +165,12 @@ const AddDesgination = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) =>
                   />
                 </div>
 
-                <div style={{ marginTop: "30px" }}>
-                  <button 
-                    type="submit" 
+                {/* Submit Button */}
+                <div style={{ marginTop: "10px" }}>
+                  <button
+                    type="submit"
                     style={{
-                      width: "100%",
-                      maxWidth: "160px",
+                      width: "160px",
                       padding: "14px",
                       backgroundColor: "#28a745",
                       color: "white",
