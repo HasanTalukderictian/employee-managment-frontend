@@ -15,13 +15,14 @@ const Leave = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
   const [role, setRole] = useState(null);
 
+ const userId = localStorage.getItem('employee_id');
+
   // Apply Leave form states
   const [leaveType, setLeaveType] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
 
-  const userId = localStorage.getItem('employeeId');
   const [leaveRequests, setLeaveRequests] = useState([]); 
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -39,6 +40,7 @@ const Leave = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
+   
     setRole(storedRole);
   }, []);
 
@@ -64,8 +66,14 @@ const Leave = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   useEffect(() => {
     if (!role) return;
     const endpoint = role === 'admin' ? `${BASE_URL}/api/get-apply-leave` : `${BASE_URL}/api/my-leaves`;
+    const token = localStorage.getItem('authToken');
     
-    fetch(endpoint)
+    fetch(endpoint, {
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}` // ✅ MUST
+  }
+})
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data)) setLeaveRequests(data);

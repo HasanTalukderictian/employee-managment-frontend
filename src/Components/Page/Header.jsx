@@ -3,6 +3,7 @@ import { IoMdSunny, IoMdMoon } from "react-icons/io";
 
 const Header = ({ darkMode, setDarkMode }) => {
   const [role, setRole] = useState(null);
+   const [name, setName] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -14,7 +15,8 @@ const Header = ({ darkMode, setDarkMode }) => {
   // FETCH NOTIFICATIONS
   // =========================
 
-  console.log("EMPLOYEE ID:", localStorage.getItem("employee_id"));
+  // console.log("EMPLOYEE ID:", localStorage.getItem("employee_id"));
+
   const fetchNotifications = async (empId) => {
     try {
       const res = await fetch(`${BASE_URL}/api/get-notification/${empId}`);
@@ -36,10 +38,11 @@ const Header = ({ darkMode, setDarkMode }) => {
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
     const employeeId = localStorage.getItem("employee_id"); // 🔥 MUST BE employee.id
+     const employeeName = localStorage.getItem("employee_name");
+      setRole(storedRole);
+    setName(employeeName);
 
-    setRole(storedRole);
-
-    console.log("employee_id:", employeeId);
+    // console.log("employee_id:", employeeId);
 
     if (employeeId) {
       fetchNotifications(employeeId);
@@ -214,6 +217,10 @@ const Header = ({ darkMode, setDarkMode }) => {
             <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: textColor }}>
               Hello
             </p>
+
+            {/* <small style={{ color: '#10b981' }}>
+              {name || 'User'}
+            </small> */}
             <small style={{ color: '#10b981' }}>
               {role || 'User'}
             </small>
