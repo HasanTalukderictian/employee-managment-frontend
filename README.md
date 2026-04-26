@@ -1,12 +1,55 @@
-# Employee Management
+# 🚀 Employee Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-featured **Employee Management System** built with **React.js (Frontend)** and **Laravel (Backend)**.  
+This system helps organizations manage employees, tasks, targets, attendance, and leave in one place.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📸 Project Screenshots
 
-## Expanding the ESLint configuration
+### 🏠 Dashboard View
+![Dashboard 1](https://i.ibb.co.com/XZxjSmW0/screencapture-localhost-5173-admin-home-2026-04-23-16-09-06.png)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 📊 Admin Panel View
+![Dashboard 2](https://i.ibb.co.com/8D71zZQP/screencapture-localhost-5173-admin-home-2026-04-23-16-05-50.png)
+
+### 📌 Task Management
+![Task](https://i.ibb.co.com/fdYhbVQt/Task.png)
+
+---
+
+## ✨ Features
+
+- 👨‍💼 Employee Management (Create / Update / Active / Deactive)
+- 👤 User Role Management (Admin & Employee)
+- 🎯 Target Setting System
+- 📋 Task Management System
+- 📅 Attendance System
+- 📩 Email Integration System
+- 🔔 Real-time Notifications
+- 🌙 Dark / Light Mode UI
+- 📊 Admin Dashboard Analytics
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend:
+- React.js (Vite)
+- Bootstrap / Custom CSS
+- Axios
+- React Hot Toast
+
+### Backend:
+- Laravel
+- MySQL
+- REST API
+- Laravel Mail & Notification System
+
+---
+
+## ⚙️ Installation Guide
+
+### 🔹 Step 1: Clone Project
+```bash
+git clone https://github.com/your-username/employee-management-system.git
