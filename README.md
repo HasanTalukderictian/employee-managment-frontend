@@ -26,6 +26,7 @@ This system helps organizations manage employees, tasks, targets, attendance, an
 - 📋 Task Management System
 - 📅 Attendance System
 - 📩 Email Integration System
+- 📩 Leave Management System
 - 🔔 Real-time Notifications
 - 🌙 Dark / Light Mode UI
 - 📊 Admin Dashboard Analytics
