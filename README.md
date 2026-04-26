@@ -52,4 +52,4 @@ This system helps organizations manage employees, tasks, targets, attendance, an
 
 ### 🔹 Step 1: Clone Project
 ```bash
-git clone https://github.com/your-username/employee-management-system.git
+git clone https://github.com/HasanTalukderictian/employee-managment-frontend.git
