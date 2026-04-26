@@ -44,7 +44,7 @@ const Leave = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
   // Fetch employees & leave balances
   useEffect(() => {
-    fetch(`${BASE_URL}/api/get-emplyee`)
+    fetch(`${BASE_URL}/api/get-employee`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data.data)) setEmployees(data.data);
