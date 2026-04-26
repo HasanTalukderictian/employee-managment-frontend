@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Menu from './Menu';
 import Footer from './Footer';
-import '../../App.css'; 
+import '../../App.css';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -26,6 +26,18 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     label: darkMode ? "#94a3b8" : "#6c757d",
     border: darkMode ? "#334155" : "#f8f9fa",
     inputBg: darkMode ? "#0f172a" : "#f8f9fa",
+  };
+
+  const handleEmployeeChange = (id) => {
+    setEmployeeId(id);
+
+    const selectedEmp = employees.find(emp => emp.id == id);
+
+    if (selectedEmp) {
+      setEmail(selectedEmp.email); // ✅ auto fill email
+    } else {
+      setEmail('');
+    }
   };
 
   useEffect(() => {
@@ -86,33 +98,33 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
   const fadeClass = fadeOut ? 'fade-out' : '';
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      width: '100%', 
-      minHeight: '100vh', 
-      backgroundColor: theme.bg, 
-      transition: '0.3s ease' 
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      minHeight: '100vh',
+      backgroundColor: theme.bg,
+      transition: '0.3s ease'
     }}>
       <Toaster position="top-right" reverseOrder={false} />
-      
+
       <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-      
+
       <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
         <Menu darkMode={darkMode} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
-        
+
         <main style={{ flexGrow: 1, padding: '30px', overflowY: 'auto' }}>
-          <div style={{ 
-            background: theme.cardBg, 
-            borderRadius: '20px', 
-            boxShadow: darkMode ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.08)', 
-            padding: '40px', 
-            maxWidth: '1000px', 
-            margin: '0 auto', 
+          <div style={{
+            background: theme.cardBg,
+            borderRadius: '20px',
+            boxShadow: darkMode ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.08)',
+            padding: '40px',
+            maxWidth: '1000px',
+            margin: '0 auto',
             minHeight: '80vh',
             border: darkMode ? `1px solid ${theme.border}` : 'none'
           }}>
-            
+
             {/* Header Section */}
             <div className="d-flex align-items-center mb-5" style={{ borderBottom: `2px solid ${theme.border}`, paddingBottom: '20px' }}>
               <button
@@ -129,6 +141,33 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
 
             <form onSubmit={handleSubmit} autoComplete="off">
               <div className="row mb-4">
+
+                 <div className="col-md-6">
+                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Select Linked Employee</label>
+
+                  <select
+                    className={`form-select form-select-lg border-0 shadow-sm ${fadeClass}`}
+                    style={{
+                      backgroundColor: theme.inputBg,
+                      color: theme.text,
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      padding: '15px'
+                    }}
+                    value={employeeId}
+                    onChange={(e) => handleEmployeeChange(e.target.value)} // ✅ এখানে change
+                    required
+                  >
+                    <option value="" style={{ background: theme.cardBg }}>-- Select Employee --</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id} style={{ background: theme.cardBg }}>
+                        {emp.first_name} {emp.last_name}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
+                
                 <div className="col-md-6">
                   <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Email Address</label>
                   <input
@@ -136,12 +175,12 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                     name="new_user_email_field"
                     autoComplete="one-time-code"
                     className={`form-control form-control-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ 
-                      backgroundColor: theme.inputBg, 
-                      color: theme.text, 
-                      borderRadius: '12px', 
-                      fontSize: '16px', 
-                      padding: '15px' 
+                    style={{
+                      backgroundColor: theme.inputBg,
+                      color: theme.text,
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      padding: '15px'
                     }}
                     placeholder="Enter employee email"
                     value={email}
@@ -149,26 +188,7 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                     required
                   />
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Password</label>
-                  <input
-                    type="password"
-                    name="new_user_password_field" 
-                    autoComplete="new-password"
-                    className={`form-control form-control-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ 
-                      backgroundColor: theme.inputBg, 
-                      color: theme.text, 
-                      borderRadius: '12px', 
-                      fontSize: '16px', 
-                      padding: '15px' 
-                    }}
-                    placeholder="Create a strong password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
+               
               </div>
 
               <div className="row mb-5">
@@ -176,12 +196,12 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                   <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Assign Role</label>
                   <select
                     className={`form-select form-select-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ 
-                      backgroundColor: theme.inputBg, 
-                      color: theme.text, 
-                      borderRadius: '12px', 
-                      fontSize: '16px', 
-                      padding: '15px' 
+                    style={{
+                      backgroundColor: theme.inputBg,
+                      color: theme.text,
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      padding: '15px'
                     }}
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
@@ -192,40 +212,39 @@ const AddUser = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
                     <option value="user" style={{ background: theme.cardBg }}>Standard User</option>
                   </select>
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Select Linked Employee</label>
-                  <select
-                    className={`form-select form-select-lg border-0 shadow-sm ${fadeClass}`}
-                    style={{ 
-                      backgroundColor: theme.inputBg, 
-                      color: theme.text, 
-                      borderRadius: '12px', 
-                      fontSize: '16px', 
-                      padding: '15px' 
+
+                 <div className="col-md-6">
+                  <label className="form-label fw-bold mb-2" style={{ color: theme.label }}>Password</label>
+                  <input
+                    type="password"
+                    name="new_user_password_field"
+                    autoComplete="new-password"
+                    className={`form-control form-control-lg border-0 shadow-sm ${fadeClass}`}
+                    style={{
+                      backgroundColor: theme.inputBg,
+                      color: theme.text,
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      padding: '15px'
                     }}
-                    value={employeeId}
-                    onChange={(e) => setEmployeeId(e.target.value)}
+                    placeholder="Create a strong password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
-                  >
-                    <option value="" style={{ background: theme.cardBg }}>-- Select Employee --</option>
-                    {employees.map((emp) => (
-                      <option key={emp.id} value={emp.id} style={{ background: theme.cardBg }}>
-                        {emp.first_name} {emp.last_name}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
+               
               </div>
 
               <div className="text-center mt-5">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSubmitting}
-                  className="btn btn-warning btn-lg px-5 py-3 shadow" 
-                  style={{ 
-                    borderRadius: '15px', 
-                    fontWeight: '700', 
-                    minWidth: '280px', 
+                  className="btn btn-warning btn-lg px-5 py-3 shadow"
+                  style={{
+                    borderRadius: '15px',
+                    fontWeight: '700',
+                    minWidth: '280px',
                     fontSize: '18px',
                     transition: 'all 0.3s ease',
                     color: '#000'

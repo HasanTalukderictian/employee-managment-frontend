@@ -25,8 +25,11 @@ const Task = ({ darkMode, setDarkMode, isExpanded, setIsExpanded }) => {
     const totalPages = Math.ceil(tasks.length / itemsPerPage);
 
     // API URLs
-    const API_BASE_URL = "http://localhost:8000/api/tasks";
-    const API_ADD_TASK_URL = "http://localhost:8000/api/add-task";
+    // const API_BASE_URL = "http://localhost:8000/api/tasks";
+    // const API_ADD_TASK_URL = "http://localhost:8000/api/add-task";
+
+     const API_BASE_URL = "https://db.akashbariholidays.org/api/tasks";
+    const API_ADD_TASK_URL = "https://db.akashbariholidays.org/api/add-task";
 
     // const API_BASE_URL = import.meta.env.VITE_BASE_URL;
     // const API_ADD_TASK_URL = import.meta.env.VITE_BASE_URL;
