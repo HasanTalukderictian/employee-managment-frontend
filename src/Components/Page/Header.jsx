@@ -3,55 +3,88 @@ import { IoMdSunny, IoMdMoon } from "react-icons/io";
 
 const Header = ({ darkMode, setDarkMode }) => {
   const [role, setRole] = useState(null);
-   const [name, setName] = useState(null);
+  const [name, setName] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const dropdownRef = useRef(null);
-    const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   // =========================
   // FETCH NOTIFICATIONS
   // =========================
-
-  // console.log("EMPLOYEE ID:", localStorage.getItem("employee_id"));
-
   const fetchNotifications = async (empId) => {
     try {
       const res = await fetch(`${BASE_URL}/api/get-notification/${empId}`);
       const result = await res.json();
-
       const list = result.data || [];
 
       setNotifications(list);
+      // আনরিড নোটিফিকেশন ফিল্টার করে কাউন্ট সেট করা
       setUnreadCount(list.filter(n => n.read_at === null).length);
-
     } catch (err) {
       console.error("Notification Fetch Error:", err);
     }
   };
 
+  // ===================================
+  // MARK AS READ (ব্যাকএন্ড ও ফ্রন্টএন্ড আপডেট)
+  // ===================================
+  const markAsRead = async () => {
+    const employeeId = localStorage.getItem("employee_id");
+    
+    // যদি কোনো আনরিড মেসেজ না থাকে তবে রিকোয়েস্ট পাঠানোর দরকার নেই
+    if (unreadCount === 0) return;
+
+    try {
+      // আপনার কন্ট্রোলারের নতুন এন্ডপয়েন্ট কল করা
+      const res = await fetch(`${BASE_URL}/api/mark-notifications-read/${employeeId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (res.ok) {
+        // ব্যাকএন্ডে সাকসেস হলে ফ্রন্টএন্ড স্টেট আপডেট করা
+        const updatedNotifications = notifications.map(n => ({
+          ...n,
+          read_at: n.read_at || new Date().toISOString()
+        }));
+        setNotifications(updatedNotifications);
+        setUnreadCount(0); // নাম্বার আইকনটি অদৃশ্য হয়ে যাবে
+      }
+    } catch (err) {
+      console.error("Error marking notifications as read:", err);
+    }
+  };
+
+  // বেল আইকনে ক্লিক হ্যান্ডলার
+  const handleBellClick = () => {
+    const nextShowDropdown = !showDropdown;
+    setShowDropdown(nextShowDropdown);
+
+    // ড্রপডাউন ওপেন করার সময় নোটিফিকেশন রিড হিসেবে মার্ক হবে
+    if (nextShowDropdown) {
+      markAsRead();
+    }
+  };
+
   // =========================
-  // INIT
+  // INITIAL LOAD
   // =========================
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
-    const employeeId = localStorage.getItem("employee_id"); // 🔥 MUST BE employee.id
-     const employeeName = localStorage.getItem("employee_name");
-      setRole(storedRole);
+    const employeeId = localStorage.getItem("employee_id");
+    const employeeName = localStorage.getItem("employee_name");
+    setRole(storedRole);
     setName(employeeName);
-
-    // console.log("employee_id:", employeeId);
 
     if (employeeId) {
       fetchNotifications(employeeId);
     }
   }, []);
 
-  // =========================
-  // CLOSE DROPDOWN OUTSIDE CLICK
-  // =========================
+  // ড্রপডাউনের বাইরে ক্লিক করলে বন্ধ হবে
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -63,15 +96,9 @@ const Header = ({ darkMode, setDarkMode }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // =========================
-  // THEME
-  // =========================
   const borderColor = darkMode ? '#334155' : '#e2e8f0';
   const textColor = darkMode ? '#f8fafc' : '#1e293b';
 
-  // =========================
-  // UI
-  // =========================
   return (
     <header
       style={{
@@ -86,34 +113,27 @@ const Header = ({ darkMode, setDarkMode }) => {
         zIndex: 1000
       }}
     >
-
-      {/* LEFT */}
+      {/* LEFT SECTION */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <h1 style={{ fontSize: '20px', color: '#10b981', margin: 0 }}>
           HASAN'S EMS
         </h1>
       </div>
 
-      {/* RIGHT */}
+      {/* RIGHT SECTION */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-
-        {/* DARK MODE */}
-        <div
-          onClick={() => setDarkMode(!darkMode)}
-          style={{ cursor: 'pointer' }}
-        >
-          {darkMode
-            ? <IoMdSunny color="#fbbf24" size={22} />
-            : <IoMdMoon color="#6366f1" size={22} />
-          }
+        
+        {/* DARK MODE TOGGLE */}
+        <div onClick={() => setDarkMode(!darkMode)} style={{ cursor: 'pointer' }}>
+          {darkMode ? <IoMdSunny color="#fbbf24" size={22} /> : <IoMdMoon color="#6366f1" size={22} />}
         </div>
 
-        {/* NOTIFICATION */}
+        {/* NOTIFICATION WRAPPER */}
         <div ref={dropdownRef} style={{ position: 'relative' }}>
-
-          {/* BELL */}
+          
+          {/* BELL ICON */}
           <div
-            onClick={() => setShowDropdown(!showDropdown)}
+            onClick={handleBellClick}
             style={{
               width: "42px",
               height: "42px",
@@ -127,7 +147,8 @@ const Header = ({ darkMode, setDarkMode }) => {
             }}
           >
             <i className="bi bi-bell" style={{ fontSize: "20px", color: "#10b981" }} />
-
+            
+            {/* UNREAD COUNT BADGE */}
             {unreadCount > 0 && (
               <span
                 style={{
@@ -139,7 +160,8 @@ const Header = ({ darkMode, setDarkMode }) => {
                   borderRadius: '50%',
                   padding: '2px 6px',
                   fontSize: '10px',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                 }}
               >
                 {unreadCount}
@@ -147,7 +169,7 @@ const Header = ({ darkMode, setDarkMode }) => {
             )}
           </div>
 
-          {/* DROPDOWN */}
+          {/* NOTIFICATION DROPDOWN */}
           {showDropdown && (
             <div
               style={{
@@ -163,7 +185,6 @@ const Header = ({ darkMode, setDarkMode }) => {
                 overflowY: 'auto'
               }}
             >
-
               <div style={{
                 padding: '12px',
                 fontWeight: 'bold',
@@ -174,11 +195,7 @@ const Header = ({ darkMode, setDarkMode }) => {
               </div>
 
               {notifications.length === 0 ? (
-                <div style={{
-                  padding: '20px',
-                  textAlign: 'center',
-                  color: '#94a3b8'
-                }}>
+                <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
                   No notifications
                 </div>
               ) : (
@@ -188,20 +205,17 @@ const Header = ({ darkMode, setDarkMode }) => {
                     style={{
                       padding: '12px',
                       borderBottom: `1px solid ${borderColor}`,
-                      background: n.read_at
-                        ? 'transparent'
-                        : (darkMode ? '#2d3748' : '#f0fff4')
+                      background: n.read_at ? 'transparent' : (darkMode ? '#2d3748' : '#f0fff4'),
+                      transition: 'background 0.3s ease'
                     }}
                   >
                     <div style={{ fontSize: '13px', fontWeight: 600, color: textColor }}>
                       {n.data?.message}
                     </div>
-
                     <div style={{ fontSize: '12px', color: '#94a3b8' }}>
                       Month: {n.data?.month} | Target: {n.data?.target_value}
                     </div>
-
-                    <div style={{ fontSize: '10px', color: '#64748b' }}>
+                    <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
                       {new Date(n.created_at).toLocaleString()}
                     </div>
                   </div>
@@ -211,33 +225,28 @@ const Header = ({ darkMode, setDarkMode }) => {
           )}
         </div>
 
-        {/* PROFILE */}
+        {/* PROFILE SECTION */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div className="text-end">
             <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: textColor }}>
               Hello
             </p>
-
-            {/* <small style={{ color: '#10b981' }}>
-              {name || 'User'}
-            </small> */}
             <small style={{ color: '#10b981' }}>
               {role || 'User'}
             </small>
           </div>
-
           <img
             src="https://i.ibb.co.com/jvFR7NXv/IMG-2688.jpg"
             alt="Profile"
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              objectFit: 'cover'
+            style={{ 
+                width: '40px', 
+                height: '40px', 
+                borderRadius: '10px', 
+                objectFit: 'cover',
+                border: `1px solid ${borderColor}`
             }}
           />
         </div>
-
       </div>
     </header>
   );
