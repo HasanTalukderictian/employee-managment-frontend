@@ -8,6 +8,7 @@ const UserLogin = () => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+  
 
     const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -27,12 +28,13 @@ const UserLogin = () => {
 
             if (response.ok) {
                 toast.success(data.message || "Login successful!", { id: loginToast });
-                
+
                 // Store essential data
                 localStorage.setItem("authToken", data.token);
                 localStorage.setItem("isAdminLoggedIn", true); // Keeping consistency with your logic
                 localStorage.setItem('userRole', data.data.role);
-                   localStorage.setItem("employee_id", data.data.employee_id);
+                localStorage.setItem("employee_id", data.data.employee_id);
+                localStorage.setItem("employee_name", data.data.employee_first_name);
 
                 setTimeout(() => navigate("/admin-home"), 1000);
             } else {
@@ -47,20 +49,20 @@ const UserLogin = () => {
     };
 
     return (
-        <div style={{ 
-            minHeight: "100vh", 
-            width: "100%", 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
+        <div style={{
+            minHeight: "100vh",
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             backgroundColor: "#f8f9fa",
-            padding: "20px" 
+            padding: "20px"
         }}>
             <Toaster position="top-center" reverseOrder={false} />
-            
-            <div className="card shadow-lg border-0" style={{ 
-                width: "100%", 
-                maxWidth: "500px", 
+
+            <div className="card shadow-lg border-0" style={{
+                width: "100%",
+                maxWidth: "500px",
                 borderRadius: "20px",
                 overflow: "hidden"
             }}>
@@ -100,8 +102,8 @@ const UserLogin = () => {
                         <div className="mb-4">
                             <label className="form-label fw-semibold small text-secondary">Password</label>
                             <div className="input-group">
-                                <span 
-                                    className="input-group-text bg-white border-end-0" 
+                                <span
+                                    className="input-group-text bg-white border-end-0"
                                     style={{ cursor: "pointer", borderRadius: "12px 0 0 12px" }}
                                     onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                                 >
@@ -147,7 +149,7 @@ const UserLogin = () => {
                             ) : "Login"}
                         </button>
                     </form>
-                    
+
                     <div className="text-center mt-4">
                         <p className="text-muted small">Forgot password? Contact your Administrator</p>
                     </div>
